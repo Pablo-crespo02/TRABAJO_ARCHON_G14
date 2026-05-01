@@ -30,6 +30,29 @@
 *.exe
 *.out
 *.app
+
+#Archivos y carpetas de visual studio:
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.db
+*.ipch
+
+#Directorios de compilación
+x64/
+x86/
+[Dd]ebug/
+[Rr]elease/
+
+#Excepciones para recursos de la librería SFML
+!SFML-2.6.1/**/*.dll
+!SFML-2.6.1/**/*.lib
+!SFML-2.6.1/**/*.so
+!SFML-2.6.1/**/*.dylib
+
+#Archivos explicitados
 ARCHON_WARHAMMER 40K/.vs/ARCHON_WARHAMMER 40K.slnx/FileContentIndex/15cb30aa-61d9-46df-a699-076a7fddb224.vsidx
 /ARCHON_WARHAMMER 40K/.vs/ARCHON_WARHAMMER 40K.slnx
 /ARCHON_WARHAMMER 40K/ARCHON_W.4ab2f03b/x64/Debug
