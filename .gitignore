@@ -1,62 +1,26 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-#Archivos y carpetas de visual studio:
+# --- Visual Studio ---
 .vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
 *.user
-*.userosscache
-*.sln.docstates
 *.suo
 *.db
 *.ipch
 
-#Directorios de compilación
-x64/
-x86/
-[Dd]ebug/
-[Rr]elease/
+# --- Git ignore general pero con excepciones ---
+# Primero ignoramos todos los ejecutables y archivos de compilación
+*.exe
+*.pdb
+*.obj
+*.o
 
-#Excepciones para recursos de la librería SFML
-!SFML-2.6.1/**/*.dll
-!SFML-2.6.1/**/*.lib
-!SFML-2.6.1/**/*.so
-!SFML-2.6.1/**/*.dylib
+# --- EXCEPCIONES PARA EL PROYECTO ---
+# Queremos que las DLLs de SFML que están en la raíz SÍ se suban
+!openal32.dll
+!sfml-*.dll
 
-#Archivos explicitados
-ARCHON_WARHAMMER 40K/.vs/ARCHON_WARHAMMER 40K.slnx/FileContentIndex/15cb30aa-61d9-46df-a699-076a7fddb224.vsidx
-/ARCHON_WARHAMMER 40K/.vs/ARCHON_WARHAMMER 40K.slnx
-/ARCHON_WARHAMMER 40K/ARCHON_W.4ab2f03b/x64/Debug
-ARCHON_WARHAMMER 40K/ARCHON_WARHAMMER 40K.vcxproj
-ARCHON_WARHAMMER 40K/ARCHON_WARHAMMER 40K.vcxproj.filters
-ARCHON_WARHAMMER 40K/ARCHON_WARHAMMER 40K.vcxproj.user
-ARCHON_WARHAMMER 40K/x64/Debug/ARCHON_WARHAMMER 40K.pdb
+# Queremos que el archivo de solución (.slnx o .sln) SÍ se suba
+!*.slnx
+!*.sln
