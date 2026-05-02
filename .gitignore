@@ -20,6 +20,7 @@ x86/
 # Queremos que las DLLs de SFML que están en la raíz SÍ se suban
 !openal32.dll
 !sfml-*.dll
+!*.vcxproj
 
 # Queremos que el archivo de solución (.slnx o .sln) SÍ se suba
 !*.slnx
