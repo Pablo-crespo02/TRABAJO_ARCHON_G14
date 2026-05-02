@@ -130,16 +130,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ARCHON_WARHAMMER 40K.cpp" />
+    <ClCompile Include="src\Arena.cpp" />
+    <ClCompile Include="src\Casilla.cpp" />
+    <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\Mundo.cpp" />
+    <ClCompile Include="src\Motor.cpp" />
     <ClCompile Include="src\Pieza.cpp" />
+    <ClCompile Include="src\PowerPoint.cpp" />
+    <ClCompile Include="src\Renderizador.cpp" />
     <ClCompile Include="src\Tablero.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Mundo.h" />
+    <ClInclude Include="src\Arena.h" />
+    <ClInclude Include="src\Casilla.h" />
+    <ClInclude Include="src\Color.h" />
+    <ClInclude Include="src\EstadoJuego.h" />
+    <ClInclude Include="src\Generador.h" />
+    <ClInclude Include="src\Motor.h" />
     <ClInclude Include="src\Pieza.h" />
+    <ClInclude Include="src\PowerPoint.h" />
+    <ClInclude Include="src\Renderizador.h" />
     <ClInclude Include="src\Tablero.h" />
+    <ClInclude Include="src\unidades_warhammer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

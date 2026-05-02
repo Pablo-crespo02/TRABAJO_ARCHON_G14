@@ -1,21 +1,20 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-
-enum class TipoCasilla { PERMANENTE_LUZ, PERMANENTE_OSCURIDAD, CAMBIANTE, POWER_POINT };
-enum class ColorActual { BLANCO_PICO, BLANCO, GRIS_CLARO, GRIS_MEDIO, GRIS_OSCURO, NEGRO, NEGRO_PICO };
-
-struct Casilla {
-    TipoCasilla tipo;
-    ColorActual colorVisual;
-};
+#include "Casilla.h"
 
 class Tablero {
+
 private:
-    Casilla matriz[9][9];
+
+    Casilla tablero[9][9];
+
+    friend class Renderizador;
 
 public:
     Tablero();
-    // Esta es la función unificada
+
+    //Función "puente" para que la clase constructora 'Generador' pueda...
+    //... acceder a la función 'SetValoresCasilla' desde 'tablero.cpp':
+    void SetValoresCasillasDesdeTablero(int fila, int columna, TipoCasilla tipo, ColorActual color, bool esPowerPoint);
+
     void actualizarColores(int numCiclo);
-    void dibujar(sf::RenderWindow& window);
 };
