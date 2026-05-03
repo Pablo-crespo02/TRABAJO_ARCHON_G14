@@ -132,6 +132,8 @@
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
+    <ClCompile Include="src\ClaseFenix.cpp" />
+    <ClCompile Include="src\ClaseGolem.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Motor.cpp" />
@@ -143,6 +145,8 @@
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\Casilla.h" />
+    <ClInclude Include="src\ClaseFenix.h" />
+    <ClInclude Include="src\ClaseGolem.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
@@ -151,7 +155,6 @@
     <ClInclude Include="src\PowerPoint.h" />
     <ClInclude Include="src\Renderizador.h" />
     <ClInclude Include="src\Tablero.h" />
-    <ClInclude Include="src\unidades_warhammer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -48,65 +48,39 @@ void Generador::GenerarTablero(Tablero& tablero) {
 }
 
 //FUNCIÓN QUE PERMITE CREAR UNA UNIDAD CON SUS ATRIBUTOS:
-void Generador::AnadirUnidad(Motor& motor, Bando bando, Warhammer::DatosPieza datos, sf::Vector2i pos) {
+void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Vector2i pos) {
+    Pieza* nuevaPieza = nullptr;
 
-    Pieza* p = new Pieza();
+    // El Generador solo sabe qué CLASE crear, los stats los sabe la propia clase interna
+    if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
+        nuevaPieza = new ClaseGolem(bando, pos, tipo);
+    }
+    else if (tipo == "LIBRARIAN" || tipo == "HARPY") {
+        nuevaPieza = new ClaseFenix(bando, pos, tipo);
+    }
+    // añadir más tipos más adelante
 
-    p->bando = bando;
-    p->posicionTablero = pos;
-    p->rangoMovimiento = datos.Rango_movimiento;
-
-    p->tipoMov = static_cast<TipoMovimiento>(datos.tipo_movimiento);
-    p->patron = static_cast<PatronMovimiento>(datos.patron_movimiento);
-
-    p->stats.vida = datos.vida;
-    p->stats.ataque = datos.ataque;
-    p->stats.defensa = datos.defensa;
-    p->stats.cooldown = datos.cooldown;
-    p->stats.esRango = datos.esRango;
-    p->stats.velAtaque = datos.velAtaque;
-
-    p->sincronizarPosicionTablero();
-
-    // Como ahora la lista es pública en Mundo, accedemos a ella directamente:
-    motor.listaPiezas.push_back(p);
-
+    if (nuevaPieza) {
+        nuevaPieza->sincronizarPosicionTablero();
+        motor.listaPiezas.push_back(nuevaPieza);
+        // añadir a listas de bando ...
+    }
 }
-
-//FUNCIÓN QUE INICIALIZA EL DESPLIEGUE DE UNIDADES:
 void Generador::GenerarDespliegueUnidades(Motor& motor) {
+    // --- BANDO LUZ (Columna 0) ---
+    // Dreadnoughts en filas 1 y 7
+    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 1));
+    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
 
-    // BANDO LUZ DESPLIEGUE
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::ASSAULT_MARINE, sf::Vector2i(0, 0));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::DREADNOUGHT, sf::Vector2i(0, 1));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::PRIMARIS, sf::Vector2i(0, 2));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::THUNDERHAWK, sf::Vector2i(0, 3));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::CAPTAIN, sf::Vector2i(0, 4)); //LIDER
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::LIBRARIAN, sf::Vector2i(0, 5));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::PRIMARIS, sf::Vector2i(0, 6));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::DREADNOUGHT, sf::Vector2i(0, 7));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::ASSAULT_MARINE, sf::Vector2i(0, 8));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::VINDICARE, sf::Vector2i(1, 0));
-    AnadirUnidad(motor, Bando::LUZ, Warhammer::VINDICARE, sf::Vector2i(1, 8));
+    // Fénix (Librarian) en fila 5
+    AnadirUnidad(motor, Bando::LUZ, "LIBRARIAN", sf::Vector2i(0, 5));
 
-    for (int i = 1; i < 8; i++) {
-        AnadirUnidad(motor, Bando::LUZ, Warhammer::INTERCESSOR, sf::Vector2i(1, i));
-    }
 
-    //BANDO OSCURIDAD DESPLIEGUE
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::HARPY, sf::Vector2i(8, 0));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::CARNIFEX, sf::Vector2i(8, 1));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TOXICRENO, sf::Vector2i(8, 2));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TIRANOFEX, sf::Vector2i(8, 3));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::HIVE_TYRANT, sf::Vector2i(8, 4));//LÍDER 
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::GENESTEALER, sf::Vector2i(8, 5));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TOXICRENO, sf::Vector2i(8, 6));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::CARNIFEX, sf::Vector2i(8, 7));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::HARPY, sf::Vector2i(8, 8));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TERMAGANT, sf::Vector2i(7, 0));
-    AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TERMAGANT, sf::Vector2i(7, 8));
+    // --- BANDO OSCURIDAD (Columna 8) ---
+    // Dreadnoughts (Carnifex) en filas 1 y 7
+    AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 1));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));
 
-    for (int i = 1; i < 8; i++) {
-        AnadirUnidad(motor, Bando::OSCURIDAD, Warhammer::TERMAGANT, sf::Vector2i(7, i));
-    }
+    // Fénix (Harpy) en fila 5
+    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 5));
 }

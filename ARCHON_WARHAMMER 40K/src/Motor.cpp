@@ -230,58 +230,33 @@ void Motor::manejarEventos() {
     }
 }
 void Motor::actualizar() {
-    // 1. Siempre reiniciamos el reloj al principio para tener el dt disponible
     float dt = reloj.restart().asSeconds();
 
-    if (estadoActual == Estado::Tablero) {
-        // Lógica de clics, selección de piezas, etc.
-    }
-    else if (estadoActual == Estado::Arena) {
-        //esntramos al movimiento de la arena
+    if (estadoActual == Estado::Arena) {
         if (!piezaAtacante || !piezaDefensor) return;
 
-        float velocidadBase = 250.f;
+        // Identificamos quién es quién solo para asignar los controles
+        Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
+        Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-        // Vemos si es luminosa u oscura
-        // (Esto nos permite asignar teclas fijas a cada bando)
-        Pieza* pLuz = (piezaAtacante->bando == Bando::LUZ) ? piezaAtacante : piezaDefensor;
-        Pieza* pOsc = (piezaAtacante->bando == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
+        // 1. Capturar intención de movimiento Luz (WASD)
+        sf::Vector2f dirLuz(0.f, 0.f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dirLuz.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dirLuz.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
 
-        // Movimiento bando luminoso
-        sf::Vector2f movLuz(0.f, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) movLuz.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movLuz.y += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) movLuz.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movLuz.x += 1.f;
+        // Ordenamos a la pieza que se mueva ella misma
+        pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
-        if (movLuz != sf::Vector2f(0.f, 0.f)) {
-            float dx = movLuz.x * velocidadBase * dt;
-            float dy = movLuz.y * velocidadBase * dt;
+        // 2. Capturar intención de movimiento Oscuridad (Flechas)
+        sf::Vector2f dirOsc(0.f, 0.f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    dirOsc.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  dirOsc.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  dirOsc.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
-            bool luzVuela = (pLuz->tipoMov == TipoMovimiento::VOLADOR);
-            // PASAMOS EL ATRIBUTO voladora AQUÍ:
-            if (arena.esPosicionValida(pLuz->posicionAbsoluta + sf::Vector2f(dx, dy), 20.f, luzVuela)) {
-                pLuz->moverEnArena(dx, dy);
-            }
-        }
-
-        // Movimiento bando oscuridad
-        sf::Vector2f movOsc(0.f, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    movOsc.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  movOsc.y += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  movOsc.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) movOsc.x += 1.f;
-
-        // Para el bando Oscuridad
-        if (movOsc != sf::Vector2f(0.f, 0.f)) {
-            float dx = movOsc.x * velocidadBase * dt;
-            float dy = movOsc.y * velocidadBase * dt;
-
-            bool oscVuela = (pOsc->tipoMov == TipoMovimiento::VOLADOR);
-
-            if (arena.esPosicionValida(pOsc->posicionAbsoluta + sf::Vector2f(dx, dy), 20.f, oscVuela)) {
-                pOsc->moverEnArena(dx, dy);
-            }
-        }
+        // Ordenamos a la pieza que se mueva ella misma
+        pOsc->procesarMovimientoArena(dirOsc, dt, this->arena);
     }
 }
