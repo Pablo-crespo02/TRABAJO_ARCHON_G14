@@ -11,9 +11,10 @@ bool PiezaTerrestre::poderMover(sf::Vector2i destino, const std::vector<Pieza*>&
     if (distX > rangoMovimiento || distY > rangoMovimiento) return false;
 
     // 2. Validar Patrón (0: ORTOGONAL, 1: DIAGONAL, 2: AMBOS)
-    if (patronMovimiento == 0 && (distX != 0 && distY != 0)) return false;
-    if (patronMovimiento == 1 && (distX != distY)) return false;
-    if (patronMovimiento == 2 && (distX != 0 && distY != 0 && distX != distY)) return false;
+   
+    if (patronMovimiento == PatronMovimiento::Ortogonal && (distX != 0 && distY != 0)) return false;
+    if (patronMovimiento == PatronMovimiento::Diagonal && (distX != distY)) return false;
+    if (patronMovimiento == PatronMovimiento::Ambos && (distX != 0 && distY != 0 && distX != distY)) return false;
 
     // 3. Validar Camino (Paso a paso)
     int stepX = (destino.x > posicionTablero.x) ? 1 : (destino.x < posicionTablero.x ? -1 : 0);
