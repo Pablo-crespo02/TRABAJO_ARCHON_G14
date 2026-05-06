@@ -89,5 +89,8 @@
     <ClInclude Include="src\ClaseGolem.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="src\PantallaInicio.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
