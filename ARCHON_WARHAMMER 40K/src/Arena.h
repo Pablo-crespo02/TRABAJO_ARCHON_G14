@@ -50,6 +50,7 @@ public:
     void prepararSpawns(sf::Color colorAtacante, sf::Color colorDefensor);
     void generarMapaProcedural();
     bool esPosicionValida(sf::Vector2f pos, float radio, bool esVoladora) const;
+    void dibujar(sf::RenderWindow& window) const;
     bool esGeneracionValida(sf::Vector2f posActual, float radioActual, TipoObjeto tipo);
     void establecerAmbiente(sf::Color colorCasilla);
 

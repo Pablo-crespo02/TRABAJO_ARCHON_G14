@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Arena.h"
+#include "EstadoJuego.h"
 #include <vector>
 #include <string>
 
@@ -36,29 +37,46 @@ protected:
     friend class Generador;
 
 public:
-    // 1. Constructor: Solo pide lo básico para ubicar la pieza
+    // Constructor: Solo pide lo básico para ubicar la pieza
     Pieza(Bando b, sf::Vector2i pos);
 
-    // 2. Destructor Virtual: CRÍTICO al usar herencia para evitar fugas de memoria
+    // Destructor Virtual: CRÍTICO al usar herencia para evitar fugas de memoria
     virtual ~Pieza() = default;
 
-    // 3. Métodos Virtuales Puros: Obligan a las hijas a implementar su propia lógica
+    // Métodos Virtuales Puros: Obligan a las hijas a implementar su propia lógica
     virtual bool poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) = 0;
     // La pieza recibe la dirección deseada, el tiempo transcurrido y la referencia a la arena para validar
     virtual void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) = 0;
+    // La pieza recibe la ventana y el estado actual para saber cómo mostrarse
+    virtual void dibujar(sf::RenderWindow& window, Estado estadoActual) = 0;
 
-    // 4. Métodos Comunes: Lógica que es igual para todos (implementada en Pieza.cpp)
+    // Métodos Comunes: Lógica que es igual para todos (implementada en Pieza.cpp)
     void mover(sf::Vector2i destino);
     void moverEnArena(float dx, float dy);
     void sincronizarPosicionTablero();
     bool detectarConflicto(const std::vector<Pieza*>& otrasPiezas);
 
 
-    // 5. Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
+    //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
     sf::Vector2i getPosicionTablero() const { return posicionTablero; }
     Bando getBando() const { return bando; }
+    sf::Color getColorVisual() const {
+        return formaVisual.getFillColor();
+    }
 
     sf::FloatRect getHitbox() const {
         return sf::FloatRect(posicionAbsoluta.x - 15.f, posicionAbsoluta.y - 15.f, 30.f, 30.f);
+    }
+
+    //Setters públicos: 
+   // Setter para la selección (quita el borde amarillo)
+    void setSeleccionado(bool valor) {
+        seleccionado = valor;
+    }
+
+    // Setter para la posición en la arena
+    void setPosicionAbsoluta(sf::Vector2f nuevaPos) {
+        posicionAbsoluta = nuevaPos;
+        formaVisual.setPosition(posicionAbsoluta); // Actualizamos la forma visual al instante
     }
 };

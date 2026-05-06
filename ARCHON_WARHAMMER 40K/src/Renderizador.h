@@ -22,5 +22,5 @@ public:
 	static void dibujarTablero(sf::RenderWindow& window, Tablero& tablero);
 	static void dibujarMotor(sf::RenderWindow& window, Motor& motor);
 	static void dibujarPieza(sf::RenderWindow& window, Pieza* p, Estado estadoact);
-	static void dibujarArena(sf::RenderWindow& window, const Arena&);
+	static void dibujarArena(sf::RenderWindow& window, Arena& arena);
 };

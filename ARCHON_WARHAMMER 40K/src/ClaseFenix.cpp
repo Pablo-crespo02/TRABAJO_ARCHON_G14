@@ -8,14 +8,17 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->posicionTablero = pos;
     this->stats.nombre = tipo;
 
-    // Estadísticas del Arquetipo Fénix (Volador)
+    // Estadísticas Arquetipo Fénix 
     this->stats.vida = 7.0f;
     this->stats.ataque = 8.0f;
     this->stats.defensa = 5.0f;
     this->rangoMovimiento = 4;
     this->stats.esRango = false;
 
-    // Aquí podrías diferenciar visualmente si es Librarian o Harpy si fuera necesario
+    // Personalización para diferencias Librarian o Harpy 
+    if (tipo == "LIBRARIAN") {
+
+    }
 }
 
 bool ClaseFenix::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
@@ -54,4 +57,35 @@ void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     if (arena.esPosicionValida(nuevaPos, 20.f, true)) {
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }
+}
+
+void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
+    if (estadoActual == Estado::Tablero) {
+        // --- LÓGICA DE TABLERO ---
+        this->sincronizarPosicionTablero();
+
+        // Solo aquí aplicamos el color de bando y el borde de selección
+        formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
+
+        if (seleccionado) {
+            formaVisual.setOutlineThickness(4.0f);
+            formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
+        }
+        else {
+            formaVisual.setOutlineThickness(0.0f);
+        }
+    }
+    else if (estadoActual == Estado::Arena) {
+        // --- LÓGICA DE ARENA ---
+        // Usamos la posición absoluta que se mueve con procesarMovimientoArena
+        formaVisual.setPosition(posicionAbsoluta);
+
+        // En la arena, quizás quieras que no tengan borde o un borde distinto
+        formaVisual.setOutlineThickness(0.0f);
+
+        // Podemos asegurar que el origen esté centrado para rotaciones o colisiones
+        formaVisual.setOrigin(20.f, 20.f);
+    }
+
+    window.draw(formaVisual);
 }

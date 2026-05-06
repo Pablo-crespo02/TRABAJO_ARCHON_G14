@@ -26,14 +26,13 @@ public:
     Pieza* piezaSeleccionada = nullptr; // Para saber qué pieza estamos moviendo
     Pieza* piezaAtacante = nullptr;
     Pieza* piezaDefensor = nullptr; // Lista de todas las piezas en juego...
-    //... pública porque se modificará desde otros .cpp ('Generador')
+    //... pública porque se modificará desde otros .cpp ('Generador'), tambiémn se puede declarar amiga
 
     Motor(); //Declaración constructor
     ~Motor(); // Para borrar las piezas al cerrar
 
-    //Función para manejar el click
-    void manejarClick(sf::Vector2i mousePos);
 
+    void manejarClick(sf::Vector2i mousePos);
     void manejarEventos();
     void actualizar();
     void renderizar();

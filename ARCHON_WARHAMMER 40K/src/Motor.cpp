@@ -87,28 +87,33 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
 
-    // Definimos los puntos de spawn fijos
+    // Limpia estados de selección previos
+    piezaAtacante->setSeleccionado(false);
+    piezaDefensor->setSeleccionado(false);
+
+    // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
     sf::Vector2f spawnDerecha(650.f, 300.f);
 
-    // LÓGICA DE POSICIONAMIENTO POR BANDO
-    if (piezaAtacante->bando == Bando::LUZ) {
-        // Atacante es Luz (Izquierda), Defensor es Oscuridad (Derecha)
-        piezaAtacante->posicionAbsoluta = spawnIzquierda;
-        piezaDefensor->posicionAbsoluta = spawnDerecha;
+    // LÓGICA DE POSICIONAMIENTO: Luz siempre a la izquierda
+    if (piezaAtacante->getBando() == Bando::LUZ) {
+        piezaAtacante->setPosicionAbsoluta(spawnIzquierda);
+        piezaDefensor->setPosicionAbsoluta(spawnDerecha);
     }
     else {
-        // Atacante es Oscuridad (Derecha), Defensor es Luz (Izquierda) //Lo tenemos que quitar, luz siempre izquierda
-        piezaAtacante->posicionAbsoluta = spawnDerecha;
-        piezaDefensor->posicionAbsoluta = spawnIzquierda;
+        // Si el atacante es oscuridad, él va a la derecha y el defensor (Luz) a la izquierda
+        piezaAtacante->setPosicionAbsoluta(spawnDerecha);
+        piezaDefensor->setPosicionAbsoluta(spawnIzquierda);
     }
-    sf::Color colorA = piezaAtacante->formaVisual.getFillColor();
-    sf::Color colorD = piezaDefensor->formaVisual.getFillColor();
-    // Generar el escenario
+
+    // Preparar la Arena
+    sf::Color colorA = piezaAtacante->getColorVisual();
+    sf::Color colorD = piezaDefensor->getColorVisual();
+
     arena.prepararSpawns(colorA, colorD);
     arena.generarMapaProcedural();
 
-    // Cambiar el estado para que el Motor empiece a usar la lógica de Arena
+    // Cambiar el estado
     estadoActual = Estado::Arena;
 }
 void Motor::imprimirEstado() {
@@ -119,7 +124,7 @@ void Motor::imprimirEstado() {
 
 void Motor::manejarClick(sf::Vector2i mousePos) {
     if (estadoActual != Estado::Tablero) return;
-    //Comprueba que está en el tablero
+    // Comprueba que está en el tablero
     std::cout << "DEBUG: Clic en pixeles (" << mousePos.x << "," << mousePos.y << ")" << std::endl;
     // Conversión de píxeles a coordenadas de tablero (0-8)
     int tableroX = (mousePos.x - 50) / 60;
@@ -132,7 +137,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
         return;
     }
 
-    // comprobamos si hay pieza en la casilla
+    // Comprobamos si hay pieza en la casilla
     std::cout << "DEBUG: Buscando pieza en la celda... Total piezas: " << listaPiezas.size() << std::endl;
 
     sf::Vector2i celdaClickeada(tableroX, tableroY);
@@ -160,7 +165,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
         // Tenemos una piza seleccionada
 
         // Deseleccionar si se clica en la misma casilla 
-        //Si hemos escogido una pieza hay que volver a haver click para deseleccionarla
+        // Si hemos escogido una pieza hay que volver a haver click para deseleccionarla
         if (celdaClickeada == piezaSeleccionada->posicionTablero) {
             piezaSeleccionada->seleccionado = false;
             piezaSeleccionada = nullptr;
@@ -239,24 +244,24 @@ void Motor::actualizar() {
         Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
         Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-        // 1. Capturar intención de movimiento Luz (WASD)
+        // Capturar intención de movimiento Luz (WASD)
         sf::Vector2f dirLuz(0.f, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dirLuz.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dirLuz.y += 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
 
-        // Ordenamos a la pieza que se mueva ella misma
+        // Ordena a la pieza que se mueva ella misma
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
-        // 2. Capturar intención de movimiento Oscuridad (Flechas)
+        // Capturar intención de movimiento Oscuridad (Flechas)
         sf::Vector2f dirOsc(0.f, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    dirOsc.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  dirOsc.y += 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  dirOsc.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
-        // Ordenamos a la pieza que se mueva ella misma
+        // Ordena a la pieza que se mueva ella misma
         pOsc->procesarMovimientoArena(dirOsc, dt, this->arena);
     }
 }

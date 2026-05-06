@@ -66,6 +66,8 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
         // añadir a listas de bando ...
     }
 }
+
+// Se irán añadiendo las unidades conforme se creen las clases 
 void Generador::GenerarDespliegueUnidades(Motor& motor) {
     // --- BANDO LUZ (Columna 0) ---
     // Dreadnoughts en filas 1 y 7

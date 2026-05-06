@@ -1,28 +1,27 @@
 #include "ClaseGolem.h"
 #include <cmath> // Necesario para std::abs
 
-// Fíjate en cómo llamamos al constructor de la clase Padre (Pieza)
+//llamamos al constructor de la clase Padre (Pieza)
 ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
-    : Pieza(b, pos) // Llama al constructor base de Pieza (ajusta Pieza.h si es necesario)
+    : Pieza(b, pos) // Llama al constructor base de Pieza
 {
     this->bando = b;
     this->posicionTablero = pos;
     this->stats.nombre = tipo;
 
-    // Aquí defines las estadísticas fijas del "Arquetipo Golem"
+    // estadísticas Arquetipo Golem
     this->stats.vida = 10.0f;
     this->stats.ataque = 4.0f;
     this->stats.defensa = 9.0f;
     this->rangoMovimiento = 2;
     this->stats.esRango = false;
 
-    // Personalización extra si quieres diferenciar Dreadnought de Carnifex
+    // Personalización para diferencias Dreadnought de Carnifex 
     if (tipo == "DREADNOUGHT") {
-        // Podrías ajustar algo específico aquí si quisieras
+
     }
 }
 
-// Fíjate en el prefijo ClaseGolem::
 bool ClaseGolem::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
     // 1. Cálculo de distancias y patrón (ya lo tendrás arriba)
     int distX = std::abs(destino.x - posicionTablero.x);
@@ -36,7 +35,7 @@ bool ClaseGolem::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otr
     int stepX = (destino.x > posicionTablero.x) ? 1 : (destino.x < posicionTablero.x ? -1 : 0);
     int stepY = (destino.y > posicionTablero.y) ? 1 : (destino.y < posicionTablero.y ? -1 : 0);
 
-    // 'rev' es nuestra casilla de revisión, empezamos en nuestra posición actual
+    // 'rev' es casilla de revisión, empezamos en nuestra posición actual
     sf::Vector2i rev = posicionTablero;
 
     // Bucle para revisar el camino (sin incluir la casilla de destino final)
@@ -45,7 +44,7 @@ bool ClaseGolem::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otr
         rev.y += stepY;
 
         for (const auto* otra : otrasPiezas) {
-            // Usamos el Getter que creamos antes
+            // Usamos un getter
             if (otra->getPosicionTablero() == rev) {
                 return false; // CAMINO BLOQUEADO
             }
@@ -77,4 +76,34 @@ void ClaseGolem::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     if (arena.esPosicionValida(nuevaPos, 20.f, false)) {
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }
+}
+void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
+    if (estadoActual == Estado::Tablero) {
+        // --- LÓGICA DE TABLERO ---
+        this->sincronizarPosicionTablero();
+
+        // Solo aquí aplicamos el color de bando y el borde de selección
+        formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
+
+        if (seleccionado) {
+            formaVisual.setOutlineThickness(4.0f);
+            formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
+        }
+        else {
+            formaVisual.setOutlineThickness(0.0f);
+        }
+    }
+    else if (estadoActual == Estado::Arena) {
+        // --- LÓGICA DE ARENA ---
+        // Usamos la posición absoluta que se mueve con procesarMovimientoArena
+        formaVisual.setPosition(posicionAbsoluta);
+
+        // En la arena, no tienen borde
+        formaVisual.setOutlineThickness(0.0f);
+
+        // Podemos asegurar que el origen esté centrado para rotaciones o colisiones
+        formaVisual.setOrigin(20.f, 20.f);
+    }
+
+    window.draw(formaVisual);
 }

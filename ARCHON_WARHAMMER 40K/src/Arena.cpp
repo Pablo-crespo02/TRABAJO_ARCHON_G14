@@ -5,16 +5,13 @@
 #include <cmath>   
 
 Arena::Arena() {
-    // 1. Configuración básica del Suelo (Solo valores, no dibuja)
+    //Configuración básica del Suelo (Solo valores, no dibuja)
     suelo.setSize(sf::Vector2f(ANCHO_MAPA, ALTO_MAPA));
     suelo.setFillColor(sf::Color(80, 70, 60));
 
-    // 2. Configuración de la Cámara/Vista
+    //Configuración de la Cámara/Vista
     vistaArena.setCenter(ANCHO_MAPA / 2.f, ALTO_MAPA / 2.f);
     vistaArena.setSize(ANCHO_MAPA * 1.1f, ALTO_MAPA * 1.1f);
-
-    //No llamamos a generarMapaProcedural aquí, 
-    // lo hará el Generador cuando sea necesario.
 }
 
 void Arena::prepararSpawns(sf::Color colorAtacante, sf::Color colorDefensor) {
@@ -43,26 +40,25 @@ void Arena::prepararSpawns(sf::Color colorAtacante, sf::Color colorDefensor) {
     circuloOscuridad.setFillColor(sf::Color::Transparent);
 
     // Inicializamos los muros perimetrales
-    // Asegúrate de tener este vector en Arena.h: std::vector<sf::RectangleShape> sombrasMuros;
 
-    // Paleta de colores profesional
+    // Paleta de colores muro
     sf::Color colorRelleno(30, 32, 40);      // Gris azulado muy oscuro
     sf::Color colorContorno(80, 85, 95);    // Gris claro para el brillo de la arista
     sf::Color colorSombra(0, 0, 0, 120);    // Sombra negra semitransparente
 
-    // 1. Configurar prototipo Horizontal
+    //Configurar prototipo Horizontal
     sf::RectangleShape muroH(sf::Vector2f(ANCHO_MAPA + GROSOR_MURO * 2, GROSOR_MURO));
     muroH.setFillColor(colorRelleno);
     muroH.setOutlineThickness(-2.f); // Contorno hacia adentro para no alterar el tamaño
     muroH.setOutlineColor(colorContorno);
 
-    // 2. Configurar prototipo Vertical
+    //Configurar prototipo Vertical
     sf::RectangleShape muroV(sf::Vector2f(GROSOR_MURO, ALTO_MAPA));
     muroV.setFillColor(colorRelleno);
     muroV.setOutlineThickness(-2.f);
     muroV.setOutlineColor(colorContorno);
 
-    //  FUNCIÓN SOMBRA 
+    // FUNCIÓN SOMBRA 
     auto agregarMuroConSombra = [&](sf::RectangleShape& forma, float x, float y) {
         forma.setPosition(x, y);
 
@@ -76,7 +72,7 @@ void Arena::prepararSpawns(sf::Color colorAtacante, sf::Color colorDefensor) {
         muros.push_back(forma);
         };
 
-    //  Posicionamiento de los 4 muros
+    //Posicionamiento de los 4 muros
     agregarMuroConSombra(muroH, -GROSOR_MURO, -GROSOR_MURO); // Arriba
     agregarMuroConSombra(muroH, -GROSOR_MURO, ALTO_MAPA);    // Abajo
     agregarMuroConSombra(muroV, -GROSOR_MURO, 0);            // Izquierda
@@ -84,7 +80,7 @@ void Arena::prepararSpawns(sf::Color colorAtacante, sf::Color colorDefensor) {
 }
 
 void Arena::generarMapaProcedural() {
-    //  Limpieza total de vectores
+    // Limpieza total de vectores
     rocas.clear();
     sombras.clear();
     charcosSangre.clear();
@@ -94,7 +90,7 @@ void Arena::generarMapaProcedural() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     int intentos;
 
-    // generar rejillas
+    // Generar rejillas
     int numRejillas = std::rand() % 3 + 3;
     intentos = 100;
     while (rejillasSuelo.size() < numRejillas && intentos > 0) {
@@ -262,7 +258,55 @@ bool Arena::esPosicionValida(sf::Vector2f pos, float radio, bool esVoladora) con
     return true;
 }
 
-/**
+void Arena::dibujar(sf::RenderWindow& window) const {
+    // Aplicamos la vista específica de la arena (zoom/posición)
+    window.setView(this->vistaArena);
+
+    // Capa Base: Suelo y Rejillas
+    window.draw(this->suelo);
+    for (const auto& r : this->rejillasSuelo) {
+        window.draw(r.marco);
+        for (const auto& barra : r.barras) window.draw(barra);
+    }
+
+    // Capa de Suelo: Sangre
+    for (const auto& mancha : this->charcosSangre) window.draw(mancha);
+    for (const auto& gota : this->gotasSangre) window.draw(gota);
+
+    // Capa de Sombras de Muros 
+    for (const auto& sombraMuro : this->sombrasMuros) {
+        window.draw(sombraMuro);
+    }
+
+    // Rocas con efecto 3D
+    // Nota: sf::ConvexShape no es costoso de copiar para el dibujo, pero usamos const para seguridad
+    for (size_t i = 0; i < this->rocas.size(); ++i) {
+        window.draw(this->sombras[i]); // Sombra proyectada
+
+        sf::ConvexShape cuerpo = this->rocas[i];
+        cuerpo.setFillColor(sf::Color(80, 80, 85));
+
+        // Extrusión para efecto 3D
+        for (int j = 0; j < 10; ++j) {
+            cuerpo.move(0.f, -1.f);
+            window.draw(cuerpo);
+        }
+
+        // Tapa superior
+        sf::ConvexShape tapa = this->rocas[i];
+        tapa.move(0.f, -10.f);
+        tapa.setFillColor(sf::Color(100, 100, 105));
+        window.draw(tapa);
+    }
+
+    // Capa Final: Muros
+    for (const auto& muro : this->muros) {
+        window.draw(muro);
+    }
+}
+
+
+/*
   Valida si una posición es apta para spawnear un objeto sin colisionar con otros.
   posActual    Coordenada (x, y) donde se intenta generar el objeto.
   radioActual  Radio de colisión del objeto a generar.
@@ -311,7 +355,7 @@ bool Arena::esGeneracionValida(sf::Vector2f posActual, float radioActual, TipoOb
     // Si pasó todas las pruebas anteriores, la posición es válida.
     return true;
 }
-//Mejrorarla, no se nota suficiente cambio en la arena
+// Hay que mejorarla, no se nota suficiente cambio en la arena
 void Arena::establecerAmbiente(sf::Color colorCasilla) {
     if (colorCasilla == sf::Color::White || (colorCasilla.r > 200 && colorCasilla.g > 200)) {
         suelo.setFillColor(sf::Color(255, 250, 220));
