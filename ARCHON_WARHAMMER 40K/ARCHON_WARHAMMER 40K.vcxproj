@@ -105,12 +105,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\SFML-2.6.1\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\SFML-2.6.1\include;C:\Users\javie\Documents\GitHub\TRABAJO_ARCHON_G14\ARCHON_WARHAMMER 40K\SFML-2.6.1\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\SFML-2.6.1\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\SFML-2.6.1\lib;C:\Users\javie\Documents\GitHub\TRABAJO_ARCHON_G14\ARCHON_WARHAMMER 40K\SFML-2.6.1\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib;sfml-network-d.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -132,8 +132,14 @@
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
+    <ClCompile Include="src\ClaseArcher.cpp" />
+    <ClCompile Include="src\ClaseDjinn.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
+    <ClCompile Include="src\ClaseKnight.cpp" />
+    <ClCompile Include="src\ClaseUnicornio.cpp" />
+    <ClCompile Include="src\ClaseValkyrie.cpp" />
+    <ClCompile Include="src\ClaseWizard.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Motor.cpp" />
@@ -146,8 +152,14 @@
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\Casilla.h" />
+    <ClInclude Include="src\ClaseArcher.h" />
+    <ClInclude Include="src\ClaseDjinn.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
+    <ClInclude Include="src\ClaseKnight.h" />
+    <ClInclude Include="src\ClaseUnicornio.h" />
+    <ClInclude Include="src\ClaseValkyrie.h" />
+    <ClInclude Include="src\ClaseWizard.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
