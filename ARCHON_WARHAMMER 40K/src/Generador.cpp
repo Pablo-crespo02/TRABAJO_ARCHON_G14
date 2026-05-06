@@ -3,13 +3,6 @@
 #include "Tablero.h"
 #include "Motor.h"
 #include "ClaseGolem.h"
-#include "ClaseUnicornio.h"
-#include "ClaseValkyrie.h"
-#include "ClaseDjinn.h"
-#include "ClaseWizard.h"
-#include "ClaseKnight.h"
-#include "ClaseArcher.h"
-#include "ClaseFenix.h"
 
 void Generador::GenerarTablero(Tablero& tablero) {
 
@@ -59,6 +52,11 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     Pieza* nuevaPieza = nullptr;
 
     // Instanciación basada en el rol de Archon/Warhammer
+
+    if (tipo == "DREADNOUGHT") {
+        nuevaPieza = new ClaseGolem(bando, pos, "Dreadnought");
+        /*
+
     if (tipo == "CAPTAIN") {
         nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
     }
@@ -87,6 +85,7 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     if (nuevaPieza) {
         nuevaPieza->sincronizarPosicionTablero(); // Actualiza visual en tablero
         motor.listaPiezas.push_back(nuevaPieza);   // Agrega a la gestión del motor
+    } */
     }
 }
 
