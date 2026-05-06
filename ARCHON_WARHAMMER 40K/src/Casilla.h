@@ -14,7 +14,7 @@ class Casilla
 public:
 
     //Atributos que queremos que se puedan modificar libremente:
-    TipoCasilla tipocasilla;
+    TipoCasilla tipocasilla;//tipo de casilla general
     ColorActual colorcasilla;
 
     //Función que asigna valores a las casillas

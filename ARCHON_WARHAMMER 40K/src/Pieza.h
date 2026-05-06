@@ -24,7 +24,7 @@ struct Stats {
     bool esRango;
     float ataque;
     float defensa;
-    float velAtaque;
+    float velAtaque ;
 };
 
 class Pieza {
