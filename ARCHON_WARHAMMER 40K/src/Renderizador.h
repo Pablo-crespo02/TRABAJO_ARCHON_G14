@@ -2,6 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include "Tablero.h"
 #include "EstadoJuego.h"
+#pragma once
+#include <SFML/Graphics.hpp>
+#include "Tablero.h"
+#include "EstadoJuego.h"
 #include "Color.h"
 #include "Motor.h"
 #include "Arena.h"

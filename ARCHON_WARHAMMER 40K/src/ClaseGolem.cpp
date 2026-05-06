@@ -1,88 +1,24 @@
 #include "ClaseGolem.h"
-#include <cmath> // Necesario para std::abs
 
-//llamamos al constructor de la clase Padre (Pieza)
 ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
-    : Pieza(b, pos) // Llama al constructor base de Pieza
+    : PiezaTerrestre(b, pos) // Llama al constructor de la clase intermedia
 {
-    this->bando = b;
-    this->posicionTablero = pos;
     this->stats.nombre = tipo;
+    this->stats.vida = 2.0f;
+    this->stats.ataque = 5.0f;
+    this->stats.defensa = 8.0f;
+    this->rangoMovimiento = 3;
+    this->stats.esRango = true;
 
-    // estadísticas Arquetipo Golem
-    this->stats.vida = 10.0f;
-    this->stats.ataque = 4.0f;
-    this->stats.defensa = 9.0f;
-    this->rangoMovimiento = 2;
-    this->stats.esRango = false;
-
-    // Personalización para diferencias Dreadnought de Carnifex 
-    if (tipo == "DREADNOUGHT") {
-
-    }
+    // Asignación del patrón de movimiento
+    this->patronMovimiento = PatronMovimiento::Ambos;
 }
 
-bool ClaseGolem::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
-    // 1. Cálculo de distancias y patrón (ya lo tendrás arriba)
-    int distX = std::abs(destino.x - posicionTablero.x);
-    int distY = std::abs(destino.y - posicionTablero.y);
+// Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.
 
-    if (distX > rangoMovimiento || distY > rangoMovimiento) return false;
-    if (distX != 0 && distY != 0) return false; // Patrón Ortogonal
-
-    // 2. VALIDACIÓN DE COLISIONES (Aquí es donde faltaban las definiciones)
-    // Calculamos la dirección del paso: 1, -1 o 0
-    int stepX = (destino.x > posicionTablero.x) ? 1 : (destino.x < posicionTablero.x ? -1 : 0);
-    int stepY = (destino.y > posicionTablero.y) ? 1 : (destino.y < posicionTablero.y ? -1 : 0);
-
-    // 'rev' es casilla de revisión, empezamos en nuestra posición actual
-    sf::Vector2i rev = posicionTablero;
-
-    // Bucle para revisar el camino (sin incluir la casilla de destino final)
-    while (rev.x + stepX != destino.x || rev.y + stepY != destino.y) {
-        rev.x += stepX;
-        rev.y += stepY;
-
-        for (const auto* otra : otrasPiezas) {
-            // Usamos un getter
-            if (otra->getPosicionTablero() == rev) {
-                return false; // CAMINO BLOQUEADO
-            }
-        }
-
-        // Seguridad para movimientos de 1 sola casilla (evita bucles infinitos)
-        if (distX <= 1 && distY <= 1) break;
-    }
-
-    // 3. VALIDACIÓN DEL DESTINO FINAL
-    for (const auto* otra : otrasPiezas) {
-        if (otra->getPosicionTablero() == destino) {
-            if (otra->getBando() == this->bando) {
-                return false; // No puedes pisar a un aliado
-            }
-        }
-    }
-
-    return true;
-}
-void ClaseGolem::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    if (direccion == sf::Vector2f(0.f, 0.f)) return;
-
-    float velocidad = 250.f;
-    sf::Vector2f desplazamiento = direccion * velocidad * dt;
-    sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
-
-    // El Golem sabe que NO vuela (false)
-    if (arena.esPosicionValida(nuevaPos, 20.f, false)) {
-        this->moverEnArena(desplazamiento.x, desplazamiento.y);
-    }
-}
 void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
-        // --- LÓGICA DE TABLERO ---
         this->sincronizarPosicionTablero();
-
-        // Solo aquí aplicamos el color de bando y el borde de selección
         formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
 
         if (seleccionado) {
@@ -94,16 +30,9 @@ void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        // --- LÓGICA DE ARENA ---
-        // Usamos la posición absoluta que se mueve con procesarMovimientoArena
         formaVisual.setPosition(posicionAbsoluta);
-
-        // En la arena, no tienen borde
         formaVisual.setOutlineThickness(0.0f);
-
-        // Podemos asegurar que el origen esté centrado para rotaciones o colisiones
         formaVisual.setOrigin(20.f, 20.f);
     }
-
     window.draw(formaVisual);
 }
