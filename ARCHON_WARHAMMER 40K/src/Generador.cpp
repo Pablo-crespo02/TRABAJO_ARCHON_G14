@@ -11,6 +11,50 @@
 #include "ClaseArcher.h"
 #include "ClaseFenix.h"
 
+void Generador::GenerarTablero(Tablero& tablero) {
+
+    //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
+    TipoCasilla esquemacasillas[9][9] = {
+       {TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca},
+       {TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::ColorCambiante,TipoCasilla::FijaNegra, TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra},
+       {TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca},
+       {TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::ColorCambiante,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante},
+       {TipoCasilla::FijaBlanca,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::FijaNegra},
+       {TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::ColorCambiante,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante},
+       {TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca},
+       {TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::ColorCambiante,TipoCasilla::FijaNegra, TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra},
+       {TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::ColorCambiante,TipoCasilla::FijaBlanca,TipoCasilla::FijaNegra,TipoCasilla::FijaBlanca},
+    };
+
+    //Recorremos la matriz "esquemacasillas" para inicializar nuestros valores:
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+
+            //Definimos una variables locales para pasarle al consructor de casilla:
+            ColorActual colorinicial;
+            bool esPowerPoint = false;
+
+            //Definimos qué posiciones son Power Points:
+            if ((i == 0 && j == 4) || (i == 4 && j == 0) || (i == 4 && j == 4) || (i == 4 && j == 8) || (i == 8 && j == 4)) {
+                esPowerPoint = true;
+            }
+
+            //Definimos colores iniciales (cambiantes empiezan en blanco)
+            if (esquemacasillas[i][j] == TipoCasilla::FijaNegra) {
+                colorinicial = ColorActual::Negro_pico;
+            }
+            else {
+                colorinicial = ColorActual::Blanco_pico;
+            }
+
+            //Llamamos al constructor de casilla para cada posición del tablero:
+            tablero.SetValoresCasillasDesdeTablero(i, j, esquemacasillas[i][j], colorinicial, esPowerPoint);
+
+        }
+    }
+}
+
+
 void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Vector2i pos) {
     Pieza* nuevaPieza = nullptr;
 
