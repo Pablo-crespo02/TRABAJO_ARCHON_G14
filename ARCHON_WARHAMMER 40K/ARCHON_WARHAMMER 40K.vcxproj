@@ -145,6 +145,9 @@
     <ClCompile Include="src\Motor.cpp" />
     <ClCompile Include="src\PantallaInicio.cpp" />
     <ClCompile Include="src\Pieza.cpp" />
+    <ClCompile Include="src\PiezaTeletransporte.cpp" />
+    <ClCompile Include="src\PiezaTerrestre.cpp" />
+    <ClCompile Include="src\PiezaVoladora.cpp" />
     <ClCompile Include="src\PowerPoint.cpp" />
     <ClCompile Include="src\Renderizador.cpp" />
     <ClCompile Include="src\Tablero.cpp" />
@@ -166,6 +169,9 @@
     <ClInclude Include="src\Motor.h" />
     <ClInclude Include="src\PantallaInicio.h" />
     <ClInclude Include="src\Pieza.h" />
+    <ClInclude Include="src\PiezaTeletransporte.h" />
+    <ClInclude Include="src\PiezaTerrestre.h" />
+    <ClInclude Include="src\PiezaVoladora.h" />
     <ClInclude Include="src\PowerPoint.h" />
     <ClInclude Include="src\Renderizador.h" />
     <ClInclude Include="src\Tablero.h" />
