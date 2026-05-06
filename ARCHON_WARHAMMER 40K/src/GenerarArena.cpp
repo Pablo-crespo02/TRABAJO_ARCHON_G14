@@ -18,20 +18,46 @@ void GeneradorArena::generarMapa(Arena& arena, sf::Color colorLuz, sf::Color col
 }
 
 bool GeneradorArena::esPosicionValida(sf::Vector2f pos, float radio, const Arena& arena) {
-    // REGLA 1: No pisar los SpawnPoints (usando el método de la clase SpawnPoint)
+    // REGLA 1: No pisar los SpawnPoints
     for (const auto& sp : arena.getSpawns()) {
-        if (sp.contienePunto(pos, radio + 10.f)) {
-            return false;
-        }
+        if (sp.contienePunto(pos, radio + 10.f)) return false;
     }
 
-    // REGLA 2: No pisar otras rocas ya existentes
+    // REGLA 2: No pisar rocas ya existentes
     for (const auto& roca : arena.getRocas()) {
         sf::Vector2f diff = pos - roca.getPosition();
         float distSq = diff.x * diff.x + diff.y * diff.y;
-        // Radio de seguridad para evitar solapamiento entre rocas
         if (distSq < (radio + 40.f) * (radio + 40.f)) return false;
     }
+
+    // REGLA 3: No pisar rejillas ya existentes
+    for (const auto& rej : arena.getRejillas()) {
+        // Obtenemos el centro del marco de la rejilla
+        sf::Vector2f centroRej = rej.marco.getPosition() + (rej.marco.getSize() / 2.f);
+        sf::Vector2f diff = pos - centroRej;
+        float distSq = diff.x * diff.x + diff.y * diff.y;
+
+        // Usamos un radio de seguridad (la rejilla mide 60x40, un radio de 45-50 es prudente)
+        if (distSq < (radio + 45.f) * (radio + 45.f)) return false;
+    }
+    return true;
+}
+bool GeneradorArena::esPosicionSangreValida(sf::Vector2f pos, float radio, const Arena& arena) {
+    // REGLA 1: No pisar los SpawnPoints (esto lo mantenemos por limpieza)
+    for (const auto& sp : arena.getSpawns()) {
+        if (sp.contienePunto(pos, radio + 10.f)) return false;
+    }
+
+    // REGLA 2: No solapar con OTROS charcos
+    // Esto evita que la sangre se amontone toda en un solo punto
+    for (const auto& charco : arena.getCharcos()) {
+        sf::Vector2f diff = pos - charco.getPosition();
+        float distSq = diff.x * diff.x + diff.y * diff.y;
+        if (distSq < (radio + 60.f) * (radio + 60.f)) return false;
+    }
+
+    // ¡OJO! Aquí NO ponemos ni rocas ni rejillas. 
+    // Al no ponerlas, la sangre puede aparecer encima/debajo de ellas.
 
     return true;
 }
@@ -107,19 +133,24 @@ void GeneradorArena::generarRejillas(Arena& arena) {
 }
 
 void GeneradorArena::generarSangre(Arena& arena) {
-    int numManchasDeseadas = 4;
+    int numManchasDeseadas = std::rand() % 3 + 3; // Entre 3 y 6 manchas
     int intentos = 150;
 
     while (numManchasDeseadas > 0 && intentos > 0) {
         intentos--;
+
+        // Posición aleatoria
         float px = static_cast<float>(std::rand() % (int)(ANCHO_MAPA - 150) + 75);
         float py = static_cast<float>(std::rand() % (int)(ALTO_MAPA - 100) + 50);
         float radioCharco = 30.f;
 
-        if (esPosicionValida({ px, py }, radioCharco, arena)) {
+        // Comprobamos si el sitio está libre de Spawns y otros Charcos
+        if (esPosicionSangreValida({ px, py }, radioCharco, arena)) {
+
             int rojoVariado = 130 + (std::rand() % 50);
             sf::Color colorSangre(rojoVariado, 0, 0, 160);
 
+            // Crear la forma del charco
             sf::ConvexShape charco;
             int puntos = 15;
             charco.setPointCount(puntos);
@@ -135,9 +166,10 @@ void GeneradorArena::generarSangre(Arena& arena) {
                 charco.setPoint(i, sf::Vector2f(r * std::cos(angulo), r * std::sin(angulo)));
             }
 
-            charco.setScale(2.0f, 0.8f);
+            charco.setScale(2.5f, 1.0f);
             arena.addCharcoSangre(charco);
 
+            // Añadir las gotas pequeñas (decorativas, estas pueden pisar cosas)
             for (int j = 0; j < 5; ++j) {
                 sf::CircleShape gota(static_cast<float>(std::rand() % 3 + 2));
                 gota.setFillColor(colorSangre);
@@ -146,11 +178,11 @@ void GeneradorArena::generarSangre(Arena& arena) {
                 gota.setPosition(px + offX, py + offY);
                 arena.addGotaSangre(gota);
             }
+
             numManchasDeseadas--;
         }
     }
 }
-
 void GeneradorArena::prepararSpawns(Arena& arena, sf::Color colorLuz, sf::Color colorOscuridad) {
     // 1. Inyectamos los SpawnPoints en la Arena
     arena.addSpawnPoint(SpawnPoint(sf::Vector2f(150.f, 300.f), 30.f, colorLuz));

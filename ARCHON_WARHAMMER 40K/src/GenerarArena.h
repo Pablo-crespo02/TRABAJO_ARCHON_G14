@@ -52,4 +52,5 @@ private:
     static void generarSangre(Arena& arena);
 
     static bool esPosicionValida(sf::Vector2f pos, float radio, const Arena& arena);
+    static bool esPosicionSangreValida(sf::Vector2f pos, float radio, const Arena& arena);
 };

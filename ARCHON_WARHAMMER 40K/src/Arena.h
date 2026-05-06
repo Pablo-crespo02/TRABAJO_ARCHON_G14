@@ -56,6 +56,8 @@ public:
     // --- Getters ---
     const std::vector<SpawnPoint>& getSpawns() const { return spawns; }
     const std::vector<sf::ConvexShape>& getRocas() const { return rocas; }
+    const std::vector<Rejilla>& getRejillas() const { return rejillasSuelo; }
+    const std::vector<sf::ConvexShape>& getCharcos() const { return charcosSangre; }
     sf::View getVista() const { return vistaArena; }
 
     // --- Adders (Inyectores de datos) ---

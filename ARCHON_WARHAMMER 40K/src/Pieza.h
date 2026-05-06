@@ -9,14 +9,7 @@
 enum class Bando { LUZ, OSCURIDAD };
 
 // Enum para leer los patrones de movimiento fácilmente
-enum class PatronMovimiento {
-    Ortogonal,
-    Diagonal,
-    Ambos,
-    Libre     // Para teletransporte
-};
-
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
+enum class PatronMovimiento { Ortogonal, Diagonal, Ambos };
 // Estructura de estadísticas que heredará cada pieza
 struct Stats {
     std::string nombre;
@@ -27,7 +20,7 @@ struct Stats {
     float defensa;
     float velAtaque;
 };
-enum class PatronMovimiento { Ortogonal, Diagonal, Ambos };
+
 
 class Pieza {
 protected:

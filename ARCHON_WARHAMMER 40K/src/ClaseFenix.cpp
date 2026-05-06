@@ -7,7 +7,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.vida = 2.0f;
     this->stats.ataque = 5.0f;
     this->stats.defensa = 8.0f;
-    this->rangoMovimiento = 3;
+    this->rangoMovimiento = 4;
     this->stats.esRango = true;
 
     // Asignación del patrón de movimiento
