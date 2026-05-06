@@ -10,7 +10,7 @@ Motor::Motor() {
     jugadorActual = 1;
     cicloActual = 1;
     rondaActual = 1;
-    estadoActual = Estado::Tablero;
+    estadoActual = Estado::MenuPrincipal;
     //LLAMADAS A INICIALIZACIONES, FUNCIONES DE LA CLASE 'GENERADOR':
 
     //Inicializa el tablero:
@@ -30,6 +30,10 @@ Motor::~Motor() {
 
 void Motor::renderizar() {
     window.clear();
+    //dibujar pantalla inicio
+    if (estadoActual == Estado::MenuPrincipal) {
+        pantallaInicio.dibujar(window);
+    }
 
     if (estadoActual == Estado::Tablero) {
         // El motor decide que toca dibujar tablero
@@ -210,6 +214,16 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
 void Motor::manejarEventos() {
     sf::Event event;
     while (window.pollEvent(event)) {
+        if (estadoActual == Estado::MenuPrincipal)
+        {
+            if (event.type == sf::Event::KeyPressed) {
+                // al pulsa enter, vamos al juego
+                if (event.key.code == sf::Keyboard::Enter) {
+                    estadoActual = Estado::Tablero;
+                    std::cout << "Iniciando partida... ¡Al Tablero!" << std::endl;
+                }
+            }
+        }
         if (event.type == sf::Event::Closed)
             window.close();
 

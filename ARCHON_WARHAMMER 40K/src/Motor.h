@@ -5,12 +5,14 @@
 #include "EstadoJuego.h"
 #include <vector>
 #include "Renderizador.h"
+#include "PantallaInicio.h"
 
 class Renderizador;
 class Motor {
 private:
     Tablero tablero;
     Arena arena;
+    PantallaInicio pantallaInicio;
     int jugadorActual = 1;       // 1 o 2
     int cicloActual = 1;         // De 1 a 12
     int rondaActual = 1;         // Incrementa tras ciclo 12

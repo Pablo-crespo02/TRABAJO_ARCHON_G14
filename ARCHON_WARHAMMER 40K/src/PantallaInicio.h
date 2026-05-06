@@ -1,6 +1,15 @@
 #pragma once
+#include <SFML/Graphics.hpp>
+#include <iostream>
+
 class PantallaInicio
 {
-	//Esta clase nos va a servir para.....
-};
+private:
+    sf::Texture texturaFondo;
+    sf::Sprite spriteFondo;
 
+public:
+    PantallaInicio();
+
+    void dibujar(sf::RenderWindow& window);
+};
