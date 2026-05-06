@@ -1,10 +1,11 @@
 #pragma once
 #include "Pieza.h"
+#include "PiezaTeletransporte.h"
 #include "Arena.h"
 #include "Color.h"
 #include <string>
 
-class ClaseDjinn : public Pieza {
+class ClaseDjinn : public PiezaTeletransporte {
 public:
     ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo);
 

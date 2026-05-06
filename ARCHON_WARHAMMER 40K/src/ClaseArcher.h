@@ -2,9 +2,10 @@
 #include "Pieza.h"
 #include "Arena.h"
 #include "Color.h"
+#include "PiezaTerrestre.h"
 #include <string>
 
-class ClaseArcher : public Pieza {
+class ClaseArcher : public PiezaTerrestre {
 public:
     ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo);
 
