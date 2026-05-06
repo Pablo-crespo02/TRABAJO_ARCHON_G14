@@ -132,14 +132,7 @@
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
-    <ClCompile Include="src\ClaseArcher.cpp" />
-    <ClCompile Include="src\ClaseDjinn.cpp" />
-    <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
-    <ClCompile Include="src\ClaseKnight.cpp" />
-    <ClCompile Include="src\ClaseUnicornio.cpp" />
-    <ClCompile Include="src\ClaseValkyrie.cpp" />
-    <ClCompile Include="src\ClaseWizard.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\GenerarArena.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -156,14 +149,7 @@
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\Casilla.h" />
-    <ClInclude Include="src\ClaseArcher.h" />
-    <ClInclude Include="src\ClaseDjinn.h" />
-    <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
-    <ClInclude Include="src\ClaseKnight.h" />
-    <ClInclude Include="src\ClaseUnicornio.h" />
-    <ClInclude Include="src\ClaseValkyrie.h" />
-    <ClInclude Include="src\ClaseWizard.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
