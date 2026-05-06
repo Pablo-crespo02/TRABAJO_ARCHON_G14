@@ -29,12 +29,12 @@ Motor::~Motor() {
 };
 
 void Motor::renderizar() {
+
     window.clear();
     //dibujar pantalla inicio
     if (estadoActual == Estado::MenuPrincipal) {
         pantallaInicio.dibujar(window);
     }
-
     if (estadoActual == Estado::Tablero) {
         // El motor decide que toca dibujar tablero
         Renderizador::dibujarTablero(window, tablero);
@@ -114,10 +114,9 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     sf::Color colorA = piezaAtacante->getColorVisual();
     sf::Color colorD = piezaDefensor->getColorVisual();
 
-    arena.prepararSpawns(colorA, colorD);
-    arena.generarMapaProcedural();
+    // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
+    GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
 
-    // Cambiar el estado
     estadoActual = Estado::Arena;
 }
 void Motor::imprimirEstado() {

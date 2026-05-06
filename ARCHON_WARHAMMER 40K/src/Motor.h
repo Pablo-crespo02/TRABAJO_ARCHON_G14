@@ -5,7 +5,7 @@
 #include "EstadoJuego.h"
 #include <vector>
 #include "Renderizador.h"
-#include "PantallaInicio.h"
+#include "Pantallainicio.h"
 
 class Renderizador;
 class Motor {
@@ -33,7 +33,7 @@ public:
     Motor(); //Declaración constructor
     ~Motor(); // Para borrar las piezas al cerrar
 
-
+    static void generarMapa(Arena& arena, sf::Color cLuz = sf::Color::White, sf::Color cOsc = sf::Color(50, 50, 50));
     void manejarClick(sf::Vector2i mousePos);
     void manejarEventos();
     void actualizar();

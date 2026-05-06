@@ -87,4 +87,3 @@ void Renderizador::dibujarMotor(sf::RenderWindow& window, Motor& mundo) {
 		}
 	}
 }
-	

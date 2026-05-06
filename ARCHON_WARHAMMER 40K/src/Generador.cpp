@@ -2,8 +2,15 @@
 #include "Color.h"
 #include "Tablero.h"
 #include "Motor.h"
+#include "ClaseGolem.h"
+#include "ClaseUnicornio.h"
+#include "ClaseValkyrie.h"
+#include "ClaseDjinn.h"
+#include "ClaseWizard.h"
+#include "ClaseKnight.h"
+#include "ClaseArcher.h"
+#include "ClaseFenix.h"
 
-//FUNCIÓN QUE INICIALIZA EL TABLERO:
 void Generador::GenerarTablero(Tablero& tablero) {
 
     //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
@@ -47,42 +54,102 @@ void Generador::GenerarTablero(Tablero& tablero) {
     }
 }
 
-//FUNCIÓN QUE PERMITE CREAR UNA UNIDAD CON SUS ATRIBUTOS:
+
 void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Vector2i pos) {
     Pieza* nuevaPieza = nullptr;
 
-    // El Generador solo sabe qué CLASE crear, los stats los sabe la propia clase interna
-    if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
-        nuevaPieza = new ClaseGolem(bando, pos, tipo);
+    // Instanciación basada en el rol de Archon/Warhammer
+    if (tipo == "CAPTAIN") {
+        nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
     }
-    else if (tipo == "LIBRARIAN" || tipo == "HARPY") {
-        nuevaPieza = new ClaseFenix(bando, pos, tipo);
+    else if (tipo == "LIBRARIAN") {
+        nuevaPieza = new ClaseFenix(bando, pos, "Librarian");
     }
-    // añadir más tipos más adelante
+    else if (tipo == "ASSAULT_MARINE") {
+        nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
+    }
+    else if (tipo == "DREADNOUGHT") {
+        nuevaPieza = new ClaseGolem(bando, pos, "Dreadnought");
+    }
+    else if (tipo == "INTERCESSOR") {
+        nuevaPieza = new ClaseKnight(bando, pos, "Intercessor");
+    }
+    else if (tipo == "VINDICARE") {
+        nuevaPieza = new ClaseArcher(bando, pos, "Vindicare");
+    }
+    else if (tipo == "THUNDERHAWK") {
+        nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
+    }
+    else if (tipo == "PRIMARIS") {
+        nuevaPieza = new ClaseUnicornio(bando, pos, "Primaris");
+    }
+
+
+
+    else if (tipo == "HIVE_TYRANT") {
+        nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
+    }
+    else if (tipo == "GENESTEALER") {
+        nuevaPieza = new ClaseFenix(bando, pos, "Genestealer");
+    }
+    else if (tipo == "HARPY") {
+        nuevaPieza = new ClaseValkyrie(bando, pos, "Harpy");
+    }
+    else if (tipo == "CARNIFEX") {
+        nuevaPieza = new ClaseGolem(bando, pos, "Carnifex");
+    }
+    else if (tipo == "TERMAGANT") {
+        nuevaPieza = new ClaseKnight(bando, pos, "Termagant");
+    }
+    else if (tipo == "GOBLIN") {
+        nuevaPieza = new ClaseArcher(bando, pos, "Goblin");
+    }
+    else if (tipo == "TIRANOFEX") {
+        nuevaPieza = new ClaseDjinn(bando, pos, "Tiranofex");
+    }
+    else if (tipo == "TOXICRENO") {
+        nuevaPieza = new ClaseUnicornio(bando, pos, "Toxicreno");
+    }
 
     if (nuevaPieza) {
-        nuevaPieza->sincronizarPosicionTablero();
-        motor.listaPiezas.push_back(nuevaPieza);
-        // añadir a listas de bando ...
+        nuevaPieza->sincronizarPosicionTablero(); // Actualiza visual en tablero
+        motor.listaPiezas.push_back(nuevaPieza);   // Agrega a la gestión del motor
     }
 }
 
-// Se irán añadiendo las unidades conforme se creen las clases 
 void Generador::GenerarDespliegueUnidades(Motor& motor) {
-    // --- BANDO LUZ (Columna 0) ---
-    // Dreadnoughts en filas 1 y 7
+    // --- DESPLIEGUE IMPERIUM (Luz) - Columna 0 y 1 ---
+
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 0));
     AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 1));
-    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
-
-    // Fénix (Librarian) en fila 5
+    AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 2));
+    AnadirUnidad(motor, Bando::LUZ, "THUNDERHAWK", sf::Vector2i(0, 3));
+    AnadirUnidad(motor, Bando::LUZ, "CAPTAIN", sf::Vector2i(0, 4)); //LIDER
     AnadirUnidad(motor, Bando::LUZ, "LIBRARIAN", sf::Vector2i(0, 5));
+    AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 6));
+    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 8));
+    AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 0));
+    AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 8));
 
+    for (int i = 1; i < 8; i++) {
+        AnadirUnidad(motor, Bando::LUZ, "INTERCESSOR", sf::Vector2i(1, i));
+    }
 
-    // --- BANDO OSCURIDAD (Columna 8) ---
-    // Dreadnoughts (Carnifex) en filas 1 y 7
+    //BANDO OSCURIDAD DESPLIEGUE
+    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 0));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 1));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 2));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "TIRANOFEX", sf::Vector2i(8, 3));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "HIVE_TYRANT", sf::Vector2i(8, 4));//LÍDER 
+    AnadirUnidad(motor, Bando::OSCURIDAD,"GENESTEALER", sf::Vector2i(8, 5));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 6));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 8));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GOBLIN", sf::Vector2i(7, 0));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GOBLIN", sf::Vector2i(7, 8));
 
-    // Fénix (Harpy) en fila 5
-    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 5));
+    for (int i = 1; i < 8; i++) {
+        AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));
+    }
 }

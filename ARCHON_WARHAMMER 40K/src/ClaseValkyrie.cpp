@@ -1,13 +1,15 @@
 #include "ClaseValkyrie.h"
-#include <cmath>
 
 ClaseValkyrie::ClaseValkyrie(Bando b, sf::Vector2i pos, std::string tipo)
-    : Pieza(b, pos)
+<<<<<<< HEAD
+    : PiezaTerrestre(b, pos)
+=======
+    : PiezaTerrestre(b, pos) // Llama al constructor de la clase intermedia
+>>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
 {
-    this->bando = b;
-    this->posicionTablero = pos;
     this->stats.nombre = tipo;
-
+<<<<<<< HEAD
+    this->patronMovimiento = PatronMovimiento::Diagonal;
     // Estadísticas Arquetipo Fénix 
     this->stats.vida = 7.0f;
     this->stats.ataque = 8.0f;
@@ -19,52 +21,23 @@ ClaseValkyrie::ClaseValkyrie(Bando b, sf::Vector2i pos, std::string tipo)
     if (tipo == "Assault Marine") {
 
     }
+=======
+    this->stats.vida = 2.0f;
+    this->stats.ataque = 5.0f;
+    this->stats.defensa = 8.0f;
+    this->rangoMovimiento = 3;
+    this->stats.esRango = true;
+
+    // Asignación del patrón de movimiento
+    this->patronMovimiento = PatronMovimiento::Ambos;
+>>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
 }
 
-bool ClaseValkyrie::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
-    // 1. Cálculo de distancias
-    int distX = std::abs(destino.x - posicionTablero.x);
-    int distY = std::abs(destino.y - posicionTablero.y);
-
-    // 2. Comprobar Rango
-    if (distX > rangoMovimiento || distY > rangoMovimiento) return false;
-
-    // 3. Comprobar Patrón (AMBOS para el Fénix)
-    if (distX != 0 && distY != 0 && distX != distY) return false;
-
-    // 4. VALIDACIÓN DE COLISIONES: Al ser VOLADOR, ignoramos el camino.
-
-    // 5. VALIDACIÓN DEL DESTINO FINAL
-    // Solo comprobamos que no aterrice sobre un aliado
-    for (const auto* otra : otrasPiezas) {
-        if (otra->getPosicionTablero() == destino) {
-            if (otra->getBando() == this->bando) {
-                return false; // No puedes pisar a un aliado
-            }
-        }
-    }
-
-    return true; // Si el patrón es correcto y no hay aliados, el fénix vuela hasta allí
-}
-void ClaseValkyrie::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    if (direccion == sf::Vector2f(0.f, 0.f)) return;
-
-    float velocidad = 250.f;
-    sf::Vector2f desplazamiento = direccion * velocidad * dt;
-    sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
-
-    // El Fénix sabe que SÍ vuela (true)
-    if (arena.esPosicionValida(nuevaPos, 20.f, true)) {
-        this->moverEnArena(desplazamiento.x, desplazamiento.y);
-    }
-}
+// Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.
 
 void ClaseValkyrie::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
-        // --- LÓGICA DE TABLERO ---
         this->sincronizarPosicionTablero();
-
-        // Solo aquí aplicamos el color de bando y el borde de selección
         formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
 
         if (seleccionado) {
@@ -76,16 +49,9 @@ void ClaseValkyrie::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        // --- LÓGICA DE ARENA ---
-        // Usamos la posición absoluta que se mueve con procesarMovimientoArena
         formaVisual.setPosition(posicionAbsoluta);
-
-        // En la arena, quizás quieras que no tengan borde o un borde distinto
         formaVisual.setOutlineThickness(0.0f);
-
-        // Podemos asegurar que el origen esté centrado para rotaciones o colisiones
         formaVisual.setOrigin(20.f, 20.f);
     }
-
     window.draw(formaVisual);
 }

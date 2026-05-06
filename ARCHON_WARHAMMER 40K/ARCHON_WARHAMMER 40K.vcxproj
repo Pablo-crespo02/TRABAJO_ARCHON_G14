@@ -141,6 +141,7 @@
     <ClCompile Include="src\ClaseValkyrie.cpp" />
     <ClCompile Include="src\ClaseWizard.cpp" />
     <ClCompile Include="src\Generador.cpp" />
+    <ClCompile Include="src\GenerarArena.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Motor.cpp" />
     <ClCompile Include="src\PantallaInicio.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
+    <ClInclude Include="src\GenerarArena.h" />
     <ClInclude Include="src\Motor.h" />
     <ClInclude Include="src\PantallaInicio.h" />
     <ClInclude Include="src\Pieza.h" />

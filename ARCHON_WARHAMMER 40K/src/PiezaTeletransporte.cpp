@@ -1,5 +1,9 @@
 #include "PiezaTeletransporte.h"
+
+<<<<<<< HEAD
 #include <cmath>
+=======
+>>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
 
 PiezaTeletransporte::PiezaTeletransporte(Bando b, sf::Vector2i pos) : Pieza(b, pos) {}
 
@@ -15,13 +19,12 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
     if (patronMovimiento == PatronMovimiento::Diagonal && (distX != distY)) return false;
     if (patronMovimiento == PatronMovimiento::Ambos && (distX != 0 && distY != 0 && distX != distY)) return false;
 
-    // 3. SALTO: No validamos el camino. Al ser teletransporte, "desaparece y aparece",
-    // por lo que las piezas que haya en medio no bloquean el paso.
+    // 3. SALTO: Al ser teletransporte, no validamos el camino (ignora piezas intermedias)[cite: 1]
 
-    // 4. Validar Destino Final
+    // 4. Validar Destino Final (No pisar aliados)
     for (const auto* otra : otrasPiezas) {
         if (otra->getPosicionTablero() == destino && otra->getBando() == this->bando) {
-            return false; // No puede teletransportarse encima de un aliado
+            return false;
         }
     }
     return true;
@@ -30,15 +33,14 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
 void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     if (direccion == sf::Vector2f(0.f, 0.f)) return;
 
-    // En Archon, el teletransporte en combate suele ser un "salto" corto o un dash
-    // que atraviesa obstáculos.
+    // Velocidad de desplazamiento para el teletransporte/dash
     float velocidadTeletransporte = 500.f;
     sf::Vector2f desplazamiento = direccion * velocidadTeletransporte * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
 
-    // El teletransporte ignora colisiones de ambiente (rocas) igual que el volador,
-    // pero podemos hacerlo incluso más rápido o con un efecto visual.
-    if (arena.esPosicionValida(nuevaPos, 20.f, true)) { // true = ignora rocas
+    // El teletransporte ignora colisiones de ambiente (pasamos true a esVoladora)
+    if (arena.esPosicionValida(nuevaPos, 20.f, true)) {
+        // CORRECCIÓN: Llamamos a moverEnArena para aplicar el desplazamiento
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }
 }
