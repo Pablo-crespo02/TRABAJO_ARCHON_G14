@@ -9,13 +9,12 @@ bool PiezaVoladora::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& 
 
     if (distX > rangoMovimiento || distY > rangoMovimiento) return false;
 
-<<<<<<< HEAD
     // 2. Validar Patrón
-=======
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
-    if (patronMovimiento == PatronMovimiento::Ortogonal && (distX != 0 && distY != 0)) return false;
-    if (patronMovimiento == PatronMovimiento::Diagonal && (distX != distY)) return false;
-    if (patronMovimiento == PatronMovimiento::Ambos && (distX != 0 && distY != 0 && distX != distY)) return false;
+    if (patronMovimiento == 0 && (distX != 0 && distY != 0)) return false;
+    if (patronMovimiento == 1 && (distX != distY)) return false;
+    if (patronMovimiento == 2 && (distX != 0 && distY != 0 && distX != distY)) return false;
+
+    // 3. NO se valida el camino porque vuela por encima de las piezas.
 
     for (const auto* otra : otrasPiezas) {
         if (otra->getPosicionTablero() == destino && otra->getBando() == this->bando) {

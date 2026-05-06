@@ -1,14 +1,11 @@
 #include "ClaseUnicornio.h"
 
 ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
-<<<<<<< HEAD
-    : PiezaTerrestre(b, pos)
-=======
     : PiezaTerrestre(b, pos) // Llama al constructor de la clase intermedia
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
+
 {
     this->stats.nombre = tipo;
-<<<<<<< HEAD
+
     this->patronMovimiento = PatronMovimiento::Diagonal;
     // Estadísticas Arquetipo Fénix 
     this->stats.vida = 7.0f;
@@ -21,7 +18,10 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     if (tipo == "Primaris") {
 
     }
-=======
+
+    :PiezaTerrestre(b, pos) // Llama al constructor de la clase intermedia
+{
+    this->stats.nombre = tipo;
     this->stats.vida = 2.0f;
     this->stats.ataque = 5.0f;
     this->stats.defensa = 8.0f;
@@ -30,7 +30,6 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
 
     // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
 }
 
 // Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.

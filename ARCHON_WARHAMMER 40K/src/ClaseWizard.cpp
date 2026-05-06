@@ -1,14 +1,11 @@
 #include "ClaseWizard.h"
 
 ClaseWizard::ClaseWizard(Bando b, sf::Vector2i pos, std::string tipo)
-<<<<<<< HEAD
-    : PiezaVoladora(b, pos)
-=======
+
     : PiezaVoladora(b, pos) // Llama al constructor de la clase intermedia
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
+
 {
     this->stats.nombre = tipo;
-<<<<<<< HEAD
     this->patronMovimiento = PatronMovimiento::Ambos;
     // Estadísticas Arquetipo Fénix 
     this->stats.vida = 7.0f;
@@ -20,8 +17,11 @@ ClaseWizard::ClaseWizard(Bando b, sf::Vector2i pos, std::string tipo)
     // Personalización para diferencias Librarian o Harpy 
     if (tipo == "Captain Terminator") {
 
-    }
-=======
+    } 
+
+
+    this->stats.nombre = tipo;
+
     this->stats.vida = 2.0f;
     this->stats.ataque = 5.0f;
     this->stats.defensa = 8.0f;
@@ -30,10 +30,9 @@ ClaseWizard::ClaseWizard(Bando b, sf::Vector2i pos, std::string tipo)
 
     // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
 }
 
-// Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.
+// Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp
 
 void ClaseWizard::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {

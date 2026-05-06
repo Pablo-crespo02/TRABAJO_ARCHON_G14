@@ -1,9 +1,6 @@
 #include "PiezaTeletransporte.h"
-
-<<<<<<< HEAD
 #include <cmath>
-=======
->>>>>>> ae9d14edd8fb2b3f35330778e2828e95dd315d36
+
 
 PiezaTeletransporte::PiezaTeletransporte(Bando b, sf::Vector2i pos) : Pieza(b, pos) {}
 

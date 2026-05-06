@@ -85,7 +85,6 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     }
 
 
-
     else if (tipo == "HIVE_TYRANT") {
         nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
     }
@@ -125,6 +124,14 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 2));
     AnadirUnidad(motor, Bando::LUZ, "THUNDERHAWK", sf::Vector2i(0, 3));
     AnadirUnidad(motor, Bando::LUZ, "CAPTAIN", sf::Vector2i(0, 4)); //LIDER
+    // Líder en el centro
+    AnadirUnidad(motor, Bando::LUZ, "CAPTAIN", sf::Vector2i(0, 4));
+
+    // Infantería Pesada y Especialistas
+    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 1));
+    AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
+
+    AnadirUnidad(motor, Bando::LUZ, "LIBRARIAN", sf::Vector2i(0, 3));
     AnadirUnidad(motor, Bando::LUZ, "LIBRARIAN", sf::Vector2i(0, 5));
     AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 6));
     AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
@@ -152,4 +159,15 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));
     }
+
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 2));
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 6));
+
+    // Vanguardia
+    AnadirUnidad(motor, Bando::LUZ, "INTERCESSOR", sf::Vector2i(1, 0));
+    AnadirUnidad(motor, Bando::LUZ, "INTERCESSOR", sf::Vector2i(1, 8));
+
+    AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 2));
+    AnadirUnidad(motor, Bando::LUZ, "THUNDERHAWK", sf::Vector2i(1, 4));
+    AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(1, 6));
 }

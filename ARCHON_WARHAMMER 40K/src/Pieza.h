@@ -8,8 +8,7 @@
 // Enums básicos para todo el juego
 enum class Bando { LUZ, OSCURIDAD };
 
-<<<<<<< HEAD
-=======
+// Enum para leer los patrones de movimiento fácilmente
 enum class PatronMovimiento {
     Ortogonal,
     Diagonal,
