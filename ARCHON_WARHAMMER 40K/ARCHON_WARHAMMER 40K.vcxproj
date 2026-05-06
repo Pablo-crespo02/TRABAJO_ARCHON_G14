@@ -137,6 +137,7 @@
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Motor.cpp" />
+    <ClCompile Include="src\PantallaInicio.cpp" />
     <ClCompile Include="src\Pieza.cpp" />
     <ClCompile Include="src\PowerPoint.cpp" />
     <ClCompile Include="src\Renderizador.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
     <ClInclude Include="src\Motor.h" />
+    <ClInclude Include="src\PantallaInicio.h" />
     <ClInclude Include="src\Pieza.h" />
     <ClInclude Include="src\PowerPoint.h" />
     <ClInclude Include="src\Renderizador.h" />
