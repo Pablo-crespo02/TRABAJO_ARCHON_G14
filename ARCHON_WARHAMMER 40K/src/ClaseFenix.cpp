@@ -4,7 +4,8 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos) // Asumo que el Fénix hereda de PiezaVoladora
 {
     this->stats.nombre = tipo;
-    this->stats.vida = 25.0f;
+    this->stats.vida = 25.0f;  
+    this->stats.vidaMaxima = 25.0f;
     this->stats.defensa = 5.0f;
     this->stats.ataque = 12.0f;
     this->stats.velAtaque = 1.5f;
@@ -36,6 +37,8 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         formaVisual.setPosition(posicionAbsoluta);
         formaVisual.setOutlineThickness(0.0f);
         formaVisual.setOrigin(20.f, 20.f);
+        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
+        barraSalud.dibujar(window);
     }
     window.draw(formaVisual);
 }

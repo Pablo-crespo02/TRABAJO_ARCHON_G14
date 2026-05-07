@@ -27,7 +27,6 @@ struct Stats {
 
     //Variables encargadas de la gestión de proyectiles en la arena
     sf::Clock relojProyectil;  //Reloj que avanza desde que se dispara
-    double tiempoRecarga;   //Tiempo que debe pasar hasta que se puede disparar
 
 };
 
@@ -112,7 +111,7 @@ public:
 
     //Setter para establecer tiempos de recarga diferentes para cada pieza:
     void setTiempoRecarga(double tiemporecarga) {
-        stats.tiempoRecarga = tiemporecarga;
+        stats.velAtaque = tiemporecarga;
     };
 
     //Setter para establecer la última dirección de mirada de la pieza, para apuntar los proyectiles:

@@ -495,22 +495,27 @@ void Motor::actualizar() {
         pLuz->setultimadireccion(dirLuz);
         //Ataque bando Luz
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            // Usamos tu función puedeDisparar() que ya gestiona el reloj interno
             if (pLuz->puedeDisparar()) {
                 sf::Vector2f dirDisparo = pLuz->getultimadireccion();
+
+                // Normalizamos la dirección
                 float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) { dirDisparo.x /= magnitud; dirDisparo.y /= magnitud; }
-                else { dirDisparo = sf::Vector2f(1.f, 0.f); } // Por si acaso es 0
+                if (magnitud != 0) dirDisparo /= magnitud;
+                else dirDisparo = sf::Vector2f(1.f, 0.f);
 
                 if (pLuz->stats.esRango) {
-                    // ATAQUE A DISTANCIA
-                    proyectiles.emplace_back(pLuz->getPosicionAbsoluta(), dirDisparo, 15, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
+                    // Creamos proyectil con el daño de la pieza
+                    proyectiles.emplace_back(pLuz->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
                 }
                 else {
-                    // ATAQUE MELEE: Generamos la hitbox delante de la pieza
+                    // Lógica Melee
                     sf::Vector2f posMelee = pLuz->getPosicionAbsoluta() + (dirDisparo * 35.f);
                     ataquesMelee.emplace_back(posMelee, pLuz, pLuz->stats.ataque);
                 }
-                pLuz->reiniciarRelojProyectil(); // Usamos el mismo reloj para el cooldown del melee
+
+                // LLAMADA CRÍTICA: Reinicia el reloj interno de la pieza
+                pLuz->reiniciarRelojProyectil();
             }
         }
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
@@ -525,22 +530,24 @@ void Motor::actualizar() {
         // 1. Guardamos la última dirección en la que intentó moverse
         pOsc->setultimadireccion(dirOsc);
         //Ataque bando Oscuridad
+        // Ataque bando Oscuridad (Enter)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             if (pOsc->puedeDisparar()) {
                 sf::Vector2f dirDisparo = pOsc->getultimadireccion();
+
                 float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) { dirDisparo.x /= magnitud; dirDisparo.y /= magnitud; }
-                else { dirDisparo = sf::Vector2f(-1.f, 0.f); }
+                if (magnitud != 0) dirDisparo /= magnitud;
+                else dirDisparo = sf::Vector2f(-1.f, 0.f);
 
                 if (pOsc->stats.esRango) {
-                    // ATAQUE A DISTANCIA
-                    proyectiles.emplace_back(pOsc->getPosicionAbsoluta(), dirDisparo, 15, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
+                    proyectiles.emplace_back(pOsc->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
                 }
                 else {
-                    // ATAQUE MELEE
                     sf::Vector2f posMelee = pOsc->getPosicionAbsoluta() + (dirDisparo * 35.f);
                     ataquesMelee.emplace_back(posMelee, pOsc, pOsc->stats.ataque);
                 }
+
+                // Reinicia el reloj para que no pueda disparar hasta el siguiente ciclo de cooldown
                 pOsc->reiniciarRelojProyectil();
             }
         }
