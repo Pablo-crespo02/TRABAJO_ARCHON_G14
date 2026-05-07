@@ -5,6 +5,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
 {
     this->stats.nombre = tipo;
     this->stats.vida = 2.0f;
+    this->stats.vidaMaxima = 2.0f;
     this->stats.ataque = 5.0f;
     this->stats.defensa = 8.0f;
     this->rangoMovimiento = 4;
@@ -13,12 +14,8 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
 
     // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;
-
-
-    if (b == Bando::LUZ) { ultimadireccion = sf::Vector2f(1, 0); }   //Inicializa la pieza mirando hacia la derecha en la arena, a efectos de los proyectiles
-    else { ultimadireccion = sf::Vector2f(-1, 0); } //Inicializa la pieza mirando hacia la izquieda en la arena, a efectos de los proyectiles
-
 }
+
 // Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.
 
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
@@ -38,7 +35,10 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         formaVisual.setPosition(posicionAbsoluta);
         formaVisual.setOutlineThickness(0.0f);
         formaVisual.setOrigin(20.f, 20.f);
+        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
+        barraSalud.dibujar(window);
     }
     window.draw(formaVisual);
+
 }
 

@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\AtaqueMelee.cpp" />
+    <ClCompile Include="src\BarraVida.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
@@ -152,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\AtaqueMelee.h" />
+    <ClInclude Include="src\BarraVida.h" />
     <ClInclude Include="src\Casilla.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />

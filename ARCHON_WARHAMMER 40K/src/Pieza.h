@@ -4,6 +4,7 @@
 #include "EstadoJuego.h"
 #include <vector>
 #include <string>
+#include "BarraVida.h"
 
 // Enums básicos para todo el juego
 enum class Bando { LUZ, OSCURIDAD };
@@ -16,6 +17,7 @@ struct Stats {
 
     std::string nombre;
     float vida;
+    float vidaMaxima;
     bool esRango;
     float ataque;
     float defensa;
@@ -24,7 +26,7 @@ struct Stats {
     //Variables encargadas de la gestión de proyectiles en la arena
     sf::Clock relojProyectil;  //Reloj que avanza desde que se dispara
     double tiempoRecarga;   //Tiempo que debe pasar hasta que se puede disparar
-   
+
 };
 
 
@@ -35,6 +37,7 @@ protected:
     int rangoMovimiento;
     Stats stats;
     PatronMovimiento patronMovimiento;
+    BarraVida barraSalud;
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
 
@@ -93,8 +96,8 @@ public:
         return sf::Vector2f(ultimadireccion);
     }
 
-   //SETTERS PÚBLICOS:
-   // Setter para la selección (quita el borde amarillo)
+    //SETTERS PÚBLICOS:
+    // Setter para la selección (quita el borde amarillo)
     void setSeleccionado(bool valor) {
         seleccionado = valor;
     }
@@ -112,8 +115,8 @@ public:
 
     //Setter para establecer la última dirección de mirada de la pieza, para apuntar los proyectiles:
     void setultimadireccion(sf::Vector2f nuevadireccion) {
-        if (nuevadireccion.x != 0 || nuevadireccion.y != 0){
+        if (nuevadireccion.x != 0 || nuevadireccion.y != 0) {
             ultimadireccion = nuevadireccion;
-            }
+        }
     }
 };
