@@ -256,19 +256,21 @@ void Motor::manejarEventos() {
     }
 }
 
+
 //GESTIÓN DEL TECLADO ARENA
+
 void Motor::actualizar() {
     float dt = reloj.restart().asSeconds();
 
-    //SÓLO APLICABLE EN LA ARENA:
+    // SÓLO APLICABLE EN LA ARENA
     if (estadoActual == Estado::Arena) {
         if (!piezaAtacante || !piezaDefensor) return;
 
-        // Identificamos quién es quién solo para asignar los controles
+        // Identificamos quién es quién para asignar controles
         Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
         Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-        // Capturar intención de movimiento Luz (WASD)
+        // --- GESTIÓN LUZ (WASD + ESPACIO) ---
         sf::Vector2f dirLuz(0.f, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dirLuz.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dirLuz.y += 1.f;
@@ -284,9 +286,9 @@ void Motor::actualizar() {
 
                 //Definición de la dirección del proyectil:
                 sf::Vector2f direccionProyectilLuz = pLuz->getultimadireccion();  //El proyectil va hacia la última dirección mirada
-                
+
                 //Hacemos unitario el vector director del disparo para evitar que las diagonales vayan más rápido por suma de vectores
-                double magnitud = std::sqrt((direccionProyectilLuz.x* direccionProyectilLuz.x)+ (direccionProyectilLuz.y* direccionProyectilLuz.y));
+                double magnitud = std::sqrt((direccionProyectilLuz.x * direccionProyectilLuz.x) + (direccionProyectilLuz.y * direccionProyectilLuz.y));
 
                 //Únicamente normalizamos si su módulo no es 0:
 
@@ -297,21 +299,20 @@ void Motor::actualizar() {
 
 
                 //Anadimos un item al contenedor proyectiles
-                proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil);
-                
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil,pLuz,pLuz->stats.ataque);
+
                 //Reiniciamos el reloj de proyectil
                 pLuz->reiniciarRelojProyectil();
             }
         }
-
         // Ordena a la pieza que se mueva ella misma
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
-        // Capturar intención de movimiento Oscuridad (Flechas)
+        // --- GESTIÓN OSCURIDAD (Flechas + ENTER) ---
         sf::Vector2f dirOsc(0.f, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    dirOsc.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  dirOsc.y += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  dirOsc.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) dirOsc.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) dirOsc.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) dirOsc.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
         pOsc->setultimadireccion(dirOsc); //Guarda la última direción a la que miró la pieza Oscuridad
@@ -335,45 +336,78 @@ void Motor::actualizar() {
                 }
 
                 //Anadimos un item al contenedor proyectiles
-                proyectiles.emplace_back(OrigenDisparo, direccionProyectilOsc, 15, Colores::ColorProyectil);
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilOsc, 15, Colores::ColorProyectil,pOsc,pOsc->stats.ataque);
 
                 //Reiniciamos el reloj de proyectil
                 pOsc->reiniciarRelojProyectil();
             }
         }
-
-        // Ordena a la pieza que se mueva ella misma
         pOsc->procesarMovimientoArena(dirOsc, dt, this->arena);
 
-        //Ordena a todos los proyectiles exixstentes que se actualicen:
+        // Proyectiles
         for (auto& p : proyectiles) {
 
             //FUNCIONES DE MOVIMIENTO DE LOS PROYECTILES:
             p.ActualizarProyectil();
 
-            //FUNCIONES DE COLISIÓN Y DESPAWN:
+            sf::Vector2f posP = p.getPosicionProyectil();
+            float radioP = p.getFormaProyectil().getRadius();
+            bool haImpactado = false;
 
-            //Obtenemos la posición de cada proyectil
-            sf::Vector2f pos = p.getPosicionProyectil();
 
-    
+            // Umbral de colisión circular: (Radio 16 + Radio 20)^2 = 1296
+            float limiteColisionSq = 1300.f;
+
+
             //Despawn por colisión con obstáculos (rocas) o paredes
-            if (!arena.esPosicionValida(sf::Vector2f(pos), p.getFormaProyectil().getRadius(), false)) {
+            if (!arena.esPosicionValida(sf::Vector2f(posP), p.getFormaProyectil().getRadius(), false)) {
                 p.setEstadoProyectil(false);  //Proyectil marcado para destruir
                 std::cout << "Proyectil eliminado, colision con obstaculo o pared" << std::endl; //Mensaje debug por consola
             }
-
-            //Despawn por colisión con enemigos
-            //COMPLETAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
-        //Función despawn de los proyectiles en la arena
-        //Busca todos los proyectiles del contenedor con activo==false y los elimina del vector
+        // Limpieza de proyectiles desactivados
         proyectiles.erase(
-            std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {               //RECORRE EL CONTENEDOR DE PROYECTILES Y DEVUEVE UN INDICADOR DE DONDE EMPIEZAN LOS ACTIVO==FALSE
-                    return !p.getEstadoProyectil();      //DEVUELVE TRUE SI EL ESTADO ES ACTIVO==FALSE
-                }
-            ),
-            proyectiles.end());
-    };
+            std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {
+                return !p.getEstadoProyectil();
+                }), proyectiles.end());
+
+        // Piezas muertas tras combate
+        Pieza* ganador = nullptr;
+        Pieza* perdedor = nullptr;
+
+        if (piezaAtacante->stats.vida <= 0) {
+            perdedor = piezaAtacante;
+            ganador = piezaDefensor;
+        }
+        else if (piezaDefensor->stats.vida <= 0) {
+            perdedor = piezaDefensor;
+            ganador = piezaAtacante;
+        }
+
+        if (perdedor) {
+            // Casilla del defensor
+            sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
+
+            // Eliminar pieza de la memoria y del vector
+            auto it = std::find(listaPiezas.begin(), listaPiezas.end(), perdedor);
+            if (it != listaPiezas.end()) {
+                delete* it;
+                listaPiezas.erase(it);
+            }
+
+            // El ganador se mueve a la casilla del defensor
+            ganador->mover(destinoFinal);
+
+            // Limpieza de estados
+            piezaAtacante = nullptr;
+            piezaDefensor = nullptr;
+            piezaSeleccionada = nullptr;
+            proyectiles.clear();
+
+            // Volver al tablero
+            estadoActual = Estado::Tablero;
+            intentarAccionJugador(jugadorActual);
+        }
+    }
 }
