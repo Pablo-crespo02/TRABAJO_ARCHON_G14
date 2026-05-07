@@ -1,23 +1,25 @@
 #include "PantallaInicio.h"
 
 PantallaInicio::PantallaInicio() {
-    //cargar imagen de pantalla de inicio. La imagen esta en la carpeta de imagenes
     if (!texturaFondo.loadFromFile("imagenes/pantalla_inicio.png")) {
-        std::cout << "Error: No se pudo cargar pantalla_inicio.png. Comprueba la ruta." << std::endl;
+        std::cout << "Error cargando imagen" << std::endl;
     }
-
-
     spriteFondo.setTexture(texturaFondo);
 
-    //generamos una ventana acorde al tamaño de la imagen
-    sf::Vector2u tamanoImagen = texturaFondo.getSize();
-    if (tamanoImagen.x > 0 && tamanoImagen.y > 0) {
-        float escalaX = 800.f / tamanoImagen.x;
-        float escalaY = 600.f / tamanoImagen.y;
-        spriteFondo.setScale(escalaX, escalaY);
-    }
+    // 1. Obtenemos la resolución del monitor directamente
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+
+    // 2. Escalamos el sprite para que coincida con esa resolución
+    sf::Vector2u tamanoImg = texturaFondo.getSize();
+
+    float escalaX = (float)desktop.width / tamanoImg.x;
+    float escalaY = (float)desktop.height / tamanoImg.y;
+
+    spriteFondo.setScale(escalaX, escalaY);
 }
 
 void PantallaInicio::dibujar(sf::RenderWindow& window) {
+    // IMPORTANTE: Asegurarnos de que no hay "vistas" raras activas
+    window.setView(window.getDefaultView());
     window.draw(spriteFondo);
 }

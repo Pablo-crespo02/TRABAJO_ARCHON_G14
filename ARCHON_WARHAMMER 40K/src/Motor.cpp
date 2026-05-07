@@ -7,14 +7,32 @@
 
 
 Motor::Motor() {
-    // Inicialización de la ventana sin repetir Motor::
-    window.create(sf::VideoMode(anchopantalla, altopantalla), "ARCHON WARHAMMER 40K");
+    if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
+        // Si entra aquí, es que no encuentra el archivo
+        std::cout << "Error: No se encontro el archivo de fuente!" << std::endl;
+    }
+    // Configuración de Ventana en Pantalla Completa
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
 
+    // Configuración de la Vista del Tablero (Mundo del Juego)
+    // Definimos un tamaño lógico fijo para el tablero (ej: 800x800)
+    vistaTablero.setSize(700.f, 700.f);
+    vistaTablero.setCenter(350.f, 350.f); // Centro lógico (size / 2)
+
+    // Define dónde aparece el tablero en la pantalla (de 0.0 a 1.0)
+    // Lo situamos un poco a la izquierda (x=0.10)
+    vistaTablero.setViewport(sf::FloatRect(0.10f, 0.20f, 0.60f, 0.80f));
+
+    // Configuración de la Vista de Interfaz (HUD)
+    // Esta vista usa las coordenadas píxel a píxel de la ventana para que sea fácil posicionar elementos
+    vistaUI = window.getDefaultView();
     jugadorActual = 1;
     cicloActual = 1;
     rondaActual = 1;
     estadoActual = Estado::MenuPrincipal;
+    piezaSeleccionada = nullptr; // Importante para la interfaz de la derecha
 
     // Inicializaciones de lógica
     Generador::GenerarTablero(tablero);
@@ -33,19 +51,27 @@ void Motor::renderizar() {
 
     // 1. PANTALLA DE INICIO (Menu principal)
     if (estadoActual == Estado::MenuPrincipal) {
+        window.setView(vistaUI);
         pantallaInicio.dibujar(window);
     }
 
     // 2. MODO TABLERO
     else if (estadoActual == Estado::Tablero) {
+        window.setView(vistaTablero);
         Renderizador::dibujarTablero(window, tablero);
         for (auto p : listaPiezas) {
             Renderizador::dibujarPieza(window, p, estadoActual);
         }
-    }
+            // --- VISTA DE INTERFAZ (HUD) ---
+        // Solo llamamos al HUD aquí, en el estado Tablero
+            window.setView(vistaUI);
+            dibujarHUD();
+        }
 
     // 3. MODO ARENA DE COMBATE
     else if (estadoActual == Estado::Arena) {
+
+        window.setView(vistaTablero);
         // Dibujamos el escenario base
         Renderizador::dibujarArena(window, arena);
 
@@ -69,6 +95,181 @@ void Motor::renderizar() {
     window.display();
 }
 
+void Motor::dibujarHUD() {
+    float ancho = (float)window.getSize().x;
+    float alto = (float)window.getSize().y;
+    float inicioUI = ancho * 0.66f;
+    float anchoHUD = ancho - inicioUI;
+
+    // --- 1. CABECERA SOBRE EL TABLERO ---
+    sf::Text textoTop;
+    textoTop.setFont(fuenteGlobal);
+    textoTop.setOutlineThickness(2);
+    textoTop.setOutlineColor(sf::Color::Black);
+
+    // RONDA Y CICLO (Un poco más a la izquierda para separar del turno)
+    textoTop.setCharacterSize(35);
+    textoTop.setFillColor(sf::Color(180, 180, 180));
+    textoTop.setString("RONDA: " + std::to_string(rondaActual));
+    textoTop.setPosition(ancho * 0.10f, 35.f);
+    window.draw(textoTop);
+
+    textoTop.setString("CICLO: " + std::to_string(cicloActual) + " / 12");
+    textoTop.setPosition(ancho * 0.10f, 80.f);
+    window.draw(textoTop);
+
+    // TURNO ACTUAL (Separado del Ciclo/Ronda)
+    std::string nombreTurno = (jugadorActual == 1) ? "TURNO: IMPERIUM (LUZ)" : "TURNO: TIRANIDOS (OSCURIDAD)";
+    sf::Color colorTurno = (jugadorActual == 1) ? sf::Color(255, 255, 150) : sf::Color(180, 100, 255);
+
+    textoTop.setCharacterSize(40);
+    textoTop.setFillColor(colorTurno);
+    textoTop.setString(nombreTurno);
+    // Posición centrada respecto al tablero, bajada un poco para no pegarse arriba
+    textoTop.setPosition((inicioUI / 2.f) - 150.f, 35.f);
+    window.draw(textoTop);
+
+
+    // --- 2. PANEL LATERAL (HUD) ---
+    sf::RectangleShape panel({ anchoHUD, alto });
+    panel.setPosition(inicioUI, 0);
+    panel.setFillColor(sf::Color(18, 18, 22));
+    window.draw(panel);
+
+    float margenLateral = 25.f;
+    float margenX = inicioUI + margenLateral;
+    float yActual = 60.f;
+
+    // Título Unidad
+    sf::Text texto;
+    texto.setFont(fuenteGlobal);
+    texto.setCharacterSize(35);
+    texto.setFillColor(sf::Color(120, 120, 130));
+    texto.setString("UNIDAD");
+    texto.setPosition(margenX, yActual);
+    window.draw(texto);
+
+    yActual += 70.f;
+
+    // 3. RECTÁNGULOS DE IMAGEN
+    float anchoTotalDisponible = anchoHUD - (margenLateral * 2);
+    float anchoMarco = (anchoTotalDisponible - 20.f) / 2.f;
+    sf::Vector2f tamanoMarco(anchoMarco, 320.f);
+
+    sf::RectangleShape marco(tamanoMarco);
+    marco.setOutlineThickness(3);
+    marco.setOutlineColor(sf::Color(80, 80, 90));
+    marco.setFillColor(sf::Color(25, 25, 30));
+
+    marco.setPosition(margenX, yActual);
+    window.draw(marco);
+
+    marco.setPosition(margenX + anchoMarco + 20.f, yActual);
+    window.draw(marco);
+
+    yActual += tamanoMarco.y + 40.f;
+
+    if (piezaSeleccionada != nullptr) {
+        texto.setCharacterSize(50);
+        texto.setFillColor(sf::Color::White);
+        texto.setString(piezaSeleccionada->stats.nombre);
+        texto.setPosition(margenX, yActual);
+        window.draw(texto);
+
+        yActual += 85.f;
+
+        // Lambda con posición de valor corregida
+        auto dibujarDato = [&](std::string etiqueta, std::string valor, sf::Color colorVal = sf::Color::White) {
+            texto.setCharacterSize(18);
+            texto.setFillColor(sf::Color(140, 140, 150));
+            texto.setString(etiqueta);
+            texto.setPosition(margenX, yActual);
+            window.draw(texto);
+
+            texto.setCharacterSize(28);
+            texto.setFillColor(colorVal);
+            texto.setString(valor);
+
+            // CORRECCIÓN: Volvemos a una posición relativa al margen izquierdo del HUD
+            // para que no se salgan por la derecha
+            texto.setPosition(margenX + 210.f, yActual - 5.f);
+
+            window.draw(texto);
+            yActual += 48.f;
+            };
+
+        // --- LISTA DE DATOS ---
+        dibujarDato("VIDA:", std::to_string((int)piezaSeleccionada->stats.vida), sf::Color(100, 255, 100));
+        dibujarDato("ATAQUE:", std::to_string((int)piezaSeleccionada->stats.ataque), sf::Color(255, 120, 120));
+        dibujarDato("RANGO MOV:", std::to_string(piezaSeleccionada->rangoMovimiento) + " CASILLAS");
+
+        sf::Color colMov = piezaSeleccionada->stats.esVolador ? sf::Color(100, 200, 255) : sf::Color(200, 150, 100);
+        dibujarDato("MOVIMIENTO:", piezaSeleccionada->stats.esVolador ? "VOLADOR" : "TERRESTRE", colMov);
+
+        sf::Color colCom = piezaSeleccionada->stats.esRango ? sf::Color(255, 215, 0) : sf::Color(255, 80, 80);
+        dibujarDato("COMBATE:", piezaSeleccionada->stats.esRango ? "DISTANCIA" : "MELEE", colCom);
+
+        dibujarDato("VEL. ATQ:", std::to_string((int)piezaSeleccionada->stats.velAtaque));
+        dibujarDato("COOLDOWN:", std::to_string((int)piezaSeleccionada->stats.cooldown));
+
+        std::string pTxt = "";
+        switch (piezaSeleccionada->patronMovimiento) {
+        case PatronMovimiento::Ambos: pTxt = "DIAGONAL Y ORTOGONAL (*)"; break;
+        case PatronMovimiento::Ortogonal: pTxt = "ORTOGONAL (+)"; break;
+        case PatronMovimiento::Diagonal: pTxt = "DIAGONAL (X)"; break;
+        default: pTxt = "OTRO"; break;
+        }
+        dibujarDato("PATRON:", pTxt, sf::Color(255, 255, 150));
+    }
+}
+
+void Motor::dibujarInfoPieza(sf::RenderWindow& window, Pieza* pieza, float x, float y) {
+    if (pieza == nullptr) return;
+
+    sf::Text texto;
+    texto.setFont(fuenteGlobal);
+    texto.setOutlineColor(sf::Color::Black); // Borde negro para que resalte
+    texto.setOutlineThickness(1);            // Grosor sutil del borde
+    texto.setLetterSpacing(1.2);             // Opcional: separa un poco las letras si se ven muy juntas
+    float espaciado = 32.f;
+
+    // --- NOMBRE ---
+    texto.setCharacterSize(26);
+    texto.setFillColor(sf::Color::White);
+    texto.setString(pieza->stats.nombre);
+    texto.setPosition(x, y);
+    window.draw(texto);
+
+    float yFila = y + 50.f;
+
+    // Lambda auxiliar para dibujar cada dato         IMPORTANTE: aprender que es una funcion LAMBDA
+    auto dibujarDato = [&](std::string etiqueta, std::string valor) {
+        texto.setCharacterSize(14);
+        texto.setFillColor(sf::Color(150, 150, 150));
+        texto.setString(etiqueta);
+        texto.setPosition(x, yFila);
+        window.draw(texto);
+
+        texto.setCharacterSize(18);
+        texto.setFillColor(sf::Color::White);
+        texto.setString(valor);
+        texto.setPosition(x + 140.f, yFila - 2.f);
+        window.draw(texto);
+
+        yFila += espaciado;
+        };
+
+    // --- DATOS REALES DE TU STRUCT ---
+    dibujarDato("VIDA:", std::to_string((int)pieza->stats.vida));
+    dibujarDato("ATAQUE:", std::to_string((int)pieza->stats.ataque));
+    dibujarDato("DEFENSA:", std::to_string((int)pieza->stats.defensa));
+    dibujarDato("VEL. ATQ:", std::to_string((int)pieza->stats.velAtaque));
+    dibujarDato("COOLDOWN:", std::to_string((int)pieza->stats.cooldown));
+
+    // Para el booleano esRango
+    std::string tipoRango = pieza->stats.esRango ? "DISTANCIA" : "CUERPO A CUERPO";
+    dibujarDato("TIPO:", tipoRango);
+}
 
 void Motor::intentarAccionJugador(int idJugador) {
     // Solo hacemos algo si el ID del jugador que pulsó coincide con el turno actual
@@ -100,6 +301,7 @@ void Motor::intentarAccionJugador(int idJugador) {
         std::cout << "¡No es el turno del Jugador " << idJugador << "!" << std::endl;
     }
 }
+
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
@@ -140,6 +342,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 
     estadoActual = Estado::Arena;
 }
+
 void Motor::imprimirEstado() {
     std::cout << "Ronda " << rondaActual
         << " | Ciclo [" << cicloActual << "/12] | "
@@ -147,12 +350,15 @@ void Motor::imprimirEstado() {
 }
 
 void Motor::manejarClick(sf::Vector2i mousePos) {
-    if (estadoActual != Estado::Tablero) return;
     // Comprueba que está en el tablero
+    if (estadoActual != Estado::Tablero) return;
+
+    sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
+   
     std::cout << "DEBUG: Clic en pixeles (" << mousePos.x << "," << mousePos.y << ")" << std::endl;
     // Conversión de píxeles a coordenadas de tablero (0-8)
-    int tableroX = (mousePos.x - 50) / 60;
-    int tableroY = (mousePos.y - 30) / 60;
+    int tableroX = static_cast<int>(worldPos.x / 60.f);
+    int tableroY = static_cast<int>(worldPos.y / 60.f);
 
     std::cout << "DEBUG: Celda calculada [" << tableroX << "," << tableroY << "]" << std::endl;
 
@@ -160,9 +366,6 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
         std::cout << "DEBUG: Clic fuera del tablero" << std::endl;
         return;
     }
-
-    // Comprobamos si hay pieza en la casilla
-    std::cout << "DEBUG: Buscando pieza en la celda... Total piezas: " << listaPiezas.size() << std::endl;
 
     sf::Vector2i celdaClickeada(tableroX, tableroY);
 
@@ -186,10 +389,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
         }
     }
     else {
-        // Tenemos una piza seleccionada
-
-        // Deseleccionar si se clica en la misma casilla 
-        // Si hemos escogido una pieza hay que volver a haver click para deseleccionarla
+        // LÓGICA CON PIEZA SELECCIONADA
         if (celdaClickeada == piezaSeleccionada->posicionTablero) {
             piezaSeleccionada->seleccionado = false;
             piezaSeleccionada = nullptr;
@@ -231,6 +431,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
         }
     }
 }
+
 void Motor::manejarEventos() {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -240,7 +441,7 @@ void Motor::manejarEventos() {
                 // al pulsa enter, vamos al juego
                 if (event.key.code == sf::Keyboard::Enter) {
                     estadoActual = Estado::Tablero;
-                    std::cout << "Iniciando partida... ¡Al Tablero!" << std::endl;
+                    std::cout << "Iniciando partida... Al Tablero" << std::endl;
                 }
             }
         }

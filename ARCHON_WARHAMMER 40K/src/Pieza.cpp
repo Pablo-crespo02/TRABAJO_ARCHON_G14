@@ -19,9 +19,12 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
 // SINCRONIZACIÓN VISUAL
 // Esto es igual para todas las piezas: todas se dibujan en el tablero
 void Pieza::sincronizarPosicionTablero() {
-    float px = static_cast<float>(posicionTablero.x) * 60.0f + 80.0f;
-    float py = static_cast<float>(posicionTablero.y) * 60.0f + 60.0f;
+    // 60.f es el valor de tu TAMANOCASILLA. 
+    // Asegúrate de que este número sea el mismo que usas en el Renderizador.
+    float px = (posicionTablero.x * 60.f) + (60.f / 2.f);
+    float py = (posicionTablero.y * 60.f) + (60.f / 2.f);
 
+    // Guardamos la posición y movemos el sprite o forma
     posicionAbsoluta = sf::Vector2f(px, py);
     formaVisual.setPosition(posicionAbsoluta);
 }

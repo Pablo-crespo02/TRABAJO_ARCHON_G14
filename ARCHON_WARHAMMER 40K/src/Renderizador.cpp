@@ -3,13 +3,16 @@
 //RENDERIZADO DE LAS CASILLAS
 void Renderizador::dibujarCasilla(sf::RenderWindow& window, const Casilla& casilla) {
 
-	//DIBUJO DEL CUADRADO:
-	//Generamos un cuadrado de SFML:
+	// Configuración geométrica del cuadrado
+   // Eliminamos los márgenes externos, dejamos que la Vista posicione el tablero
 	sf::RectangleShape cuadrado(sf::Vector2f(TAMANOCASILLA - MARGEN, TAMANOCASILLA - MARGEN));
 
-	//Calculamos su posición en la ventana según su fila y su columna.
-	//Multiplicamos por 55 para dejar margen entre ellas:
-	cuadrado.setPosition(sf::Vector2f(casilla.columna * TAMANOCASILLA + OFFSETX, casilla.fila * TAMANOCASILLA + OFFSETY));
+	// Posición relativa al origen (0,0) del tablero
+	// La Vista del Motor se encargará de mover este (0,0) a la izquierda de la pantalla
+	float posX = casilla.columna * TAMANOCASILLA;
+	float posY = casilla.fila * TAMANOCASILLA;
+
+	cuadrado.setPosition(sf::Vector2f(posX, posY));
 
 	//Asignamos el color gráfico de SFML según el enum ColorCasilla: blanco
 	if (casilla.colorcasilla == ColorActual::Blanco_pico)cuadrado.setFillColor(Colores::ColorBlanco_pico);
@@ -28,9 +31,12 @@ void Renderizador::dibujarCasilla(sf::RenderWindow& window, const Casilla& casil
 	window.draw(cuadrado);
 
 	//DIBUJO DEL POWER POINT:
-	if (casilla.powerpoint == true) {
-		PowerPoint::Dibujar(window, ((casilla.columna * TAMANOCASILLA + OFFSETX) + ((TAMANOCASILLA - MARGEN) / 2.0f)), (casilla.fila * TAMANOCASILLA + OFFSETY) + ((TAMANOCASILLA - MARGEN) / 2.0f));
+	if (casilla.powerpoint) {
+		// Calculamos el centro exacto de la casilla para el PowerPoint
+		float centroX = posX + (TAMANOCASILLA - MARGEN) / 2.0f;
+		float centroY = posY + (TAMANOCASILLA - MARGEN) / 2.0f;
 
+		PowerPoint::Dibujar(window, centroX, centroY);
 	}
 
 }

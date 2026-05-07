@@ -13,25 +13,24 @@ class Renderizador;
 class Motor {
 private:
 
-    //TAMAÑO DE LA PANTALLA:
-    double anchopantalla = 800;
-    double altopantalla = 600;
-
     //ATRIBUTOS MOTOR:
     Tablero tablero;
     Arena arena;
     PantallaInicio pantallaInicio;
-    int jugadorActual;       // 1 o 2
-    int cicloActual;         // De 1 a 12
-    int rondaActual;         // Incrementa tras ciclo 12
+    int jugadorActual = 1;       // 1 o 2
+    int cicloActual = 1;         // De 1 a 12
+    int rondaActual = 1;         // Incrementa tras ciclo 12
+    std::string cicloNombre = "Luz";
     Estado estadoActual;
     sf::RenderWindow window;
+    sf::View vistaTablero;
+    sf::View vistaUI;
     sf::Clock reloj;
-    friend class Renderizador;
+    sf::Font fuenteGlobal;
     std::vector<Proyectil> proyectiles;    //Contenedor para los proyectiles activos
     std::vector<AtaqueMelee> ataquesMelee; //Igual pero para melee
     //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
-
+    friend class Renderizador;
 public:
     bool windowAbierta() { return window.isOpen(); }
 
@@ -49,6 +48,8 @@ public:
     void manejarEventos();
     void actualizar();
     void renderizar();
+    void dibujarHUD();
+    void dibujarInfoPieza(sf::RenderWindow& window, Pieza* pieza, float x, float y);
 
     // Se llama cuando un jugador termina su acción
     void intentarAccionJugador(int idJugador);

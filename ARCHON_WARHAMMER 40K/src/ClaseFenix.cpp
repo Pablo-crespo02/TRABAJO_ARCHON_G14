@@ -1,18 +1,19 @@
 #include "ClaseFenix.h"
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
-    : PiezaVoladora(b, pos) // Llama al constructor de la clase intermedia
+    : PiezaVoladora(b, pos) // Asumo que el Fénix hereda de PiezaVoladora
 {
     this->stats.nombre = tipo;
-    this->stats.vida = 2.0f;
-    this->stats.vidaMaxima = 2.0f;
-    this->stats.ataque = 5.0f;
-    this->stats.defensa = 8.0f;
+    this->stats.vida = 25.0f;
+    this->stats.defensa = 5.0f;
+    this->stats.ataque = 12.0f;
+    this->stats.velAtaque = 1.5f;
+    this->stats.cooldown = 1.0f;
     this->rangoMovimiento = 4;
     this->stats.esRango = true;
-    this->stats.tiempoRecarga = 2; //Valor provisional
+    this->stats.esVolador = true;    // Esto es solo para el HUD
 
-    // Asignación del patrón de movimiento
+    // Asignación del patrón de movimiento: ESTRELLA (*)
     this->patronMovimiento = PatronMovimiento::Ambos;
 }
 
@@ -35,10 +36,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         formaVisual.setPosition(posicionAbsoluta);
         formaVisual.setOutlineThickness(0.0f);
         formaVisual.setOrigin(20.f, 20.f);
-        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
-        barraSalud.dibujar(window);
     }
     window.draw(formaVisual);
-
 }
 

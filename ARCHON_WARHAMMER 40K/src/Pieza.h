@@ -19,9 +19,11 @@ struct Stats {
     float vida;
     float vidaMaxima;
     bool esRango;
+    bool esVolador;
     float ataque;
     float defensa;
     float velAtaque;
+    float cooldown;
 
     //Variables encargadas de la gestión de proyectiles en la arena
     sf::Clock relojProyectil;  //Reloj que avanza desde que se dispara
