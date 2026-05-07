@@ -15,6 +15,7 @@ struct Colores
 	static const sf::Color ColorFichaLuz;
 	static const sf::Color ColorFichaOscuridad;
 	static const sf::Color ColorOutlineSeleccion;
+	static const sf::Color ColorProyectil;
 };
 
 
@@ -29,3 +30,4 @@ inline const sf::Color Colores::ColorPowerPoint = sf::Color(255, 215, 0);
 inline const sf::Color Colores::ColorFichaLuz = sf::Color(0, 183, 235);
 inline const sf::Color Colores::ColorFichaOscuridad = sf::Color(255, 0, 0);
 inline const sf::Color Colores::ColorOutlineSeleccion = sf::Color(255, 255, 0);
+inline const sf::Color Colores::ColorProyectil = sf::Color(255, 255, 255);

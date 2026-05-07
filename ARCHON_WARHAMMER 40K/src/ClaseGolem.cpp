@@ -9,6 +9,7 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.defensa = 8.0f;
     this->rangoMovimiento = 2;
     this->stats.esRango = true;
+    this->stats.tiempoRecarga = 1;  //Valor provisional
 
     // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;

@@ -2,6 +2,7 @@
 #include "Generador.h"
 #include"Renderizador.h"
 #include <iostream>
+#include <vector>
 
 
 Motor::Motor() {
@@ -11,8 +12,9 @@ Motor::Motor() {
     cicloActual = 1;
     rondaActual = 1;
     estadoActual = Estado::MenuPrincipal;
-    //LLAMADAS A INICIALIZACIONES, FUNCIONES DE LA CLASE 'GENERADOR':
 
+    //LLAMADAS A INICIALIZACIONES, FUNCIONES DE LA CLASE 'GENERADOR':
+    // 
     //Inicializa el tablero:
     Generador::GenerarTablero(tablero);
 
@@ -45,6 +47,11 @@ void Motor::renderizar() {
     else if (estadoActual == Estado::Arena) {
         // El motor decide que toca dibujar la arena de combate
         Renderizador::dibujarArena(window, arena);
+
+        //Dibujar los proyectiles activos:
+        for (const auto& p : proyectiles) {
+            window.draw(p.getFormaProyectil());
+        }
 
         // ¡CRÍTICO!: Solo dibujar si existen
         if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
@@ -247,9 +254,12 @@ void Motor::manejarEventos() {
         }
     }
 }
+
+//GESTIÓN DEL TECLADO ARENA
 void Motor::actualizar() {
     float dt = reloj.restart().asSeconds();
 
+    //SÓLO APLICABLE EN LA ARENA:
     if (estadoActual == Estado::Arena) {
         if (!piezaAtacante || !piezaDefensor) return;
 
@@ -264,6 +274,18 @@ void Motor::actualizar() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
 
+        //Capturar intención de disparo proyectil Luz (ESPACIO)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            if (pLuz->puedeDisparar()) {
+                sf::Vector2i OrigenDisparo = pLuz->getPosicionAbsoluta();
+
+                //Definición de la dirección del proyectil:
+                sf::Vector2i direccionProyectilLuz(1, 0); //Provisionalmente va hacia la dcha.
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
+                pLuz->reiniciarRelojProyectil();
+            }
+        }
+
         // Ordena a la pieza que se mueva ella misma
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
@@ -274,7 +296,24 @@ void Motor::actualizar() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  dirOsc.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
+        //Capturar disparo proyectil pieza Oscuridad (ENTER)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+            if (pOsc->puedeDisparar()) {
+                sf::Vector2i OrigenDisparo = pOsc->getPosicionAbsoluta();
+
+                //Definición de la dirección del proyectil:
+                sf::Vector2i direccionProyectilOscuridad(-1, 0); //Provisionalmente va hacia la dcha.
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilOscuridad, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
+                pOsc->reiniciarRelojProyectil();
+            }
+        }
+
         // Ordena a la pieza que se mueva ella misma
         pOsc->procesarMovimientoArena(dirOsc, dt, this->arena);
+
+        //Ordena a todos los proyectiles exixstentes que se actualicen:
+        for (auto& p : proyectiles) {
+            p.ActualizarProyectil();
+        }
     }
 }

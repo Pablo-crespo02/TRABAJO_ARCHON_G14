@@ -10,8 +10,10 @@ enum class Bando { LUZ, OSCURIDAD };
 
 // Enum para leer los patrones de movimiento fácilmente
 enum class PatronMovimiento { Ortogonal, Diagonal, Ambos };
+
 // Estructura de estadísticas que heredará cada pieza
 struct Stats {
+
     std::string nombre;
     float vida;
     float cooldown;
@@ -19,6 +21,10 @@ struct Stats {
     float ataque;
     float defensa;
     float velAtaque;
+
+    //Variables encargadas de la gestión de proyectiles en la arena
+    sf::Clock relojProyectil;
+    double tiempoRecarga;
 };
 
 
@@ -60,16 +66,25 @@ public:
     void sincronizarPosicionTablero();
     bool detectarConflicto(const std::vector<Pieza*>& otrasPiezas);
 
+    //Métodos de gestión de proyectiles en la arena:
+    bool puedeDisparar()const;   //Comprueba si ha pasado sufucuente tiempo desde el disparo anterior
+    void reiniciarRelojProyectil(); //Reinicia el reloj de disparo
 
     //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
     sf::Vector2i getPosicionTablero() const { return posicionTablero; }
+
     Bando getBando() const { return bando; }
+
     sf::Color getColorVisual() const {
         return formaVisual.getFillColor();
     }
 
     sf::FloatRect getHitbox() const {
         return sf::FloatRect(posicionAbsoluta.x - 15.f, posicionAbsoluta.y - 15.f, 30.f, 30.f);
+    }
+
+    sf::Vector2i getPosicionAbsoluta() const {
+        return sf::Vector2i(posicionAbsoluta.x, posicionAbsoluta.y);
     }
 
     //Setters públicos: 
@@ -83,4 +98,9 @@ public:
         posicionAbsoluta = nuevaPos;
         formaVisual.setPosition(posicionAbsoluta); // Actualizamos la forma visual al instante
     }
+
+    //Setter para establecer tiempos de recarga diferentes para cada pieza:
+    void setTiempoRecarga(double tiemporecarga) {
+        stats.tiempoRecarga = tiemporecarga;
+    };
 };;

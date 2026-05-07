@@ -6,6 +6,7 @@
 #include <vector>
 #include "Renderizador.h"
 #include "Pantallainicio.h"
+#include "Proyectil.h"
 
 class Renderizador;
 class Motor {
@@ -13,13 +14,15 @@ private:
     Tablero tablero;
     Arena arena;
     PantallaInicio pantallaInicio;
-    int jugadorActual = 1;       // 1 o 2
-    int cicloActual = 1;         // De 1 a 12
-    int rondaActual = 1;         // Incrementa tras ciclo 12
+    int jugadorActual;       // 1 o 2
+    int cicloActual;         // De 1 a 12
+    int rondaActual;         // Incrementa tras ciclo 12
     Estado estadoActual;
     sf::RenderWindow window;
     sf::Clock reloj;
     friend class Renderizador;
+    std::vector<Proyectil> proyectiles;    //Contenedor para los proyectiles activos
+                                           //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
 
 public:
     bool windowAbierta() { return window.isOpen(); }
