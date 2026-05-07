@@ -3,6 +3,7 @@
 #include"Renderizador.h"
 #include <iostream>
 #include <vector>
+#include<cmath>
 
 
 Motor::Motor() {
@@ -274,14 +275,31 @@ void Motor::actualizar() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
 
+        pLuz->setultimadireccion(dirLuz); //Guarda la última direción a la que miró la pieza Luz
+
         //Capturar intención de disparo proyectil Luz (ESPACIO)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             if (pLuz->puedeDisparar()) {
                 sf::Vector2f OrigenDisparo = pLuz->getPosicionAbsoluta();
 
                 //Definición de la dirección del proyectil:
-                sf::Vector2f direccionProyectilLuz(1, 0); //Provisionalmente va hacia la dcha.
-                proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
+                sf::Vector2f direccionProyectilLuz = pLuz->getultimadireccion();  //El proyectil va hacia la última dirección mirada
+                
+                //Hacemos unitario el vector director del disparo para evitar que las diagonales vayan más rápido por suma de vectores
+                double magnitud = std::sqrt((direccionProyectilLuz.x* direccionProyectilLuz.x)+ (direccionProyectilLuz.y* direccionProyectilLuz.y));
+
+                //Únicamente normalizamos si su módulo no es 0:
+
+                if (magnitud > 0) {
+                    direccionProyectilLuz.x = direccionProyectilLuz.x / magnitud;
+                    direccionProyectilLuz.y = direccionProyectilLuz.y / magnitud;
+                }
+
+
+                //Anadimos un item al contenedor proyectiles
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil);
+                
+                //Reiniciamos el reloj de proyectil
                 pLuz->reiniciarRelojProyectil();
             }
         }
@@ -296,14 +314,30 @@ void Motor::actualizar() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  dirOsc.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
+        pOsc->setultimadireccion(dirOsc); //Guarda la última direción a la que miró la pieza Oscuridad
+
         //Capturar disparo proyectil pieza Oscuridad (ENTER)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             if (pOsc->puedeDisparar()) {
                 sf::Vector2f OrigenDisparo = pOsc->getPosicionAbsoluta();
 
                 //Definición de la dirección del proyectil:
-                sf::Vector2f direccionProyectilOscuridad(-1, 0); //Provisionalmente va hacia la dcha.
-                proyectiles.emplace_back(OrigenDisparo, direccionProyectilOscuridad, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
+                sf::Vector2f direccionProyectilOsc = pOsc->getultimadireccion();  //El proyectil va hacia la última dirección mirada
+
+                //Hacemos unitario el vector director del disparo para evitar que las diagonales vayan más rápido por suma de vectores
+                double magnitud = std::sqrt((direccionProyectilOsc.x * direccionProyectilOsc.x) + (direccionProyectilOsc.y * direccionProyectilOsc.y));
+
+                //Únicamente normalizamos si su módulo no es 0:
+
+                if (magnitud > 0) {
+                    direccionProyectilOsc.x = direccionProyectilOsc.x / magnitud;
+                    direccionProyectilOsc.y = direccionProyectilOsc.y / magnitud;
+                }
+
+                //Anadimos un item al contenedor proyectiles
+                proyectiles.emplace_back(OrigenDisparo, direccionProyectilOsc, 15, Colores::ColorProyectil);
+
+                //Reiniciamos el reloj de proyectil
                 pOsc->reiniciarRelojProyectil();
             }
         }
@@ -314,6 +348,7 @@ void Motor::actualizar() {
         //Ordena a todos los proyectiles exixstentes que se actualicen:
         for (auto& p : proyectiles) {
 
+            //FUNCIONES DE MOVIMIENTO DE LOS PROYECTILES:
             p.ActualizarProyectil();
 
             //FUNCIONES DE COLISIÓN Y DESPAWN:
@@ -325,7 +360,7 @@ void Motor::actualizar() {
             //Despawn por colisión con obstáculos (rocas) o paredes
             if (!arena.esPosicionValida(sf::Vector2f(pos), p.getFormaProyectil().getRadius(), false)) {
                 p.setEstadoProyectil(false);  //Proyectil marcado para destruir
-                std::cout << "Proyectil eliminado, colision con obstaculo o pared" << std::endl; //Mensaje debug pir consola
+                std::cout << "Proyectil eliminado, colision con obstaculo o pared" << std::endl; //Mensaje debug por consola
             }
 
             //Despawn por colisión con enemigos

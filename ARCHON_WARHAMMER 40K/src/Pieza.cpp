@@ -55,6 +55,7 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 //GESTIÓN DE PROYECTILES:
 
 bool Pieza::puedeDisparar() const {
+
     return stats.relojProyectil.getElapsedTime().asSeconds() > stats.tiempoRecarga;
 };
 

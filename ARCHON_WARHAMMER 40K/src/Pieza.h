@@ -16,15 +16,15 @@ struct Stats {
 
     std::string nombre;
     float vida;
-    float cooldown;
     bool esRango;
     float ataque;
     float defensa;
     float velAtaque;
 
     //Variables encargadas de la gestión de proyectiles en la arena
-    sf::Clock relojProyectil;
-    double tiempoRecarga;
+    sf::Clock relojProyectil;  //Reloj que avanza desde que se dispara
+    double tiempoRecarga;   //Tiempo que debe pasar hasta que se puede disparar
+   
 };
 
 
@@ -35,6 +35,8 @@ protected:
     int rangoMovimiento;
     Stats stats;
     PatronMovimiento patronMovimiento;
+
+    sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
 
     bool seleccionado;
     sf::Vector2i posicionTablero;
@@ -84,10 +86,14 @@ public:
     }
 
     sf::Vector2f getPosicionAbsoluta() const {
-        return sf::Vector2f(posicionAbsoluta.x, posicionAbsoluta.y);
+        return sf::Vector2f(posicionAbsoluta);
     }
 
-    //Setters públicos: 
+    sf::Vector2f getultimadireccion()const {
+        return sf::Vector2f(ultimadireccion);
+    }
+
+   //SETTERS PÚBLICOS:
    // Setter para la selección (quita el borde amarillo)
     void setSeleccionado(bool valor) {
         seleccionado = valor;
@@ -103,4 +109,11 @@ public:
     void setTiempoRecarga(double tiemporecarga) {
         stats.tiempoRecarga = tiemporecarga;
     };
+
+    //Setter para establecer la última dirección de mirada de la pieza, para apuntar los proyectiles:
+    void setultimadireccion(sf::Vector2f nuevadireccion) {
+        if (nuevadireccion.x != 0 || nuevadireccion.y != 0){
+            ultimadireccion = nuevadireccion;
+            }
+    }
 };;

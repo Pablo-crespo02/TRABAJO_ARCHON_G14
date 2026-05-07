@@ -13,8 +13,12 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
 
     // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;
-}
 
+
+    if (b == Bando::LUZ) { ultimadireccion = sf::Vector2f(1, 0); }   //Inicializa la pieza mirando hacia la derecha en la arena, a efectos de los proyectiles
+    else { ultimadireccion = sf::Vector2f(-1, 0); } //Inicializa la pieza mirando hacia la izquieda en la arena, a efectos de los proyectiles
+
+}
 // Aquí NO deben ir las funciones de movimiento. Ya están en PiezaTeletransporte.cpp.
 
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
