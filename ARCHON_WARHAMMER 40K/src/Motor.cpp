@@ -111,11 +111,19 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     if (piezaAtacante->getBando() == Bando::LUZ) {
         piezaAtacante->setPosicionAbsoluta(spawnIzquierda);
         piezaDefensor->setPosicionAbsoluta(spawnDerecha);
+        //Inicialización:
+        piezaAtacante->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
+        piezaDefensor->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
     }
     else {
         // Si el atacante es oscuridad, él va a la derecha y el defensor (Luz) a la izquierda
         piezaAtacante->setPosicionAbsoluta(spawnDerecha);
         piezaDefensor->setPosicionAbsoluta(spawnIzquierda);
+        //Inicialización:
+        // --- DIRECCIÓN INICIAL ---
+        piezaAtacante->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
+        piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
+
     }
 
     // Preparar la Arena
@@ -270,35 +278,59 @@ void Motor::actualizar() {
         Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
         Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-        // --- GESTIÓN LUZ (WASD + ESPACIO) ---
+        // Movimiento Luz
         sf::Vector2f dirLuz(0.f, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dirLuz.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dirLuz.y += 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
 
+        // 1. Guardamos la última dirección en la que intentó moverse
+        pLuz->setultimadireccion(dirLuz);
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             if (pLuz->puedeDisparar()) {
                 sf::Vector2f origen = pLuz->getPosicionAbsoluta();
-                // Pasamos 'pLuz' (el puntero) como dueño del proyectil
-                proyectiles.emplace_back(origen, sf::Vector2f(1, 0), 15, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
+
+                // 2. Extraemos la dirección de apuntado y la normalizamos
+                sf::Vector2f dirDisparo = pLuz->getultimadireccion();
+                float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
+                if (magnitud != 0) {
+                    dirDisparo.x /= magnitud;
+                    dirDisparo.y /= magnitud;
+                }
+
+                // 3. Asignamos 'dirDisparo' al nuevo proyectil
+                proyectiles.emplace_back(origen, dirDisparo, 15, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
                 pLuz->reiniciarRelojProyectil();
             }
         }
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
-        // --- GESTIÓN OSCURIDAD (Flechas + ENTER) ---
+        // Movimiento oscuridad
         sf::Vector2f dirOsc(0.f, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) dirOsc.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) dirOsc.y += 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) dirOsc.x -= 1.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
 
+        // 1. Guardamos la última dirección en la que intentó moverse
+        pOsc->setultimadireccion(dirOsc);
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             if (pOsc->puedeDisparar()) {
                 sf::Vector2f origen = pOsc->getPosicionAbsoluta();
-                // Pasamos 'pOsc' (el puntero) como dueño del proyectil
-                proyectiles.emplace_back(origen, sf::Vector2f(-1, 0), 15, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
+
+                // 2. Extraemos la dirección de apuntado y la normalizamos
+                sf::Vector2f dirDisparo = pOsc->getultimadireccion();
+                float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
+                if (magnitud != 0) {
+                    dirDisparo.x /= magnitud;
+                    dirDisparo.y /= magnitud;
+                }
+
+                // 3. Asignamos 'dirDisparo' al nuevo proyectil
+                proyectiles.emplace_back(origen, dirDisparo, 15, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
                 pOsc->reiniciarRelojProyectil();
             }
         }
