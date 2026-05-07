@@ -85,5 +85,10 @@ void Renderizador::dibujarMotor(sf::RenderWindow& window, Motor& mundo) {
 		if (mundo.piezaDefensor != nullptr) {
 			dibujarPieza(window, mundo.piezaDefensor, estado);
 		}
+		// Dibujar proyectiles
+		for (const auto& p : mundo.proyectiles) { window.draw(p.getFormaProyectil()); }
+
+		// Dibujar ataques Melee
+		for (const auto& m : mundo.ataquesMelee) { window.draw(m.getForma()); }
 	}
 }

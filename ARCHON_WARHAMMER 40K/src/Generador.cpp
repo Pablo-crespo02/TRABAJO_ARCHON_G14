@@ -58,55 +58,55 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     }
     else if (tipo == "LIBRARIAN" || tipo == "GENESTEALER") {
 
-        nuevaPieza = new ClaseFenix(bando, pos, tipo); 
+        nuevaPieza = new ClaseFenix(bando, pos, tipo);
     }
-        /*
+    /*
 
-    if (tipo == "CAPTAIN") {
-        nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
-    }
-    else if (tipo == "LIBRARIAN") {
-        nuevaPieza = new ClaseFenix(bando, pos, "Librarian");
-    }
-    else if (tipo == "ASSAULT_MARINE") {
-        nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
-    }
-    else if (tipo == "INTERCESSOR") {
-        nuevaPieza = new ClaseKnight(bando, pos, "Intercessor");
-    }
-    else if (tipo == "VINDICARE") {
-        nuevaPieza = new ClaseArcher(bando, pos, "Vindicare");
-    }
-    else if (tipo == "THUNDERHAWK") {
-        nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
-    }
-    else if (tipo == "PRIMARIS") {
-        nuevaPieza = new ClaseUnicornio(bando, pos, "Primaris");
-    }
+if (tipo == "CAPTAIN") {
+    nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
+}
+else if (tipo == "LIBRARIAN") {
+    nuevaPieza = new ClaseFenix(bando, pos, "Librarian");
+}
+else if (tipo == "ASSAULT_MARINE") {
+    nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
+}
+else if (tipo == "INTERCESSOR") {
+    nuevaPieza = new ClaseKnight(bando, pos, "Intercessor");
+}
+else if (tipo == "VINDICARE") {
+    nuevaPieza = new ClaseArcher(bando, pos, "Vindicare");
+}
+else if (tipo == "THUNDERHAWK") {
+    nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
+}
+else if (tipo == "PRIMARIS") {
+    nuevaPieza = new ClaseUnicornio(bando, pos, "Primaris");
+}
 
 
-    else if (tipo == "HIVE_TYRANT") {
-        nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
-    }
-    else if (tipo == "GENESTEALER") {
-        nuevaPieza = new ClaseFenix(bando, pos, "Genestealer");
-    }
-    else if (tipo == "HARPY") {
-        nuevaPieza = new ClaseValkyrie(bando, pos, "Harpy");
-    }
-    else if (tipo == "TERMAGANT") {
-        nuevaPieza = new ClaseKnight(bando, pos, "Termagant");
-    }
-    else if (tipo == "GOBLIN") {
-        nuevaPieza = new ClaseArcher(bando, pos, "Goblin");
-    }
-    else if (tipo == "TIRANOFEX") {
-        nuevaPieza = new ClaseDjinn(bando, pos, "Tiranofex");
-    }
-    else if (tipo == "TOXICRENO") {
-        nuevaPieza = new ClaseUnicornio(bando, pos, "Toxicreno");
-    }
-    */
+else if (tipo == "HIVE_TYRANT") {
+    nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
+}
+else if (tipo == "GENESTEALER") {
+    nuevaPieza = new ClaseFenix(bando, pos, "Genestealer");
+}
+else if (tipo == "HARPY") {
+    nuevaPieza = new ClaseValkyrie(bando, pos, "Harpy");
+}
+else if (tipo == "TERMAGANT") {
+    nuevaPieza = new ClaseKnight(bando, pos, "Termagant");
+}
+else if (tipo == "GOBLIN") {
+    nuevaPieza = new ClaseArcher(bando, pos, "Goblin");
+}
+else if (tipo == "TIRANOFEX") {
+    nuevaPieza = new ClaseDjinn(bando, pos, "Tiranofex");
+}
+else if (tipo == "TOXICRENO") {
+    nuevaPieza = new ClaseUnicornio(bando, pos, "Toxicreno");
+}
+*/
     if (nuevaPieza != nullptr) {
         nuevaPieza->sincronizarPosicionTablero(); // Calcula la posición real en píxeles
         motor.listaPiezas.push_back(nuevaPieza);  // La mete en la lista para que el Motor la dibuje
@@ -140,7 +140,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 2));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TIRANOFEX", sf::Vector2i(8, 3));
     AnadirUnidad(motor, Bando::OSCURIDAD, "HIVE_TYRANT", sf::Vector2i(8, 4));//LÍDER 
-    AnadirUnidad(motor, Bando::OSCURIDAD,"GENESTEALER", sf::Vector2i(8, 5));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GENESTEALER", sf::Vector2i(8, 5));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 6));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));
     AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 8));

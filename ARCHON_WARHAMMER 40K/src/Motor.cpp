@@ -7,23 +7,20 @@
 
 
 Motor::Motor() {
+    // Inicialización de la ventana sin repetir Motor::
     window.create(sf::VideoMode(anchopantalla, altopantalla), "ARCHON WARHAMMER 40K");
-    window.setFramerateLimit(60); // Recomendable para no fundir la CPU
+    window.setFramerateLimit(60);
+
     jugadorActual = 1;
     cicloActual = 1;
     rondaActual = 1;
     estadoActual = Estado::MenuPrincipal;
 
-    //LLAMADAS A INICIALIZACIONES, FUNCIONES DE LA CLASE 'GENERADOR':
-    // 
-    //Inicializa el tablero:
+    // Inicializaciones de lógica
     Generador::GenerarTablero(tablero);
-
-    //Inicicializa las piezas de cada ejército y la lista de piezas
     Generador::GenerarDespliegueUnidades(*this);
 }
-
-// Destructor para evitar fugas de memoria     || HACE FALTA?
+// Destructor para evitar fugas de memoria     
 Motor::~Motor() {
     for (auto p : listaPiezas) {
         delete p;
@@ -32,37 +29,45 @@ Motor::~Motor() {
 };
 
 void Motor::renderizar() {
-
     window.clear();
-    //dibujar pantalla inicio
+
+    // 1. PANTALLA DE INICIO (Menu principal)
     if (estadoActual == Estado::MenuPrincipal) {
         pantallaInicio.dibujar(window);
     }
-    if (estadoActual == Estado::Tablero) {
-        // El motor decide que toca dibujar tablero
+
+    // 2. MODO TABLERO
+    else if (estadoActual == Estado::Tablero) {
         Renderizador::dibujarTablero(window, tablero);
         for (auto p : listaPiezas) {
             Renderizador::dibujarPieza(window, p, estadoActual);
         }
     }
+
+    // 3. MODO ARENA DE COMBATE
     else if (estadoActual == Estado::Arena) {
-        // El motor decide que toca dibujar la arena de combate
+        // Dibujamos el escenario base
         Renderizador::dibujarArena(window, arena);
 
-        //Dibujar los proyectiles activos:
+        // Capa de ataques Melee (el círculo rojo de daño físico)
+        for (const auto& m : ataquesMelee) {
+            window.draw(m.getForma());
+        }
+
+        // Capa de proyectiles (disparos a distancia)
         for (const auto& p : proyectiles) {
             window.draw(p.getFormaProyectil());
         }
 
-        // ¡CRÍTICO!: Solo dibujar si existen
+        // Capa de combatientes
         if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
             Renderizador::dibujarPieza(window, piezaAtacante, estadoActual);
             Renderizador::dibujarPieza(window, piezaDefensor, estadoActual);
         }
     }
+
     window.display();
 }
-
 
 
 void Motor::intentarAccionJugador(int idJugador) {
@@ -287,22 +292,24 @@ void Motor::actualizar() {
 
         // 1. Guardamos la última dirección en la que intentó moverse
         pLuz->setultimadireccion(dirLuz);
-
+        //Ataque bando Luz
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             if (pLuz->puedeDisparar()) {
-                sf::Vector2f origen = pLuz->getPosicionAbsoluta();
-
-                // 2. Extraemos la dirección de apuntado y la normalizamos
                 sf::Vector2f dirDisparo = pLuz->getultimadireccion();
                 float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) {
-                    dirDisparo.x /= magnitud;
-                    dirDisparo.y /= magnitud;
-                }
+                if (magnitud != 0) { dirDisparo.x /= magnitud; dirDisparo.y /= magnitud; }
+                else { dirDisparo = sf::Vector2f(1.f, 0.f); } // Por si acaso es 0
 
-                // 3. Asignamos 'dirDisparo' al nuevo proyectil
-                proyectiles.emplace_back(origen, dirDisparo, 15, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
-                pLuz->reiniciarRelojProyectil();
+                if (pLuz->stats.esRango) {
+                    // ATAQUE A DISTANCIA
+                    proyectiles.emplace_back(pLuz->getPosicionAbsoluta(), dirDisparo, 15, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
+                }
+                else {
+                    // ATAQUE MELEE: Generamos la hitbox delante de la pieza
+                    sf::Vector2f posMelee = pLuz->getPosicionAbsoluta() + (dirDisparo * 35.f);
+                    ataquesMelee.emplace_back(posMelee, pLuz, pLuz->stats.ataque);
+                }
+                pLuz->reiniciarRelojProyectil(); // Usamos el mismo reloj para el cooldown del melee
             }
         }
         pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
@@ -316,21 +323,23 @@ void Motor::actualizar() {
 
         // 1. Guardamos la última dirección en la que intentó moverse
         pOsc->setultimadireccion(dirOsc);
-
+        //Ataque bando Oscuridad
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             if (pOsc->puedeDisparar()) {
-                sf::Vector2f origen = pOsc->getPosicionAbsoluta();
-
-                // 2. Extraemos la dirección de apuntado y la normalizamos
                 sf::Vector2f dirDisparo = pOsc->getultimadireccion();
                 float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) {
-                    dirDisparo.x /= magnitud;
-                    dirDisparo.y /= magnitud;
-                }
+                if (magnitud != 0) { dirDisparo.x /= magnitud; dirDisparo.y /= magnitud; }
+                else { dirDisparo = sf::Vector2f(-1.f, 0.f); }
 
-                // 3. Asignamos 'dirDisparo' al nuevo proyectil
-                proyectiles.emplace_back(origen, dirDisparo, 15, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
+                if (pOsc->stats.esRango) {
+                    // ATAQUE A DISTANCIA
+                    proyectiles.emplace_back(pOsc->getPosicionAbsoluta(), dirDisparo, 15, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
+                }
+                else {
+                    // ATAQUE MELEE
+                    sf::Vector2f posMelee = pOsc->getPosicionAbsoluta() + (dirDisparo * 35.f);
+                    ataquesMelee.emplace_back(posMelee, pOsc, pOsc->stats.ataque);
+                }
                 pOsc->reiniciarRelojProyectil();
             }
         }
@@ -380,7 +389,44 @@ void Motor::actualizar() {
                 }
             }
         }
+        // Ataques melee
+        for (auto& m : ataquesMelee) {
+            m.actualizar(dt); // Resta el tiempo de vida (0.2s)
 
+            if (m.getEstado()) {
+                sf::Vector2f posM = m.getPosicion();
+                // Umbral: (Radio Melee 25 + Radio Pieza 20)^2 = 45^2 = 2025
+                float limiteColisionSq = 2050.f;
+
+                // Impacto en Atacante
+                if (piezaAtacante && m.getAtacante() != piezaAtacante) {
+                    sf::Vector2f posE = piezaAtacante->getPosicionAbsoluta();
+                    float distSq = std::pow(posM.x - posE.x, 2) + std::pow(posM.y - posE.y, 2);
+                    if (distSq < limiteColisionSq) {
+                        piezaAtacante->stats.vida -= m.getDano();
+                        m.setEstado(false); // Desactiva el golpe tras acertar (no pega dos veces)
+                        std::cout << "¡Zasca de Melee al Atacante! Vida: " << piezaAtacante->stats.vida << std::endl;
+                    }
+                }
+
+                // Impacto en Defensor
+                if (m.getEstado() && piezaDefensor && m.getAtacante() != piezaDefensor) {
+                    sf::Vector2f posE = piezaDefensor->getPosicionAbsoluta();
+                    float distSq = std::pow(posM.x - posE.x, 2) + std::pow(posM.y - posE.y, 2);
+                    if (distSq < limiteColisionSq) {
+                        piezaDefensor->stats.vida -= m.getDano();
+                        m.setEstado(false);
+                        std::cout << "¡Zasca de Melee al Defensor! Vida: " << piezaDefensor->stats.vida << std::endl;
+                    }
+                }
+            }
+        }
+
+        // Limpieza de ataques Melee expirados o que ya golpearon
+        ataquesMelee.erase(
+            std::remove_if(ataquesMelee.begin(), ataquesMelee.end(), [](const AtaqueMelee& m) {
+                return !m.getEstado();
+                }), ataquesMelee.end());
         // Limpieza de proyectiles muertos
         proyectiles.erase(
             std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {

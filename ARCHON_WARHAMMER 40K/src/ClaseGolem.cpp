@@ -8,7 +8,7 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.ataque = 5.0f;
     this->stats.defensa = 8.0f;
     this->rangoMovimiento = 2;
-    this->stats.esRango = true;
+    this->stats.esRango = false;
     this->stats.tiempoRecarga = 1;  //Valor provisional
 
     // Asignación del patrón de movimiento

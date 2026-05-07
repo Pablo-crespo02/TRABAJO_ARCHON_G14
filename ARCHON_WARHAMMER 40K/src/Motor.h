@@ -7,14 +7,15 @@
 #include "Renderizador.h"
 #include "Pantallainicio.h"
 #include "Proyectil.h"
+#include "AtaqueMelee.h"
 
 class Renderizador;
 class Motor {
 private:
 
     //TAMAÑO DE LA PANTALLA:
-    double anchopantalla=800;
-    double altopantalla=600;
+    double anchopantalla = 800;
+    double altopantalla = 600;
 
     //ATRIBUTOS MOTOR:
     Tablero tablero;
@@ -28,7 +29,8 @@ private:
     sf::Clock reloj;
     friend class Renderizador;
     std::vector<Proyectil> proyectiles;    //Contenedor para los proyectiles activos
-                                           //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
+    std::vector<AtaqueMelee> ataquesMelee; //Igual pero para melee
+    //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
 
 public:
     bool windowAbierta() { return window.isOpen(); }
