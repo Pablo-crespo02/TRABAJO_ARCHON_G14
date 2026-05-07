@@ -11,6 +11,12 @@
 class Renderizador;
 class Motor {
 private:
+
+    //TAMAÑO DE LA PANTALLA:
+    double anchopantalla=800;
+    double altopantalla=600;
+
+    //ATRIBUTOS MOTOR:
     Tablero tablero;
     Arena arena;
     PantallaInicio pantallaInicio;

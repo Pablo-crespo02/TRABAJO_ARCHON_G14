@@ -6,7 +6,7 @@
 
 
 Motor::Motor() {
-    window.create(sf::VideoMode(800, 600), "ARCHON WARHAMMER 40K");
+    window.create(sf::VideoMode(anchopantalla, altopantalla), "ARCHON WARHAMMER 40K");
     window.setFramerateLimit(60); // Recomendable para no fundir la CPU
     jugadorActual = 1;
     cicloActual = 1;
@@ -277,10 +277,10 @@ void Motor::actualizar() {
         //Capturar intención de disparo proyectil Luz (ESPACIO)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
             if (pLuz->puedeDisparar()) {
-                sf::Vector2i OrigenDisparo = pLuz->getPosicionAbsoluta();
+                sf::Vector2f OrigenDisparo = pLuz->getPosicionAbsoluta();
 
                 //Definición de la dirección del proyectil:
-                sf::Vector2i direccionProyectilLuz(1, 0); //Provisionalmente va hacia la dcha.
+                sf::Vector2f direccionProyectilLuz(1, 0); //Provisionalmente va hacia la dcha.
                 proyectiles.emplace_back(OrigenDisparo, direccionProyectilLuz, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
                 pLuz->reiniciarRelojProyectil();
             }
@@ -299,10 +299,10 @@ void Motor::actualizar() {
         //Capturar disparo proyectil pieza Oscuridad (ENTER)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             if (pOsc->puedeDisparar()) {
-                sf::Vector2i OrigenDisparo = pOsc->getPosicionAbsoluta();
+                sf::Vector2f OrigenDisparo = pOsc->getPosicionAbsoluta();
 
                 //Definición de la dirección del proyectil:
-                sf::Vector2i direccionProyectilOscuridad(-1, 0); //Provisionalmente va hacia la dcha.
+                sf::Vector2f direccionProyectilOscuridad(-1, 0); //Provisionalmente va hacia la dcha.
                 proyectiles.emplace_back(OrigenDisparo, direccionProyectilOscuridad, 15, Colores::ColorProyectil); //Añade un ítem al contenedor de proyectiles
                 pOsc->reiniciarRelojProyectil();
             }
@@ -313,7 +313,32 @@ void Motor::actualizar() {
 
         //Ordena a todos los proyectiles exixstentes que se actualicen:
         for (auto& p : proyectiles) {
+
             p.ActualizarProyectil();
+
+            //FUNCIONES DE COLISIÓN Y DESPAWN:
+
+            //Obtenemos la posición de cada proyectil
+            sf::Vector2f pos = p.getPosicionProyectil();
+
+    
+            //Despawn por colisión con obstáculos (rocas) o paredes
+            if (!arena.esPosicionValida(sf::Vector2f(pos), p.getFormaProyectil().getRadius(), false)) {
+                p.setEstadoProyectil(false);  //Proyectil marcado para destruir
+                std::cout << "Proyectil eliminado, colision con obstaculo o pared" << std::endl; //Mensaje debug pir consola
+            }
+
+            //Despawn por colisión con enemigos
+            //COMPLETAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
-    }
+
+        //Función despawn de los proyectiles en la arena
+        //Busca todos los proyectiles del contenedor con activo==false y los elimina del vector
+        proyectiles.erase(
+            std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {               //RECORRE EL CONTENEDOR DE PROYECTILES Y DEVUEVE UN INDICADOR DE DONDE EMPIEZAN LOS ACTIVO==FALSE
+                    return !p.getEstadoProyectil();      //DEVUELVE TRUE SI EL ESTADO ES ACTIVO==FALSE
+                }
+            ),
+            proyectiles.end());
+    };
 }

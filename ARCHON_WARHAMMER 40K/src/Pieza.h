@@ -83,8 +83,8 @@ public:
         return sf::FloatRect(posicionAbsoluta.x - 15.f, posicionAbsoluta.y - 15.f, 30.f, 30.f);
     }
 
-    sf::Vector2i getPosicionAbsoluta() const {
-        return sf::Vector2i(posicionAbsoluta.x, posicionAbsoluta.y);
+    sf::Vector2f getPosicionAbsoluta() const {
+        return sf::Vector2f(posicionAbsoluta.x, posicionAbsoluta.y);
     }
 
     //Setters públicos: 
