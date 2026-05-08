@@ -391,7 +391,7 @@ void Motor::actualizar() {
             std::cout << pOsc->stats.nombre << " uso su hechizo!" << std::endl;
         }
     }
-    //ACTUALIZACIÓN DE PROYECTILES:
+    //Proyectiles
 
     //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
     auto comprobarColision = [](const sf::Vector2f pos1, const sf::Vector2f pos2, double limite) {
@@ -400,19 +400,14 @@ void Motor::actualizar() {
 
     //Recorremos todos los proyectiles activos del contenedor:
     for (auto& h : Hitboxes) {
-
-        //Actualizamos su posición física en la arena:
         h.ActualizarHitbox(dt);
-
-        //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
         if (!h.getEstadoHitbox()) continue;
 
-        //Obtenemos la posición y el radio del proyectil:
         sf::Vector2f posH = h.getPosicionHitbox();
-        float radioH = h.getFormaHitbox().getRadius(); // IMPORTANTE: Declarar radioH aquí
-        bool impactado = false;
+        float radioH = h.getFormaHitbox().getRadius();
 
-        // 1. COMPROBACIÓN CON EL ENTORNO (Muros o rocas)
+
+        // Si la posición de la bala o el torbellino está dentro de un muro o roca:
         if (!arena.esPosicionValida(posH, radioH, false)) {
 
             if (h.getEsErratico()) {
@@ -424,55 +419,47 @@ void Motor::actualizar() {
             else {
                 // Si es una bala normal, choca contra la piedra/muro y se destruye
                 h.setEstadoHitbox(false);
-                continue; // Saltamos al siguiente proyectil
+                continue; // Saltamos al siguiente elemento del bucle para que no haga daño fantasma
             }
         }
 
-        // 2. COMPROBACIÓN CON OBJETIVOS (Jugadores)
+
         Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
         for (Pieza* obj : objetivos) {
-            // Verificamos existencia, que no sea el propio atacante y que el proyectil siga vivo
-            if (obj && h.getAtacante() != obj && h.getEstadoHitbox()) {
+            if (obj && h.getAtacante() != obj) {
                 sf::Vector2f posE = obj->getPosicionAbsoluta();
-                float dx = posH.x - posE.x;
-                float dy = posH.y - posE.y;
-                float distSq = dx * dx + dy * dy;
+                float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
                 float limiteSq = std::pow(radioH + 20.f, 2);
 
-                // Comprobación de impacto
                 if (distSq < limiteSq) {
 
-                    // A) Daño continuo (Zona de fuego/Fénix)
+                    // A) ZONA DE DAÑO CONTINUO (Torbellino)
                     if (h.getEsDanoContinuo()) {
                         obj->stats.vida -= h.getDano() * dt;
                     }
-                    // B) Ataque instantáneo (Melee o Proyectil)
+                    // B) DAÑO INSTANTÁNEO (Balas y Melee)
                     else if (!h.getYaHizoDano()) {
                         obj->stats.vida -= h.getDano();
                         h.setYaHizoDano(true);
 
-                        // Si tiene velocidad es un proyectil (muere al chocar), si es 0 es Melee (persiste su tiempo de vida)
                         sf::Vector2f vel = h.getVelocidadHitbox();
                         if (vel.x != 0.f || vel.y != 0.f) {
-                            h.setEstadoHitbox(false);
+                            h.setEstadoHitbox(false); // Proyectil muere
                         }
                     }
-
-                    // Si el proyectil ha muerto en este impacto, dejamos de comprobar contra otros objetivos
-                    if (!h.getEstadoHitbox()) break;
                 }
             }
         }
     }
 
 
-    //LIMPIEZA DE CONTENEDORES:
+    //Limpieza de contenedores
 
     Hitboxes.erase(std::remove_if(Hitboxes.begin(), Hitboxes.end(), [](const Hitbox& h) {return !h.getEstadoHitbox(); }), Hitboxes.end());
 
 
-    //RESOLUCIÓN DE MUERTES Y FIN DE COMBATE:
+    //Muerte y fin de combate
 
     //Evaluamos si alguno de los dos combatientes tiene vida=0 tras las colisiones de proyectiles y melee:
     if (piezaAtacante->stats.vida <= 0 || piezaDefensor->stats.vida <= 0) {

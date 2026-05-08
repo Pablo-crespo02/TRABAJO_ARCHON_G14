@@ -40,11 +40,10 @@ void Hitbox::ActualizarHitbox(double dt) {
     if (tiempoVida <= 0) activo = false;
 }
 void Hitbox::rebotar() {
-    // Invertimos la velocidad (Efecto rebote de billar)
+    // Velocidad invertida para que rebote
     velocidad.x = -velocidad.x;
     velocidad.y = -velocidad.y;
 
-    // Le damos un micro-empujón para sacarlo de la pared inmediatamente
-    // y evitar que se quede atascado colisionando infinitamente.
+    //Para que no se quede rebotando dentro de la pared
     forma.move(velocidad.x * 0.05f, velocidad.y * 0.05f);
 }
