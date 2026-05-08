@@ -8,6 +8,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     bando = b;
     posicionTablero = pos;
     seleccionado = false;
+    hechizoDisponible = true;
 
     // Inicialización visual básica
     formaVisual.setRadius(20.f);

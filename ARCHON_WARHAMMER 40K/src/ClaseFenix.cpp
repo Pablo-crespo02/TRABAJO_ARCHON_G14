@@ -1,4 +1,5 @@
 #include "ClaseFenix.h"
+#include <iostream>
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos) // Asumo que el Fénix hereda de PiezaVoladora
@@ -42,4 +43,21 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     }
     window.draw(formaVisual);
 }
+void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    // El Fénix no se cura, sino que hace una explosión que ocupa media pantalla
+    // No se mueve (velocidad 0), dura medio segundo (0.5), y tiene radio gigante (150.f)
+    sf::Vector2f dirFija(0, 0);
 
+    // Reutilizamos tu clase Hitbox para crear el área de daño
+    hitboxes.emplace_back(
+        this->posicionAbsoluta, // Aparece justo encima del Fénix
+        dirFija,
+        0,                      // Rapidez 0
+        sf::Color(255, 100, 0, 150), // Naranja translúcido
+        this,
+        15.0f,                  // Daño masivo, aún no hace daño
+        0.5,                    // Dura medio segundo
+        150.0f                  // Radio enorme
+    );
+    std::cout << "¡El Fenix desata una Supernova!" << std::endl;
+}

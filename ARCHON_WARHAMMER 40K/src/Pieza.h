@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "BarraVida.h"
+#include "Hitboxes.h"
 
 // Enums básicos para todo el juego
 enum class Bando { LUZ, OSCURIDAD };
@@ -41,7 +42,7 @@ protected:
     BarraVida barraSalud;
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
-
+    bool hechizoDisponible;//Hechizo sólo una vez por combate
     bool seleccionado;
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
@@ -119,4 +120,10 @@ public:
             ultimadireccion = nuevadireccion;
         }
     }
+    bool getHechizoDisponible() const { return hechizoDisponible; }
+    void setHechizoDisponible(bool estado) { hechizoDisponible = estado; }
+    // Función virtual. Pasamos el vector de Hitboxes y el enemigo por si el hechizo es de daño o control
+    // OJO: Le ponemos "{}" al final y no "= 0" para que sea opcional. Así las piezas a las 
+    // que aún no les hayas programado hechizo no darán error de compilación.
+    virtual void usarHechizo(std::vector<Hitbox>& contenedordeAtaques, Pieza* enemigo) {}
 };

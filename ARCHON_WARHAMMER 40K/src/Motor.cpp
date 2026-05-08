@@ -309,6 +309,10 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante->setSeleccionado(false);
     piezaDefensor->setSeleccionado(false);
 
+    //Recarga el hechizo al entrar en la arena
+    piezaAtacante->setHechizoDisponible(true);
+    piezaDefensor->setHechizoDisponible(true);
+
     // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
     sf::Vector2f spawnDerecha(650.f, 300.f);
@@ -541,10 +545,27 @@ void Motor::actualizar() {
 
     //LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
     procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
+    // Lanzar Hechizo Luz (Tecla Q)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        if (pLuz->getHechizoDisponible()) {
+            // Ejecuta la lógica única de la pieza
+            pLuz->usarHechizo(Hitboxes, pOsc);
+            // Lo marcamos como gastado
+            pLuz->setHechizoDisponible(false);
+            std::cout << pLuz->stats.nombre << " uso su hechizo!" << std::endl;
+        }
+    }
 
     //OSCURIDAD: FLECHAS, disparo con ENTER, inicialmente mira hacia la izq:
     procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1, 0));
-
+    // Lanzar Hechizo Oscuridad (RShift o la tecla que prefieras)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+        if (pOsc->getHechizoDisponible()) {
+            pOsc->usarHechizo(Hitboxes, pLuz);
+            pOsc->setHechizoDisponible(false);
+            std::cout << pOsc->stats.nombre << " uso su hechizo!" << std::endl;
+        }
+    }
     //ACTUALIZACIÓN DE PROYECTILES:
 
     //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
