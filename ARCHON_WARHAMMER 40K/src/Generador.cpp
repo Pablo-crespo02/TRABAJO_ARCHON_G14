@@ -4,7 +4,7 @@
 #include "Motor.h"
 #include "ClaseGolem.h"
 #include "ClaseFenix.h"
-
+#include "ClaseDjinn.h"
 void Generador::GenerarTablero(Tablero& tablero) {
 
     //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
@@ -59,6 +59,9 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "LIBRARIAN" || tipo == "GENESTEALER") {
 
         nuevaPieza = new ClaseFenix(bando, pos, tipo);
+    }
+    else if (tipo == "THUNDERHAWK") {
+        nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
     }
     /*
 

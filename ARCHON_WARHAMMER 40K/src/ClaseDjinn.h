@@ -9,3 +9,5 @@ public:
     ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo);
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 };
+
+

@@ -1,5 +1,4 @@
 #pragma once
-#include "Pieza.h"
 #include "PiezaVoladora.h"
 #include "Arena.h"
 #include "Color.h"
