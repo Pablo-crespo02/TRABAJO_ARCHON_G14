@@ -1,6 +1,6 @@
 #include "Motor.h"
 #include "Generador.h"
-#include"Renderizador.h"
+#include "Color.h"
 #include <iostream>
 #include <vector>
 #include<cmath>
@@ -58,39 +58,42 @@ void Motor::renderizar() {
     // 2. MODO TABLERO
     else if (estadoActual == Estado::Tablero) {
         window.setView(vistaTablero);
-        Renderizador::dibujarTablero(window, tablero);
+
+        // El tablero se dibuja a sí mismo
+        tablero.dibujar(window);
+
+        // Cada pieza se dibuja a sí misma
         for (auto p : listaPiezas) {
-            Renderizador::dibujarPieza(window, p, estadoActual);
+            p->dibujar(window, estadoActual);
         }
-            // --- VISTA DE INTERFAZ (HUD) ---
-        // Solo llamamos al HUD aquí, en el estado Tablero
-            window.setView(vistaUI);
-            dibujarHUD();
-        }
+
+        // --- VISTA DE INTERFAZ (HUD) ---
+        window.setView(vistaUI);
+        dibujarHUD();
+    }
 
     // 3. MODO ARENA DE COMBATE
     else if (estadoActual == Estado::Arena) {
-
         window.setView(vistaTablero);
-        // Dibujamos el escenario base
-        Renderizador::dibujarArena(window, arena);
 
+        // LA ARENA SE DIBUJA A SÍ MISMA (suelo, rocas, sangre, muros)
+        arena.dibujar(window);
 
-        // Capa de hitboxes (disparos a distancia y melee)
+        // CAPA DE HITBOXES UNIFICADA (Proyectiles a distancia y cortes Melee)
+        // Sustituye a los dos bucles for anteriores
         for (const auto& h : Hitboxes) {
             window.draw(h.getFormaHitbox());
         }
 
-        // Capa de combatientes
+        // LAS PIEZAS COMBATIENTES SE DIBUJAN A SÍ MISMAS
         if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
-            Renderizador::dibujarPieza(window, piezaAtacante, estadoActual);
-            Renderizador::dibujarPieza(window, piezaDefensor, estadoActual);
+            piezaAtacante->dibujar(window, estadoActual);
+            piezaDefensor->dibujar(window, estadoActual);
         }
     }
 
     window.display();
 }
-
 void Motor::dibujarHUD() {
     float ancho = (float)window.getSize().x;
     float alto = (float)window.getSize().y;

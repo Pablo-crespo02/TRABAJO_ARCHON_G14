@@ -14,40 +14,35 @@ void Casilla::SetValoresCasillas(int f, int c, TipoCasilla t, ColorActual C, boo
 
 //Dibuja por pantalla:
 void Casilla::Dibujar(sf::RenderWindow& window) {
-
     const float tamCasilla = 60.0f;
     const float margen = 2.0f;
 
-
-
-    //DIBUJO DEL CUADRADO:
-    //Generamos un cuadrado de SFML:
+    // DIBUJO DEL CUADRADO:
     sf::RectangleShape cuadrado(sf::Vector2f(tamCasilla - margen, tamCasilla - margen));
 
-    //Calculamos su posición en la ventana según su fila y su columna.
-    //Multiplicamos por 55 para dejar margen entre ellas:
-    cuadrado.setPosition(sf::Vector2f(columna * tamCasilla + 50.f, fila * tamCasilla + 30.f));
+    // CORRECCIÓN: Quitamos los +50.f y +30.f. 
+    // Usamos coordenadas puras para alinear con Pieza::sincronizarPosicionTablero()
+    float posX = columna * tamCasilla;
+    float posY = fila * tamCasilla;
+    cuadrado.setPosition(sf::Vector2f(posX, posY));
 
-    //Asignamos el color gráfico de SFML según el enum ColorCasilla: blanco
-    if (colorcasilla == ColorActual::Blanco_pico)cuadrado.setFillColor(Colores::ColorBlanco_pico);
-
-    //Asignamos el color gráfico de SFML según el enum ColorCasilla: negro
+    // Asignamos los colores (sin cambios)
+    if (colorcasilla == ColorActual::Blanco_pico) cuadrado.setFillColor(Colores::ColorBlanco_pico);
     else if (colorcasilla == ColorActual::Negro_pico) cuadrado.setFillColor(Colores::ColorNegro_pico);
-
-    //Asignamos los colores de las casillas cambiantes según su estado:
     else if (colorcasilla == ColorActual::Blanco) cuadrado.setFillColor(Colores::ColorBlanco);
     else if (colorcasilla == ColorActual::Gris_claro) cuadrado.setFillColor(Colores::ColorGris_claro);
     else if (colorcasilla == ColorActual::Gris_medio) cuadrado.setFillColor(Colores::ColorGris_medio);
     else if (colorcasilla == ColorActual::Gris_oscuro) cuadrado.setFillColor(Colores::ColorGris_oscuro);
     else if (colorcasilla == ColorActual::Negro) cuadrado.setFillColor(Colores::ColorNegro);
 
-    //Llamamos a la función draw de SFML para que pinte el cuadrado
+    // Pintamos
     window.draw(cuadrado);
 
-    //DIBUJO DEL POWER POINT:
-    if (powerpoint == true) {
-        PowerPoint::Dibujar(window, ((columna * tamCasilla + 50.f) + ((tamCasilla - margen) / 2.0f)), (fila * tamCasilla + 30.f) + ((tamCasilla - margen) / 2.0f));
-
+    // DIBUJO DEL POWER POINT:
+    if (powerpoint) {
+        // CORRECCIÓN: Calculamos el centro exacto basado en posX y posY limpios
+        float centroX = posX + ((tamCasilla - margen) / 2.0f);
+        float centroY = posY + ((tamCasilla - margen) / 2.0f);
+        PowerPoint::Dibujar(window, centroX, centroY);
     }
-
 }

@@ -49,7 +49,6 @@ protected:
 
     // Amistades para que el Renderizador y el Motor sigan funcionando sin cambios pesados
     friend class Motor;
-    friend class Renderizador;
     friend class Generador;
 
 public:

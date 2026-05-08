@@ -32,3 +32,12 @@ void Tablero::actualizarColores(int numCiclo) {
         }
     }
 }
+void Tablero::dibujar(sf::RenderWindow& window) {
+    // Recorremos la matriz 9x9 y mandamos a cada Casilla a dibujarse
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            // 'tablero' es el nombre de tu matriz interna (Casilla tablero[9][9])
+            tablero[i][j].Dibujar(window);
+        }
+    }
+}

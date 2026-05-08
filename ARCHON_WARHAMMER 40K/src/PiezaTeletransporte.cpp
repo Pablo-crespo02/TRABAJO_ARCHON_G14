@@ -41,7 +41,7 @@ void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float 
         return; // Terminamos la función aquí porque no hay desplazamiento físico
     }
 
-    //  Si se está moviendo, se vuelve invisible (translucido)
+    //  Si se está moviendo, se vuelve invisible (translucido)->colorActual = 40    invisible ->colorActual = 0
     
     if (colorActual.a != 0) {
         colorActual.a = 40;//Si se pone a 0 desaparece

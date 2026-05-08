@@ -22,5 +22,4 @@ public:
 
     //Función para dibujar por pantalla:
     void Dibujar(sf::RenderWindow& window);    //Función dibujar, recibe la ventana "window" para...
-    friend class Renderizador;
 };

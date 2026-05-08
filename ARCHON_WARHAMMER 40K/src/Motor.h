@@ -4,11 +4,9 @@
 #include "Arena.h"
 #include "EstadoJuego.h"
 #include <vector>
-#include "Renderizador.h"
 #include "Pantallainicio.h"
 #include "Hitboxes.h"
 
-class Renderizador;
 class Motor {
 private:
 
@@ -28,7 +26,6 @@ private:
     sf::Font fuenteGlobal;
     std::vector<Hitbox> Hitboxes;    //Contenedor para los proyectiles activos
     //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
-    friend class Renderizador;
     double limitecolision = 36;
 
 public:

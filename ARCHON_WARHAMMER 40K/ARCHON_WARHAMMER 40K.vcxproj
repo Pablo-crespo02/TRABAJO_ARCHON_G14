@@ -147,7 +147,6 @@
     <ClCompile Include="src\PiezaVoladora.cpp" />
     <ClCompile Include="src\PowerPoint.cpp" />
     <ClCompile Include="src\Hitboxes.cpp" />
-    <ClCompile Include="src\Renderizador.cpp" />
     <ClCompile Include="src\Tablero.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,7 +168,6 @@
     <ClInclude Include="src\PiezaVoladora.h" />
     <ClInclude Include="src\PowerPoint.h" />
     <ClInclude Include="src\Hitboxes.h" />
-    <ClInclude Include="src\Renderizador.h" />
     <ClInclude Include="src\Tablero.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -7,7 +7,7 @@ private:
 
     Casilla tablero[9][9];
 
-    friend class Renderizador;
+    
 
 public:
     Tablero();
@@ -15,6 +15,6 @@ public:
     //Función "puente" para que la clase constructora 'Generador' pueda...
     //... acceder a la función 'SetValoresCasilla' desde 'tablero.cpp':
     void SetValoresCasillasDesdeTablero(int fila, int columna, TipoCasilla tipo, ColorActual color, bool esPowerPoint);
-
+    void dibujar(sf::RenderWindow& window);//Orden para dibujarse
     void actualizarColores(int numCiclo);
 };
