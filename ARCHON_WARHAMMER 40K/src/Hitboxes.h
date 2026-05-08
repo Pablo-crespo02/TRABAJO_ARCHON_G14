@@ -24,6 +24,7 @@ public:
         bool esDoT = false, bool erratico = false);
 
     void ActualizarHitbox(double dt);
+    void rebotar();
 
     //getters
     sf::CircleShape getFormaHitbox() const { return forma; }
