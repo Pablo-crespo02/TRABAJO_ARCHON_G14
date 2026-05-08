@@ -3,31 +3,39 @@
 
 //Constructor actualizado
 Hitbox::Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
-    Pieza* propietario, double danoHitbox, double tiempodevida, double radio, bool esDoT) {
+    Pieza* propietario, double danoHitbox, double tiempodevida, double radio, bool esDoT, bool erratico) {
     forma.setRadius(radio);
     forma.setOrigin(radio, radio);
     forma.setPosition(posicionInicial);
     forma.setFillColor(color);
 
-    velocidad.x = direccion.x * (float)rapidez;
-    velocidad.y = direccion.y * (float)rapidez;
+    rapidezOriginal = (float)rapidez;
+    velocidad = direccion * rapidezOriginal;
 
     activo = true;
     haHechoDano = false;
-    esDanoContinuo = esDoT; // Valor asignado
+    esDanoContinuo = esDoT; //Fenix
+    esErratico = erratico;      // Djinn
+    tiempoCambioDir = 0.0f;     // Inicializar temporizador
     atacante = propietario;
     dano = (float)danoHitbox;
     tiempoVida = (float)tiempodevida;
 }
 
 void Hitbox::ActualizarHitbox(double dt) {
+    // LÓGICA DE MOVIMIENTO ERRÁTICO
+    if (esErratico && activo) {
+        tiempoCambioDir += (float)dt;
+        if (tiempoCambioDir >= 0.5f) { // Cambia de rumbo cada 0.5 segundos
+            // Generar dirección aleatoria
+            float angulo = static_cast<float>(std::rand() % 360) * 3.14159f / 180.f;
+            velocidad.x = std::cos(angulo) * rapidezOriginal;
+            velocidad.y = std::sin(angulo) * rapidezOriginal;
+            tiempoCambioDir = 0.0f;
+        }
+    }
 
-    //Multiplicamos la velocidad por dt:
-    forma.move(velocidad.x*dt,velocidad.y*dt);
-
-    //Restamos al reloj de vida el delta time:
-    tiempoVida -= dt;
-
-    //Eliminamos si el reloj de vida llega a 0:
-    if (tiempoVida <= 0)activo = false;
+    forma.move(velocidad * (float)dt);
+    tiempoVida -= (float)dt;
+    if (tiempoVida <= 0) activo = false;
 }
