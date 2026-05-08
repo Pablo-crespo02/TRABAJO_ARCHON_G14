@@ -203,3 +203,14 @@ void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         barraSalud.dibujar(window);
     }
 }
+void ClaseGolem::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    // El Golem se repara a sí mismo (Heal)
+    float curacion = 10.0f;
+    this->stats.vida += curacion;
+
+    // Evitamos que se cure por encima de su vida máxima
+    if (this->stats.vida > this->stats.vidaMaxima) {
+        this->stats.vida = this->stats.vidaMaxima;
+    }
+    std::cout << "El Golem ruge y se cura " << curacion << " puntos de vida." << std::endl;
+}

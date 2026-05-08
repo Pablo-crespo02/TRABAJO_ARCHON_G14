@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include<cmath>
+#include "Hitboxes.h"
 
 
 Motor::Motor() {
@@ -76,16 +77,16 @@ void Motor::renderizar() {
     else if (estadoActual == Estado::Arena) {
         window.setView(vistaTablero);
 
-        // LA ARENA SE DIBUJA A SÍ MISMA (suelo, rocas, sangre, muros)
+        // La arena se dibuja a sí misma
         arena.dibujar(window);
 
-        // CAPA DE HITBOXES UNIFICADA (Proyectiles a distancia y cortes Melee)
-        // Sustituye a los dos bucles for anteriores
+        // 
+        // Este bucle es el que hace visible la explosión
         for (const auto& h : Hitboxes) {
             window.draw(h.getFormaHitbox());
         }
 
-        // LAS PIEZAS COMBATIENTES SE DIBUJAN A SÍ MISMAS
+        // Capa de combatientes
         if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
             piezaAtacante->dibujar(window, estadoActual);
             piezaDefensor->dibujar(window, estadoActual);
@@ -308,6 +309,10 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     // Limpia estados de selección previos
     piezaAtacante->setSeleccionado(false);
     piezaDefensor->setSeleccionado(false);
+
+    //Recarga el hechizo al entrar en la arena
+    piezaAtacante->setHechizoDisponible(true);
+    piezaDefensor->setHechizoDisponible(true);
 
     // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
@@ -541,11 +546,28 @@ void Motor::actualizar() {
 
     //LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
     procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
+    // Lanzar Hechizo Luz (Tecla Q)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        if (pLuz->getHechizoDisponible()) {
+            // Ejecuta la lógica única de la pieza
+            pLuz->usarHechizo(Hitboxes, pOsc);
+            // Lo marcamos como gastado
+            pLuz->setHechizoDisponible(false);
+            std::cout << pLuz->stats.nombre << " uso su hechizo!" << std::endl;
+        }
+    }
 
     //OSCURIDAD: FLECHAS, disparo con ENTER, inicialmente mira hacia la izq:
     procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1, 0));
-
-    //ACTUALIZACIÓN DE PROYECTILES:
+    // Lanzar Hechizo Oscuridad (RShift o la tecla que prefieras)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+        if (pOsc->getHechizoDisponible()) {
+            pOsc->usarHechizo(Hitboxes, pLuz);
+            pOsc->setHechizoDisponible(false);
+            std::cout << pOsc->stats.nombre << " uso su hechizo!" << std::endl;
+        }
+    }
+    //Proyectiles
 
     //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
     auto comprobarColision = [](const sf::Vector2f pos1, const sf::Vector2f pos2, double limite) {
@@ -554,61 +576,55 @@ void Motor::actualizar() {
 
     //Recorremos todos los proyectiles activos del contenedor:
     for (auto& h : Hitboxes) {
-
-        //Actualizamos su posición física en la arena:
         h.ActualizarHitbox(dt);
+        if (!h.getEstadoHitbox()) continue;
 
-        //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
-        if (!h.getEstadoHitbox())continue;
-
-        //Obtenemos la posición del proyectil en el mapa:
         sf::Vector2f posH = h.getPosicionHitbox();
-        bool impactado = false; //Booleano que registra la colisión
+        float radioH = h.getFormaHitbox().getRadius();
 
-        //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
         Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
-        //Recorremos el vector auxiliar:
         for (Pieza* obj : objetivos) {
+            if (obj && h.getAtacante() != obj) {
+                sf::Vector2f posE = obj->getPosicionAbsoluta();
+                float dx = posH.x - posE.x;
+                float dy = posH.y - posE.y;
+                float distSq = dx * dx + dy * dy;
+                float limiteSq = std::pow(radioH + 20.f, 2);
 
-            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
-            if (obj && h.getAtacante() != obj && comprobarColision(posH, obj->getPosicionAbsoluta(), limitecolision)) {
-                //Restamos vida al jugador colisionado:
-                obj->stats.vida -= h.getDano();
-                //Desactivamos el proyectil:
-                h.setEstadoHitbox(false);
-                //Marcamos como true el booleano "impactado" para evitar múltiples colisiones en el mismo frame:
-                impactado = true;
-                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
-                break;
-            }
-        }
+                // Comprobación de impacto
+                if (distSq < limiteSq) {
 
-        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente) para los ataques a distancia:
-        //Los ataques melee tienen velocidad 0, mientras que los proyectiles tienen velocidad v.x + v.y. Es posible encontrar una comprobación más elegante en el futuro
+                    // Zona de fuego del fénix (Daño por segundo)
+                    if (h.getEsDanoContinuo()) {
+                        // Restamos el daño proporcional a los milisegundos de este frame
+                        obj->stats.vida -= h.getDano() * dt;
 
-        sf::Vector2f velocidadcomprobacion = h.getVelocidadHitbox();
+                       
+                        // El fuego se queda hasta que su tiempoVida llegue a 0.w
+                    }
+                    // Ataque instantaneo (Melee o Proyectil)
+                    else if (!h.getYaHizoDano()) {
+                        obj->stats.vida -= h.getDano();
+                        h.setYaHizoDano(true);
 
-        bool esProyectil = (velocidadcomprobacion.x != 0  || velocidadcomprobacion.y != 0);
-
-        if (esProyectil) {
-            if (!impactado && h.getEstadoHitbox()) {
-                //Si el proyectil ocupa una posición no válida en la arena:
-                if (!arena.esPosicionValida(posH, (h.getFormaHitbox().getRadius()),false)) {
-                    //Desactivamos el proyectil
-                    h.setEstadoHitbox(false);
+                        sf::Vector2f vel = h.getVelocidadHitbox();
+                        if (vel.x != 0.f || vel.y != 0.f) {
+                            h.setEstadoHitbox(false); // Borramos la bala
+                        }
+                    }
                 }
             }
         }
     }
 
 
-    //LIMPIEZA DE CONTENEDORES:
+    //Limpieza de contenedores
 
     Hitboxes.erase(std::remove_if(Hitboxes.begin(), Hitboxes.end(), [](const Hitbox& h) {return !h.getEstadoHitbox(); }), Hitboxes.end());
 
 
-    //RESOLUCIÓN DE MUERTES Y FIN DE COMBATE:
+    //Muerte y fin de combate
 
     //Evaluamos si alguno de los dos combatientes tiene vida=0 tras las colisiones de proyectiles y melee:
     if (piezaAtacante->stats.vida <= 0 || piezaDefensor->stats.vida <= 0) {

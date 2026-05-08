@@ -1,4 +1,7 @@
+
 /*#include "ClaseFenix.h"
+#include "ClaseFenix.h"
+#include <iostream>
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos) // Asumo que el Fénix hereda de PiezaVoladora
@@ -53,7 +56,7 @@ const float PIEZA_ALTURA_ARENA_FENIX = 75.0f;
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
-    //ESTADÍSTICAS 
+    // ESTADÍSTICAS 
     this->stats.nombre = tipo;
     this->stats.vida = 25.0f;
     this->stats.vidaMaxima = 25.0f;
@@ -62,20 +65,16 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.velAtaque = 1.5f;
     this->stats.cooldown = 1.0f;
 
-    // --- Lógica de tipos ---
-    this->stats.esRango = true;    // El Fénix ataca a distancia
-    this->stats.esVolador = true;  // Vuela sobre obstáculos
-
+    this->stats.esRango = true;
+    this->stats.esVolador = true;
     this->rangoMovimiento = 4;
-    this->patronMovimiento = PatronMovimiento::Ambos; // Patrón de estrella
+    this->patronMovimiento = PatronMovimiento::Ambos;
 
-    //CARGA DE SPRITES (Chibi)
+    // CARGA DE SPRITES
     if (tipo == "LIBRARIAN" || tipo == "HARPY") {
-
         std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-FENIX-Luz.png" : "imagenes/BASE-MANTICORA-Oscuridad.png";
         std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-FENIX-Luz-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
 
-        // se adapta a la tira del Fénix (1 fila, aprox 10 frames de animación y de harpy hay 10
         int columnas = (tipo == "LIBRARIAN") ? 8 : 10;
         int filas = 1;
 
@@ -84,7 +83,6 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
         }
         spriteTablero.setTexture(texturaTablero);
         spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
         float escalaTablero = PIEZA_ALTURA_TABLERO_FENIX / texturaTablero.getSize().y;
         spriteTablero.setScale(escalaTablero, escalaTablero);
 
@@ -92,7 +90,6 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
             std::cout << "Error: No se encontro " << rutaArena << std::endl;
         }
         spriteArena.setTexture(texturaArena);
-
         anchoFrame = texturaArena.getSize().x / columnas;
         altoFrame = texturaArena.getSize().y / filas;
 
@@ -110,52 +107,55 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
         frameActual = 0;
         temporizadorAnimacion = 0.0f;
     }
+} // <--- Cierre del constructor
+
+void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    sf::Vector2f dirFija(0.f, 0.f);
+
+    // CREACIÓN DEL ÁREA DE FUEGO (Movido a su sitio correcto)
+    hitboxes.emplace_back(
+        this->posicionAbsoluta,
+        dirFija,
+        0,
+        sf::Color(255, 69, 0, 150),
+        this,
+        10.0f,
+        5.0f,
+        100.0f,
+        true
+    );
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    //Dejamos que la clase padre (PiezaVoladora) mueva las coordenadas físicas
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
-    //Actualizamos la imagen visible con nuestra máquina de estados
     if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
         animar(dt, direccion);
     }
 }
 
 void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
-    // Para el Fénix, la fila siempre es 0 porque es una tira horizontal
     int fila = 0;
     int colInicial = 0;
     int colFinal = 0;
 
-    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
+    // Si da error en relojProyectil, asegúrate de haberlo añadido a Pieza.h
     bool estaAtacando = (this->stats.relojProyectil.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
-        // FOTOGRAMA DE ATAQUE (Frame donde escupe fuego)
-        colInicial = 4;
-        colFinal = 4;
+        colInicial = 4; colFinal = 4;
     }
     else if (direccion.x != 0) {
-        // FOTOGRAMA DE VUELO LATERAL (Aleteo estándar)
-        colInicial = 2;
-        colFinal = 3;
+        colInicial = 2; colFinal = 3;
     }
     else if (direccion.y > 0) {
-        // FOTOGRAMA DE ABAJO (Aleteo descendente)
-        colInicial = 5;
-        colFinal = 6;
+        colInicial = 5; colFinal = 6;
     }
     else if (direccion.y < 0) {
-        // FOTOGRAMA DE ARRIBA (Aleteo ascendente)
-        colInicial = 6;
-        colFinal = 7;
+        colInicial = 6; colFinal = 7;
     }
     else {
-        // FOTOGRAMA QUIETO (Posición majestuosa)
-        colInicial = 0;
-        colFinal = 0;
+        colInicial = 0; colFinal = 0;
     }
 
     int posY_Textura = fila * altoFrame;
@@ -163,36 +163,28 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 
     if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
         frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
+        spriteArena.setTextureRect(sf::IntRect((frameActual * anchoFrame) + 1, posY_Textura, anchoFrame - 2, altoFrame));
         temporizadorAnimacion = 0.0f;
     }
 
     if (colInicial != colFinal) {
         temporizadorAnimacion += dt;
-        float velocidadAnimacion = 0.12f; // Un poco más rápido que el Golem para simular aleteo
-
-        if (temporizadorAnimacion >= velocidadAnimacion) {
+        if (temporizadorAnimacion >= 0.12f) {
             temporizadorAnimacion = 0.0f;
             frameActual++;
-
-            if (frameActual > colFinal) {
-                frameActual = colInicial;
-            }
-
-            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
+            if (frameActual > colFinal) frameActual = colInicial;
+            spriteArena.setTextureRect(sf::IntRect((frameActual * anchoFrame) + 1, posY_Textura, anchoFrame - 2, altoFrame));
         }
     }
 
-    // ARREGLO DEL EFECTO ESPEJO
     float escalaArena = PIEZA_ALTURA_ARENA_FENIX / altoFrame;
     if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
+        spriteArena.setScale(-escalaArena, escalaArena);
     }
     else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
+        spriteArena.setScale(escalaArena, escalaArena);
     }
     else {
-        // Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
         float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
         spriteArena.setScale(escalaActualX, escalaArena);
     }
@@ -201,20 +193,16 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
-
         if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
-
-            // CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
                 sf::CircleShape anilloSeleccion(25.f);
                 anilloSeleccion.setOrigin(25.f, 25.f);
                 anilloSeleccion.setPosition(posicionAbsoluta);
-                anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
-                anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
-                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
+                anilloSeleccion.setFillColor(sf::Color::Transparent);
+                anilloSeleccion.setOutlineThickness(4.f);
+                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion);
                 window.draw(anilloSeleccion);
             }
-
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
         }
@@ -240,8 +228,6 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             formaVisual.setPosition(posicionAbsoluta);
             window.draw(formaVisual);
         }
-
-        // DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
         barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
         barraSalud.dibujar(window);
     }
