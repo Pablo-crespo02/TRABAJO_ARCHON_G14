@@ -26,7 +26,7 @@ struct Stats {
     float cooldown;
 
     //Variables encargadas de la gestión de proyectiles en la arena
-    sf::Clock relojProyectil;  //Reloj que avanza desde que se dispara
+    sf::Clock relojHitbox;  //Reloj que avanza desde que se dispara
 
 };
 
@@ -73,8 +73,8 @@ public:
     bool detectarConflicto(const std::vector<Pieza*>& otrasPiezas);
 
     //Métodos de gestión de proyectiles en la arena:
-    bool puedeDisparar()const;   //Comprueba si ha pasado sufucuente tiempo desde el disparo anterior
-    void reiniciarRelojProyectil(); //Reinicia el reloj de disparo
+    bool puedeAtacar()const;   //Comprueba si ha pasado sufucuente tiempo desde el disparo anterior
+    void reiniciarRelojHitbox(); //Reinicia el reloj de disparo
 
     //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
     sf::Vector2i getPosicionTablero() const { return posicionTablero; }

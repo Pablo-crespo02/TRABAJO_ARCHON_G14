@@ -131,7 +131,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
-    <ClCompile Include="src\AtaqueMelee.cpp" />
     <ClCompile Include="src\BarraVida.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
@@ -146,13 +145,12 @@
     <ClCompile Include="src\PiezaTerrestre.cpp" />
     <ClCompile Include="src\PiezaVoladora.cpp" />
     <ClCompile Include="src\PowerPoint.cpp" />
-    <ClCompile Include="src\Proyectil.cpp" />
+    <ClCompile Include="src\Hitboxes.cpp" />
     <ClCompile Include="src\Renderizador.cpp" />
     <ClCompile Include="src\Tablero.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
-    <ClInclude Include="src\AtaqueMelee.h" />
     <ClInclude Include="src\BarraVida.h" />
     <ClInclude Include="src\Casilla.h" />
     <ClInclude Include="src\ClaseFenix.h" />
@@ -168,7 +166,7 @@
     <ClInclude Include="src\PiezaTerrestre.h" />
     <ClInclude Include="src\PiezaVoladora.h" />
     <ClInclude Include="src\PowerPoint.h" />
-    <ClInclude Include="src\Proyectil.h" />
+    <ClInclude Include="src\Hitboxes.h" />
     <ClInclude Include="src\Renderizador.h" />
     <ClInclude Include="src\Tablero.h" />
   </ItemGroup>

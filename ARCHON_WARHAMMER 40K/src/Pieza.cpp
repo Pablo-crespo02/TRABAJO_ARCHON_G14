@@ -57,11 +57,11 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 
 //GESTIÓN DE PROYECTILES:
 
-bool Pieza::puedeDisparar() const {
+bool Pieza::puedeAtacar() const {
 
-    return stats.relojProyectil.getElapsedTime().asSeconds() > stats.velAtaque;
+    return stats.relojHitbox.getElapsedTime().asSeconds() > stats.velAtaque;
 };
 
-void Pieza::reiniciarRelojProyectil() {
-    stats.relojProyectil.restart();
+void Pieza::reiniciarRelojHitbox() {
+    stats.relojHitbox.restart();
 };

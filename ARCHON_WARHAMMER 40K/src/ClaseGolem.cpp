@@ -82,7 +82,7 @@ void ClaseGolem::animar(float dt, sf::Vector2f direccion) {
     int colFinal = 0;
 
     // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
-    bool estaAtacando = (this->stats.relojProyectil.getElapsedTime().asSeconds() < 0.2f);
+    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
         //FOTOGRAMA DE ATAQUE 

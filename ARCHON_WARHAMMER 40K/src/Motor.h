@@ -6,8 +6,7 @@
 #include <vector>
 #include "Renderizador.h"
 #include "Pantallainicio.h"
-#include "Proyectil.h"
-#include "AtaqueMelee.h"
+#include "Hitboxes.h"
 
 class Renderizador;
 class Motor {
@@ -27,8 +26,7 @@ private:
     sf::View vistaUI;
     sf::Clock reloj;
     sf::Font fuenteGlobal;
-    std::vector<Proyectil> proyectiles;    //Contenedor para los proyectiles activos
-    std::vector<AtaqueMelee> ataquesMelee; //Igual pero para melee
+    std::vector<Hitbox> Hitboxes;    //Contenedor para los proyectiles activos
     //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
     friend class Renderizador;
     double limitecolision = 36;

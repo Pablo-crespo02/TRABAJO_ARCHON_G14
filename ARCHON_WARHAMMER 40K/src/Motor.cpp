@@ -75,14 +75,10 @@ void Motor::renderizar() {
         // Dibujamos el escenario base
         Renderizador::dibujarArena(window, arena);
 
-        // Capa de ataques Melee (el círculo rojo de daño físico)
-        for (const auto& m : ataquesMelee) {
-            window.draw(m.getForma());
-        }
 
-        // Capa de proyectiles (disparos a distancia)
-        for (const auto& p : proyectiles) {
-            window.draw(p.getFormaProyectil());
+        // Capa de hitboxes (disparos a distancia y melee)
+        for (const auto& h : Hitboxes) {
+            window.draw(h.getFormaHitbox());
         }
 
         // Capa de combatientes
@@ -475,7 +471,7 @@ void Motor::manejarEventos() {
 void Motor::actualizar() {
 
     //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
-    float dt = reloj.restart().asSeconds();
+    double dt = reloj.restart().asSeconds();
 
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;
@@ -489,7 +485,7 @@ void Motor::actualizar() {
     //No especificamos el tipo de retorno porque en C++ no es imprescindible.
     auto procesarInput = [&](Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo, sf::Keyboard::Key izqda, sf::Keyboard::Key dcha, sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto) {
 
-        //nicializamos el vector dirección a 0 en el primer frame:
+        //Inicializamos el vector dirección a 0 en el primer frame:
         sf::Vector2f dir(0, 0);
 
         //Modificación del vector director según las teclas pulsadas:
@@ -499,34 +495,37 @@ void Motor::actualizar() {
         if (sf::Keyboard::isKeyPressed(dcha)) dir.x += 1.f;
 
         //Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
-        pLuz->setultimadireccion(dir);
+        p->setultimadireccion(dir);
 
         //Si se pulsa la tecla de ataque y el cooldown permite disparar:
-        if (sf::Keyboard::isKeyPressed(ataque) && p->puedeDisparar()) {
+        if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
 
             //Obtenemos hacia dónde está mirando la pieza:
-            sf::Vector2f dirDisparo = p->getultimadireccion();
-
+            sf::Vector2f dirAtaque = p->getultimadireccion();
+          
             //Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
-            float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
+            float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
 
             //Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
-            dirDisparo = (magnitud != 0) ? (dirDisparo / magnitud) : dirPorDefecto;
+            dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : dirPorDefecto;
 
-            //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee:
+            //Instanciamos el punto de spawn del hitbox ataque desplazado 35 píxeles del origen de la pieza en dirección del vector dirección ataque:
+            sf::Vector2f puntoSpawnAtaque = (p->getPosicionAbsoluta()) + (dirAtaque * 35.f);
+
+            //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
 
             if (p->stats.esRango) {
-                //Generamos un proyectil en la posición de la pieza:
-                proyectiles.emplace_back(p->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, p, p->stats.ataque);
+                //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque,60,15);
             }
 
             else {
-                //Generamos un ataque melee delante de la pieza:
-                ataquesMelee.emplace_back(p->getPosicionAbsoluta() + (dirDisparo * 40.f), p, p->stats.ataque);
+                //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
+                Hitboxes.emplace_back(puntoSpawnAtaque,dirAtaque,0, Colores::ColorProyectil,p, p->stats.ataque,0.2,35);
             }
 
             //Reiniciamos el cooldown interno de la pieza:
-            p->reiniciarRelojProyectil();
+            p->reiniciarRelojHitbox();
         }
 
         //Movemos físicamente la pieza en la arena aplicando colisiones:
@@ -551,16 +550,16 @@ void Motor::actualizar() {
         };
 
     //Recorremos todos los proyectiles activos del contenedor:
-    for (auto& p : proyectiles) {
+    for (auto& h : Hitboxes) {
 
         //Actualizamos su posición física en la arena:
-        p.ActualizarProyectil();
+        h.ActualizarHitbox(dt);
 
         //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
-        if (!p.getEstadoProyectil())continue;
+        if (!h.getEstadoHitbox())continue;
 
         //Obtenemos la posición del proyectil en el mapa:
-        sf::Vector2f posP = p.getPosicionProyectil();
+        sf::Vector2f posH = h.getPosicionHitbox();
         bool impactado = false; //Booleano que registra la colisión
 
         //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
@@ -570,11 +569,11 @@ void Motor::actualizar() {
         for (Pieza* obj : objetivos) {
 
             //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
-            if (obj && p.getDisparador() != obj && comprobarColision(posP, obj->getPosicionAbsoluta(), limitecolision)) {
+            if (obj && h.getAtacante() != obj && comprobarColision(posH, obj->getPosicionAbsoluta(), limitecolision)) {
                 //Restamos vida al jugador colisionado:
-                obj->stats.vida -= p.getDano();
+                obj->stats.vida -= h.getDano();
                 //Desactivamos el proyectil:
-                p.setEstadoProyectil(false);
+                h.setEstadoHitbox(false);
                 //Marcamos como true el booleano "impactado" para evitar múltiples colisiones en el mismo frame:
                 impactado = true;
                 //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
@@ -582,55 +581,29 @@ void Motor::actualizar() {
             }
         }
 
-        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente)
-        if (!impactado && p.getEstadoProyectil()) {
-            //Si el proyectil ocupa una posición no válida en la arena:
-            if (!arena.esPosicionValida(posP, (p.getFormaProyectil().getRadius()), false)) {
-                //Desactivamos el proyectil
-                p.setEstadoProyectil(false);
+        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente) para los ataques a distancia:
+        //Los ataques melee tienen velocidad 0, mientras que los proyectiles tienen velocidad v.x + v.y. Es posible encontrar una comprobación más elegante en el futuro
+
+        sf::Vector2f velocidadcomprobacion = h.getVelocidadHitbox();
+
+        bool esProyectil = (velocidadcomprobacion.x != 0  || velocidadcomprobacion.y != 0);
+
+        if (esProyectil) {
+            if (!impactado && h.getEstadoHitbox()) {
+                //Si el proyectil ocupa una posición no válida en la arena:
+                if (!arena.esPosicionValida(posH, (h.getFormaHitbox().getRadius()),false)) {
+                    //Desactivamos el proyectil
+                    h.setEstadoHitbox(false);
+                }
             }
         }
     }
 
-    //ACTUALIZACIÓN DE MELEE:
-
-    //Recorremos el contenedor de melee:
-    for (auto& m : ataquesMelee) {
-
-        //Actualizamos el ataque, descontamos tiempo de vida:
-        m.actualizar(dt);
-
-        //Si el ataque expiró o impactó pero no se ha borrado del contenedor, pasamos al siguiente:
-        if (!m.getEstado()) continue;
-
-        //Obtenemos la posición física del hitbox en la arena:
-        sf::Vector2f posM = m.getPosicion();
-
-        //Agrupamos a los jugadores en un vector auxiliar:
-        Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
-
-        //Recorremos el vector auxiliar:
-        for (Pieza* obj : objetivos) {
-
-            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
-            if (obj && m.getAtacante() != obj && comprobarColision(posM, obj->getPosicionAbsoluta(), limitecolision)) {
-                //Restamos vida al jugador colisionado:
-                obj->stats.vida -= m.getDano();
-                //Desactivamos el proyectil:
-                m.setEstado(false);
-
-                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
-                break;
-            }
-        }
-
-    }
 
     //LIMPIEZA DE CONTENEDORES:
 
-    proyectiles.erase(std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {return !p.getEstadoProyectil(); }), proyectiles.end());
+    Hitboxes.erase(std::remove_if(Hitboxes.begin(), Hitboxes.end(), [](const Hitbox& h) {return !h.getEstadoHitbox(); }), Hitboxes.end());
 
-    ataquesMelee.erase(std::remove_if(ataquesMelee.begin(), ataquesMelee.end(), [](const AtaqueMelee& m) { return !m.getEstado(); }), ataquesMelee.end());
 
     //RESOLUCIÓN DE MUERTES Y FIN DE COMBATE:
 
@@ -667,9 +640,8 @@ void Motor::actualizar() {
         piezaSeleccionada = nullptr;
 
         //Forzamos el borrado de los contenedores de proyectiles y melee:
-        proyectiles.clear();
-        ataquesMelee.clear();
-
+        Hitboxes.clear();
+       
         //Cambiamos el estado del motor a tablero:
         estadoActual = Estado::Tablero;
 
