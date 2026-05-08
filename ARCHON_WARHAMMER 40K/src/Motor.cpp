@@ -4,11 +4,10 @@
 #include <iostream>
 #include <vector>
 #include<cmath>
-#include "Hitboxes.h"
 
 
 Motor::Motor() {
-    if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
+    if (!hud.cargarFuente("fuentes/fuente_pixel.ttf")) {
         // Si entra aquí, es que no encuentra el archivo
         std::cout << "Error: No se encontro el archivo de fuente!" << std::endl;
     }
@@ -70,23 +69,23 @@ void Motor::renderizar() {
 
         // --- VISTA DE INTERFAZ (HUD) ---
         window.setView(vistaUI);
-        dibujarHUD();
+        hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
     }
 
     // 3. MODO ARENA DE COMBATE
     else if (estadoActual == Estado::Arena) {
         window.setView(vistaTablero);
 
-        // La arena se dibuja a sí misma
+        // LA ARENA SE DIBUJA A SÍ MISMA (suelo, rocas, sangre, muros)
         arena.dibujar(window);
 
-        // 
-        // Este bucle es el que hace visible la explosión
+        // CAPA DE HITBOXES UNIFICADA (Proyectiles a distancia y cortes Melee)
+        // Sustituye a los dos bucles for anteriores
         for (const auto& h : Hitboxes) {
             window.draw(h.getFormaHitbox());
         }
 
-        // Capa de combatientes
+        // LAS PIEZAS COMBATIENTES SE DIBUJAN A SÍ MISMAS
         if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
             piezaAtacante->dibujar(window, estadoActual);
             piezaDefensor->dibujar(window, estadoActual);
@@ -94,181 +93,6 @@ void Motor::renderizar() {
     }
 
     window.display();
-}
-void Motor::dibujarHUD() {
-    float ancho = (float)window.getSize().x;
-    float alto = (float)window.getSize().y;
-    float inicioUI = ancho * 0.66f;
-    float anchoHUD = ancho - inicioUI;
-
-    // --- 1. CABECERA SOBRE EL TABLERO ---
-    sf::Text textoTop;
-    textoTop.setFont(fuenteGlobal);
-    textoTop.setOutlineThickness(2);
-    textoTop.setOutlineColor(sf::Color::Black);
-
-    // RONDA Y CICLO (Un poco más a la izquierda para separar del turno)
-    textoTop.setCharacterSize(35);
-    textoTop.setFillColor(sf::Color(180, 180, 180));
-    textoTop.setString("RONDA: " + std::to_string(rondaActual));
-    textoTop.setPosition(ancho * 0.10f, 35.f);
-    window.draw(textoTop);
-
-    textoTop.setString("CICLO: " + std::to_string(cicloActual) + " / 12");
-    textoTop.setPosition(ancho * 0.10f, 80.f);
-    window.draw(textoTop);
-
-    // TURNO ACTUAL (Separado del Ciclo/Ronda)
-    std::string nombreTurno = (jugadorActual == 1) ? "TURNO: IMPERIUM (LUZ)" : "TURNO: TIRANIDOS (OSCURIDAD)";
-    sf::Color colorTurno = (jugadorActual == 1) ? sf::Color(255, 255, 150) : sf::Color(180, 100, 255);
-
-    textoTop.setCharacterSize(40);
-    textoTop.setFillColor(colorTurno);
-    textoTop.setString(nombreTurno);
-    // Posición centrada respecto al tablero, bajada un poco para no pegarse arriba
-    textoTop.setPosition((inicioUI / 2.f) - 150.f, 35.f);
-    window.draw(textoTop);
-
-
-    // --- 2. PANEL LATERAL (HUD) ---
-    sf::RectangleShape panel({ anchoHUD, alto });
-    panel.setPosition(inicioUI, 0);
-    panel.setFillColor(sf::Color(18, 18, 22));
-    window.draw(panel);
-
-    float margenLateral = 25.f;
-    float margenX = inicioUI + margenLateral;
-    float yActual = 60.f;
-
-    // Título Unidad
-    sf::Text texto;
-    texto.setFont(fuenteGlobal);
-    texto.setCharacterSize(35);
-    texto.setFillColor(sf::Color(120, 120, 130));
-    texto.setString("UNIDAD");
-    texto.setPosition(margenX, yActual);
-    window.draw(texto);
-
-    yActual += 70.f;
-
-    // 3. RECTÁNGULOS DE IMAGEN
-    float anchoTotalDisponible = anchoHUD - (margenLateral * 2);
-    float anchoMarco = (anchoTotalDisponible - 20.f) / 2.f;
-    sf::Vector2f tamanoMarco(anchoMarco, 320.f);
-
-    sf::RectangleShape marco(tamanoMarco);
-    marco.setOutlineThickness(3);
-    marco.setOutlineColor(sf::Color(80, 80, 90));
-    marco.setFillColor(sf::Color(25, 25, 30));
-
-    marco.setPosition(margenX, yActual);
-    window.draw(marco);
-
-    marco.setPosition(margenX + anchoMarco + 20.f, yActual);
-    window.draw(marco);
-
-    yActual += tamanoMarco.y + 40.f;
-
-    if (piezaSeleccionada != nullptr) {
-        texto.setCharacterSize(50);
-        texto.setFillColor(sf::Color::White);
-        texto.setString(piezaSeleccionada->stats.nombre);
-        texto.setPosition(margenX, yActual);
-        window.draw(texto);
-
-        yActual += 85.f;
-
-        // Lambda con posición de valor corregida
-        auto dibujarDato = [&](std::string etiqueta, std::string valor, sf::Color colorVal = sf::Color::White) {
-            texto.setCharacterSize(18);
-            texto.setFillColor(sf::Color(140, 140, 150));
-            texto.setString(etiqueta);
-            texto.setPosition(margenX, yActual);
-            window.draw(texto);
-
-            texto.setCharacterSize(28);
-            texto.setFillColor(colorVal);
-            texto.setString(valor);
-
-            // CORRECCIÓN: Volvemos a una posición relativa al margen izquierdo del HUD
-            // para que no se salgan por la derecha
-            texto.setPosition(margenX + 210.f, yActual - 5.f);
-
-            window.draw(texto);
-            yActual += 48.f;
-            };
-
-        // --- LISTA DE DATOS ---
-        dibujarDato("VIDA:", std::to_string((int)piezaSeleccionada->stats.vida), sf::Color(100, 255, 100));
-        dibujarDato("ATAQUE:", std::to_string((int)piezaSeleccionada->stats.ataque), sf::Color(255, 120, 120));
-        dibujarDato("RANGO MOV:", std::to_string(piezaSeleccionada->rangoMovimiento) + " CASILLAS");
-
-        sf::Color colMov = piezaSeleccionada->stats.esVolador ? sf::Color(100, 200, 255) : sf::Color(200, 150, 100);
-        dibujarDato("MOVIMIENTO:", piezaSeleccionada->stats.esVolador ? "VOLADOR" : "TERRESTRE", colMov);
-
-        sf::Color colCom = piezaSeleccionada->stats.esRango ? sf::Color(255, 215, 0) : sf::Color(255, 80, 80);
-        dibujarDato("COMBATE:", piezaSeleccionada->stats.esRango ? "DISTANCIA" : "MELEE", colCom);
-
-        dibujarDato("VEL. ATQ:", std::to_string((int)piezaSeleccionada->stats.velAtaque));
-        dibujarDato("COOLDOWN:", std::to_string((int)piezaSeleccionada->stats.cooldown));
-
-        std::string pTxt = "";
-        switch (piezaSeleccionada->patronMovimiento) {
-        case PatronMovimiento::Ambos: pTxt = "DIAGONAL Y ORTOGONAL (*)"; break;
-        case PatronMovimiento::Ortogonal: pTxt = "ORTOGONAL (+)"; break;
-        case PatronMovimiento::Diagonal: pTxt = "DIAGONAL (X)"; break;
-        default: pTxt = "OTRO"; break;
-        }
-        dibujarDato("PATRON:", pTxt, sf::Color(255, 255, 150));
-    }
-}
-
-void Motor::dibujarInfoPieza(sf::RenderWindow& window, Pieza* pieza, float x, float y) {
-    if (pieza == nullptr) return;
-
-    sf::Text texto;
-    texto.setFont(fuenteGlobal);
-    texto.setOutlineColor(sf::Color::Black); // Borde negro para que resalte
-    texto.setOutlineThickness(1);            // Grosor sutil del borde
-    texto.setLetterSpacing(1.2);             // Opcional: separa un poco las letras si se ven muy juntas
-    float espaciado = 32.f;
-
-    // --- NOMBRE ---
-    texto.setCharacterSize(26);
-    texto.setFillColor(sf::Color::White);
-    texto.setString(pieza->stats.nombre);
-    texto.setPosition(x, y);
-    window.draw(texto);
-
-    float yFila = y + 50.f;
-
-    // Lambda auxiliar para dibujar cada dato         IMPORTANTE: aprender que es una funcion LAMBDA
-    auto dibujarDato = [&](std::string etiqueta, std::string valor) {
-        texto.setCharacterSize(14);
-        texto.setFillColor(sf::Color(150, 150, 150));
-        texto.setString(etiqueta);
-        texto.setPosition(x, yFila);
-        window.draw(texto);
-
-        texto.setCharacterSize(18);
-        texto.setFillColor(sf::Color::White);
-        texto.setString(valor);
-        texto.setPosition(x + 140.f, yFila - 2.f);
-        window.draw(texto);
-
-        yFila += espaciado;
-        };
-
-    // --- DATOS REALES DE TU STRUCT ---
-    dibujarDato("VIDA:", std::to_string((int)pieza->stats.vida));
-    dibujarDato("ATAQUE:", std::to_string((int)pieza->stats.ataque));
-    dibujarDato("DEFENSA:", std::to_string((int)pieza->stats.defensa));
-    dibujarDato("VEL. ATQ:", std::to_string((int)pieza->stats.velAtaque));
-    dibujarDato("COOLDOWN:", std::to_string((int)pieza->stats.cooldown));
-
-    // Para el booleano esRango
-    std::string tipoRango = pieza->stats.esRango ? "DISTANCIA" : "CUERPO A CUERPO";
-    dibujarDato("TIPO:", tipoRango);
 }
 
 void Motor::intentarAccionJugador(int idJugador) {
@@ -356,13 +180,13 @@ void Motor::imprimirEstado() {
 //MANEJO DE CLICKS EN EL TABLERO:
 
 void Motor::manejarClick(sf::Vector2i mousePos) {
-   
+
     // Comprueba que el juego está en el estado tablero:
     if (estadoActual != Estado::Tablero) return;
 
     //Creación de un vector que indica la posición en el mundo del ratón:
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
-   
+
     // Conversión de posición en el mundo a coodenadas de tablero (0-8):
     int tableroX = static_cast<int>(worldPos.x / 60.f);
     int tableroY = static_cast<int>(worldPos.y / 60.f);
@@ -372,7 +196,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
 
     //Para la posición del ratón en coordenadas de tablero con las coordenadasde las piezas:
     sf::Vector2i celdaClickeada(tableroX, tableroY);
-    
+
     //Selección de pieza:
     if (!piezaSeleccionada) {
         // Accedemos directamente a la lista de piezas y sus miembros
@@ -510,7 +334,7 @@ void Motor::actualizar() {
 
             //Obtenemos hacia dónde está mirando la pieza:
             sf::Vector2f dirAtaque = p->getultimadireccion();
-          
+
             //Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
             float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
 
@@ -524,12 +348,12 @@ void Motor::actualizar() {
 
             if (p->stats.esRango) {
                 //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
-                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque,60,15);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque, 60, 15);
             }
 
             else {
                 //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
-                Hitboxes.emplace_back(puntoSpawnAtaque,dirAtaque,0, Colores::ColorProyectil,p, p->stats.ataque,0.2,35);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, p->stats.ataque, 0.2, 35);
             }
 
             //Reiniciamos el cooldown interno de la pieza:
@@ -567,7 +391,7 @@ void Motor::actualizar() {
             std::cout << pOsc->stats.nombre << " uso su hechizo!" << std::endl;
         }
     }
-    //Proyectiles
+    //ACTUALIZACIÓN DE PROYECTILES:
 
     //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
     auto comprobarColision = [](const sf::Vector2f pos1, const sf::Vector2f pos2, double limite) {
@@ -576,11 +400,17 @@ void Motor::actualizar() {
 
     //Recorremos todos los proyectiles activos del contenedor:
     for (auto& h : Hitboxes) {
-        h.ActualizarHitbox(dt);
-        if (!h.getEstadoHitbox()) continue;
 
+        //Actualizamos su posición física en la arena:
+        h.ActualizarHitbox(dt);
+
+        //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
+        if (!h.getEstadoHitbox())continue;
+
+        //Obtenemos la posición del proyectil en el mapa:
         sf::Vector2f posH = h.getPosicionHitbox();
-        float radioH = h.getFormaHitbox().getRadius();
+        bool impactado = false; //Booleano que registra la colisión
+        //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
 
         
         // Si la posición de la bala o el torbellino está dentro de un muro o roca:
@@ -599,10 +429,38 @@ void Motor::actualizar() {
             }
         }
 
-       
         Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
+        //Recorremos el vector auxiliar:
         for (Pieza* obj : objetivos) {
+
+            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
+            if (obj && h.getAtacante() != obj && comprobarColision(posH, obj->getPosicionAbsoluta(), limitecolision)) {
+                //Restamos vida al jugador colisionado:
+                obj->stats.vida -= h.getDano();
+                //Desactivamos el proyectil:
+                h.setEstadoHitbox(false);
+                //Marcamos como true el booleano "impactado" para evitar múltiples colisiones en el mismo frame:
+                impactado = true;
+                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
+                break;
+            }
+        }
+
+        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente) para los ataques a distancia:
+        //Los ataques melee tienen velocidad 0, mientras que los proyectiles tienen velocidad v.x + v.y. Es posible encontrar una comprobación más elegante en el futuro
+
+        sf::Vector2f velocidadcomprobacion = h.getVelocidadHitbox();
+
+        bool esProyectil = (velocidadcomprobacion.x != 0 || velocidadcomprobacion.y != 0);
+
+        if (esProyectil) {
+            if (!impactado && h.getEstadoHitbox()) {
+                //Si el proyectil ocupa una posición no válida en la arena:
+                if (!arena.esPosicionValida(posH, (h.getFormaHitbox().getRadius()), false)) {
+                    //Desactivamos el proyectil
+                    h.setEstadoHitbox(false);
+
             if (obj && h.getAtacante() != obj) {
                 sf::Vector2f posE = obj->getPosicionAbsoluta();
                 float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
@@ -630,12 +488,12 @@ void Motor::actualizar() {
     }
 
 
-    //Limpieza de contenedores
+    //LIMPIEZA DE CONTENEDORES:
 
     Hitboxes.erase(std::remove_if(Hitboxes.begin(), Hitboxes.end(), [](const Hitbox& h) {return !h.getEstadoHitbox(); }), Hitboxes.end());
 
 
-    //Muerte y fin de combate
+    //RESOLUCIÓN DE MUERTES Y FIN DE COMBATE:
 
     //Evaluamos si alguno de los dos combatientes tiene vida=0 tras las colisiones de proyectiles y melee:
     if (piezaAtacante->stats.vida <= 0 || piezaDefensor->stats.vida <= 0) {
@@ -671,7 +529,7 @@ void Motor::actualizar() {
 
         //Forzamos el borrado de los contenedores de proyectiles y melee:
         Hitboxes.clear();
-       
+
         //Cambiamos el estado del motor a tablero:
         estadoActual = Estado::Tablero;
 
@@ -679,5 +537,3 @@ void Motor::actualizar() {
         intentarAccionJugador(jugadorActual);
     }
 }
-            
- 
