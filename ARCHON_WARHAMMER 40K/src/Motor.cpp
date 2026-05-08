@@ -405,15 +405,14 @@ void Motor::actualizar() {
         h.ActualizarHitbox(dt);
 
         //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
-        if (!h.getEstadoHitbox())continue;
+        if (!h.getEstadoHitbox()) continue;
 
-        //Obtenemos la posición del proyectil en el mapa:
+        //Obtenemos la posición y el radio del proyectil:
         sf::Vector2f posH = h.getPosicionHitbox();
-        bool impactado = false; //Booleano que registra la colisión
-        //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
+        float radioH = h.getFormaHitbox().getRadius(); // IMPORTANTE: Declarar radioH aquí
+        bool impactado = false;
 
-        
-        // Si la posición de la bala o el torbellino está dentro de un muro o roca:
+        // 1. COMPROBACIÓN CON EL ENTORNO (Muros o rocas)
         if (!arena.esPosicionValida(posH, radioH, false)) {
 
             if (h.getEsErratico()) {
@@ -425,63 +424,43 @@ void Motor::actualizar() {
             else {
                 // Si es una bala normal, choca contra la piedra/muro y se destruye
                 h.setEstadoHitbox(false);
-                continue; // Saltamos al siguiente elemento del bucle para que no haga daño fantasma
+                continue; // Saltamos al siguiente proyectil
             }
         }
 
+        // 2. COMPROBACIÓN CON OBJETIVOS (Jugadores)
         Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
-        //Recorremos el vector auxiliar:
         for (Pieza* obj : objetivos) {
-
-            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
-            if (obj && h.getAtacante() != obj && comprobarColision(posH, obj->getPosicionAbsoluta(), limitecolision)) {
-                //Restamos vida al jugador colisionado:
-                obj->stats.vida -= h.getDano();
-                //Desactivamos el proyectil:
-                h.setEstadoHitbox(false);
-                //Marcamos como true el booleano "impactado" para evitar múltiples colisiones en el mismo frame:
-                impactado = true;
-                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
-                break;
-            }
-        }
-
-        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente) para los ataques a distancia:
-        //Los ataques melee tienen velocidad 0, mientras que los proyectiles tienen velocidad v.x + v.y. Es posible encontrar una comprobación más elegante en el futuro
-
-        sf::Vector2f velocidadcomprobacion = h.getVelocidadHitbox();
-
-        bool esProyectil = (velocidadcomprobacion.x != 0 || velocidadcomprobacion.y != 0);
-
-        if (esProyectil) {
-            if (!impactado && h.getEstadoHitbox()) {
-                //Si el proyectil ocupa una posición no válida en la arena:
-                if (!arena.esPosicionValida(posH, (h.getFormaHitbox().getRadius()), false)) {
-                    //Desactivamos el proyectil
-                    h.setEstadoHitbox(false);
-
-            if (obj && h.getAtacante() != obj) {
+            // Verificamos existencia, que no sea el propio atacante y que el proyectil siga vivo
+            if (obj && h.getAtacante() != obj && h.getEstadoHitbox()) {
                 sf::Vector2f posE = obj->getPosicionAbsoluta();
-                float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
+                float dx = posH.x - posE.x;
+                float dy = posH.y - posE.y;
+                float distSq = dx * dx + dy * dy;
                 float limiteSq = std::pow(radioH + 20.f, 2);
 
+                // Comprobación de impacto
                 if (distSq < limiteSq) {
 
-                    // A) ZONA DE DAÑO CONTINUO (Torbellino)
+                    // A) Daño continuo (Zona de fuego/Fénix)
                     if (h.getEsDanoContinuo()) {
                         obj->stats.vida -= h.getDano() * dt;
                     }
-                    // B) DAÑO INSTANTÁNEO (Balas y Melee)
+                    // B) Ataque instantáneo (Melee o Proyectil)
                     else if (!h.getYaHizoDano()) {
                         obj->stats.vida -= h.getDano();
                         h.setYaHizoDano(true);
 
+                        // Si tiene velocidad es un proyectil (muere al chocar), si es 0 es Melee (persiste su tiempo de vida)
                         sf::Vector2f vel = h.getVelocidadHitbox();
                         if (vel.x != 0.f || vel.y != 0.f) {
-                            h.setEstadoHitbox(false); // Proyectil muere
+                            h.setEstadoHitbox(false);
                         }
                     }
+
+                    // Si el proyectil ha muerto en este impacto, dejamos de comprobar contra otros objetivos
+                    if (!h.getEstadoHitbox()) break;
                 }
             }
         }
