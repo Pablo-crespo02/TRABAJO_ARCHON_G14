@@ -26,7 +26,8 @@ struct Stats {
     float cooldown;
 
     //Variables encargadas de la gestión de proyectiles en la arena
-    sf::Clock relojHitbox;  //Reloj que avanza desde que se dispara
+    sf::Clock relojHitbox;//Reloj que avanza desde que se dispara
+    sf::Clock relojProyectil;//para que cambie de fotograma al atacar
 
 };
 

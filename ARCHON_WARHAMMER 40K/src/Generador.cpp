@@ -56,7 +56,7 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
         nuevaPieza = new ClaseGolem(bando, pos, tipo);
     }
-    else if (tipo == "LIBRARIAN" || tipo == "GENESTEALER") {
+    else if (tipo == "LIBRARIAN" || tipo == "HARPY") {
 
         nuevaPieza = new ClaseFenix(bando, pos, tipo);
     }
@@ -136,6 +136,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::LUZ, "INTERCESSOR", sf::Vector2i(1, i));
     }
+    AnadirUnidad(motor, Bando::LUZ, "FENIX", sf::Vector2i(2, 4));
 
     //BANDO OSCURIDAD DESPLIEGUE
     AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 0));
@@ -153,4 +154,5 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));
     }
+    AnadirUnidad(motor, Bando::OSCURIDAD, "MANTICORA", sf::Vector2i(6, 4));
 }
