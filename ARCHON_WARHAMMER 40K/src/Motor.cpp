@@ -410,8 +410,25 @@ void Motor::actualizar() {
         //Obtenemos la posición del proyectil en el mapa:
         sf::Vector2f posH = h.getPosicionHitbox();
         bool impactado = false; //Booleano que registra la colisión
-
         //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
+
+        
+        // Si la posición de la bala o el torbellino está dentro de un muro o roca:
+        if (!arena.esPosicionValida(posH, radioH, false)) {
+
+            if (h.getEsErratico()) {
+                // Si es el Torbellino, rebota y sigue vivo
+                h.rebotar();
+                // Actualizamos la variable posH para el chequeo de enemigos tras el rebote
+                posH = h.getPosicionHitbox();
+            }
+            else {
+                // Si es una bala normal, choca contra la piedra/muro y se destruye
+                h.setEstadoHitbox(false);
+                continue; // Saltamos al siguiente elemento del bucle para que no haga daño fantasma
+            }
+        }
+
         Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
         //Recorremos el vector auxiliar:
@@ -443,6 +460,28 @@ void Motor::actualizar() {
                 if (!arena.esPosicionValida(posH, (h.getFormaHitbox().getRadius()), false)) {
                     //Desactivamos el proyectil
                     h.setEstadoHitbox(false);
+
+            if (obj && h.getAtacante() != obj) {
+                sf::Vector2f posE = obj->getPosicionAbsoluta();
+                float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
+                float limiteSq = std::pow(radioH + 20.f, 2);
+
+                if (distSq < limiteSq) {
+
+                    // A) ZONA DE DAÑO CONTINUO (Torbellino)
+                    if (h.getEsDanoContinuo()) {
+                        obj->stats.vida -= h.getDano() * dt;
+                    }
+                    // B) DAÑO INSTANTÁNEO (Balas y Melee)
+                    else if (!h.getYaHizoDano()) {
+                        obj->stats.vida -= h.getDano();
+                        h.setYaHizoDano(true);
+
+                        sf::Vector2f vel = h.getVelocidadHitbox();
+                        if (vel.x != 0.f || vel.y != 0.f) {
+                            h.setEstadoHitbox(false); // Proyectil muere
+                        }
+                    }
                 }
             }
         }
