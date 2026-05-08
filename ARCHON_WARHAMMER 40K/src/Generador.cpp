@@ -60,8 +60,8 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
 
         nuevaPieza = new ClaseFenix(bando, pos, tipo);
     }
-    else if (tipo == "THUNDERHAWK") {
-        nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
+    else if (tipo == "THUNDERHAWK"||tipo=="TIRANOFEX") {
+        nuevaPieza = new ClaseDjinn(bando, pos, tipo);
     }
     /*
 

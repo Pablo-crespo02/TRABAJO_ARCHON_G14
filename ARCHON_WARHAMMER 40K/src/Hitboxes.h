@@ -1,31 +1,39 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-class Pieza; // Declaración adelantada para poder usar el puntero
+class Pieza;
 
-class Hitbox
-{
+class Hitbox {
+private: // Es buena práctica encapsular esto
     sf::CircleShape forma;
     sf::Vector2f velocidad;
-    bool activo;  //Si está activo se dibuja, si está inactivo el motor lo borra
-    Pieza* atacante; // Guardamos LA DIRECCIÓN DE MEMORIA del que dispara en vez del enum
-    float dano; //Daño que causa el hitbox
-    float tiempoVida; //Tiempo que el hitbox se mantiene activo
+    bool activo;
+    Pieza* atacante;
+    float dano;
+    float tiempoVida;
+
+    // LAS DOS VARIABLES NUEVAS
+    bool haHechoDano;
+    bool esDanoContinuo;
 
 public:
-    // Constructor actualizado
-    Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color, Pieza* propietario, double danoHitbox, double tiempodevida,double radio);
+    Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
+        Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
+        bool esDoT = false);
 
     void ActualizarHitbox(double dt);
 
-    // GETTERS PÚBLICOS:
+    //getters
     sf::CircleShape getFormaHitbox() const { return forma; }
     sf::Vector2f getPosicionHitbox() const { return forma.getPosition(); }
     bool getEstadoHitbox() const { return activo; }
-    Pieza* getAtacante() const { return atacante; } // Nuevo getter
+    Pieza* getAtacante() const { return atacante; }
     float getDano() const { return dano; }
-    sf::Vector2f getVelocidadHitbox() const { return velocidad;}
+    sf::Vector2f getVelocidadHitbox() const { return velocidad; }
+    bool getYaHizoDano() const { return haHechoDano; }
+    bool getEsDanoContinuo() const { return esDanoContinuo; }
 
-    // SETTER PÚBLICOS:
+    // setters
     void setEstadoHitbox(bool estadoHitbox) { activo = estadoHitbox; }
+    void setYaHizoDano(bool valor) { haHechoDano = valor; }
 };

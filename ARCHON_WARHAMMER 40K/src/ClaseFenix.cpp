@@ -44,20 +44,17 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     window.draw(formaVisual);
 }
 void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // El Fénix no se cura, sino que hace una explosión que ocupa media pantalla
-    // No se mueve (velocidad 0), dura medio segundo (0.5), y tiene radio gigante (150.f)
-    sf::Vector2f dirFija(0, 0);
+    sf::Vector2f dirFija(0.f, 0.f);
 
-    // Reutilizamos tu clase Hitbox para crear el área de daño
     hitboxes.emplace_back(
-        this->posicionAbsoluta, // Aparece justo encima del Fénix
-        dirFija,
-        0,                      // Rapidez 0
-        sf::Color(255, 100, 0, 150), // Naranja translúcido
+        this->posicionAbsoluta,      // Se crea en la posición actual de la pieza
+        dirFija,                     // No se mueve
+        0,                           // Rapidez 0
+        sf::Color(255, 69, 0, 150),  // Naranja Fuego semitransparente
         this,
-        15.0f,                  // Daño masivo, aún no hace daño
-        0.5,                    // Dura medio segundo
-        150.0f                  // Radio enorme
+        10.0f,                       // Hace 10 de daño POR SEGUNDO
+        5.0f,                        // Dura 5 segundos exactos en la arena
+        100.0f,                      // Radio de la explosión
+        true                         // <--- ACTIVAMOS EL MODO ZONA DE FUEGO (DoT)
     );
-    std::cout << "¡El Fenix desata una Supernova!" << std::endl;
 }
