@@ -15,14 +15,12 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.ataque = 6.0f;
     this->stats.defensa = 20.0f;
     this->stats.velAtaque = 1.0f;
-    this->stats.cooldown = 2.0f;
     // --- Lógica de tipos ---
-    this->stats.esRango = false;    // El Golem es mele
-    this->stats.esVolador = false;  // Solo para el HUD
+    this->stats.esRango = false;    // El Golem es melee
 
     this->rangoMovimiento = 2;
     this->patronMovimiento = PatronMovimiento::Ortogonal;
-
+    this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
     //CARGA DE SPRITES (Chibi)
     if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
 
@@ -212,5 +210,4 @@ void ClaseGolem::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     if (this->stats.vida > this->stats.vidaMaxima) {
         this->stats.vida = this->stats.vidaMaxima;
     }
-    std::cout << "El Golem ruge y se cura " << curacion << " puntos de vida." << std::endl;
 }

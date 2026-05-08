@@ -16,7 +16,7 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
     if (patronMovimiento == PatronMovimiento::Diagonal && (distX != distY)) return false;
     if (patronMovimiento == PatronMovimiento::Ambos && (distX != 0 && distY != 0 && distX != distY)) return false;
 
-    
+
 
     // No puede acabar encima de una pieza aliada 
     for (const auto* otra : otrasPiezas) {
@@ -42,7 +42,7 @@ void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float 
     }
 
     //  Si se está moviendo, se vuelve invisible (translucido)->colorActual = 40    invisible ->colorActual = 0
-    
+
     if (colorActual.a != 0) {
         colorActual.a = 40;//Si se pone a 0 desaparece
         formaVisual.setFillColor(colorActual);
