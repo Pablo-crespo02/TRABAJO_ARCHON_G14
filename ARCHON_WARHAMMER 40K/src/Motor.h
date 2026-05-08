@@ -31,6 +31,8 @@ private:
     std::vector<AtaqueMelee> ataquesMelee; //Igual pero para melee
     //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
     friend class Renderizador;
+    double limitecolision = 36;
+
 public:
     bool windowAbierta() { return window.isOpen(); }
 

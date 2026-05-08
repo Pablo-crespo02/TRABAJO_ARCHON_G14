@@ -349,36 +349,35 @@ void Motor::imprimirEstado() {
         << "Siguiente Turno: Jugador " << jugadorActual << std::endl;
 }
 
+//MANEJO DE CLICKS EN EL TABLERO:
+
 void Motor::manejarClick(sf::Vector2i mousePos) {
-    // Comprueba que está en el tablero
+   
+    // Comprueba que el juego está en el estado tablero:
     if (estadoActual != Estado::Tablero) return;
 
+    //Creación de un vector que indica la posición en el mundo del ratón:
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
    
-    std::cout << "DEBUG: Clic en pixeles (" << mousePos.x << "," << mousePos.y << ")" << std::endl;
-    // Conversión de píxeles a coordenadas de tablero (0-8)
+    // Conversión de posición en el mundo a coodenadas de tablero (0-8):
     int tableroX = static_cast<int>(worldPos.x / 60.f);
     int tableroY = static_cast<int>(worldPos.y / 60.f);
 
-    std::cout << "DEBUG: Celda calculada [" << tableroX << "," << tableroY << "]" << std::endl;
+    //Si se pulsa fuera del tablero:
+    if (tableroX < 0 || tableroX > 8 || tableroY < 0 || tableroY > 8) return;
 
-    if (tableroX < 0 || tableroX > 8 || tableroY < 0 || tableroY > 8) {
-        std::cout << "DEBUG: Clic fuera del tablero" << std::endl;
-        return;
-    }
-
+    //Para la posición del ratón en coordenadas de tablero con las coordenadasde las piezas:
     sf::Vector2i celdaClickeada(tableroX, tableroY);
-
-    if (piezaSeleccionada == nullptr) {
+    
+    //Selección de pieza:
+    if (!piezaSeleccionada) {
         // Accedemos directamente a la lista de piezas y sus miembros
         for (auto p : listaPiezas) {
             if (p->posicionTablero == celdaClickeada) {
                 // Comprobación de turno usando acceso directo a p->bando
-                if ((jugadorActual == 1 && p->bando == Bando::LUZ) ||
-                    (jugadorActual == 2 && p->bando == Bando::OSCURIDAD)) {
-
+                if ((jugadorActual == 1 && p->bando == Bando::LUZ) || (jugadorActual == 2 && p->bando == Bando::OSCURIDAD)) {
                     piezaSeleccionada = p;
-                    piezaSeleccionada->seleccionado = true; // Setter eliminado por acceso directo
+                    piezaSeleccionada->seleccionado = true;
                     std::cout << "Seleccionado: " << p->stats.nombre << std::endl;
                 }
                 else {
@@ -474,209 +473,209 @@ void Motor::manejarEventos() {
 //GESTIÓN DEL TECLADO ARENA
 
 void Motor::actualizar() {
+
+    //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
     float dt = reloj.restart().asSeconds();
 
-    // SÓLO APLICABLE EN LA ARENA
-    if (estadoActual == Estado::Arena) {
-        if (!piezaAtacante || !piezaDefensor) return;
+    // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
+    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;
 
-        // Identificamos quién es quién para asignar controles
-        Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
-        Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
+    // Identificamos quién pertenece a qué bando para asignar controles WASD o flechas:
+    Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
+    Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-        // Movimiento Luz
-        sf::Vector2f dirLuz(0.f, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dirLuz.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dirLuz.y += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dirLuz.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dirLuz.x += 1.f;
+    //LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
+    //Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorrno{fucnción}
+    //No especificamos el tipo de retorno porque en C++ no es imprescindible.
+    auto procesarInput = [&](Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo, sf::Keyboard::Key izqda, sf::Keyboard::Key dcha, sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto) {
 
-        // 1. Guardamos la última dirección en la que intentó moverse
-        pLuz->setultimadireccion(dirLuz);
-        //Ataque bando Luz
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            // Usamos tu función puedeDisparar() que ya gestiona el reloj interno
-            if (pLuz->puedeDisparar()) {
-                sf::Vector2f dirDisparo = pLuz->getultimadireccion();
+        //nicializamos el vector dirección a 0 en el primer frame:
+        sf::Vector2f dir(0, 0);
 
-                // Normalizamos la dirección
-                float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) dirDisparo /= magnitud;
-                else dirDisparo = sf::Vector2f(1.f, 0.f);
+        //Modificación del vector director según las teclas pulsadas:
+        if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(abajo)) dir.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(izqda)) dir.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(dcha)) dir.x += 1.f;
 
-                if (pLuz->stats.esRango) {
-                    // Creamos proyectil con el daño de la pieza
-                    proyectiles.emplace_back(pLuz->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, pLuz, pLuz->stats.ataque);
-                }
-                else {
-                    // Lógica Melee
-                    sf::Vector2f posMelee = pLuz->getPosicionAbsoluta() + (dirDisparo * 35.f);
-                    ataquesMelee.emplace_back(posMelee, pLuz, pLuz->stats.ataque);
-                }
+        //Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
+        pLuz->setultimadireccion(dir);
 
-                // LLAMADA CRÍTICA: Reinicia el reloj interno de la pieza
-                pLuz->reiniciarRelojProyectil();
+        //Si se pulsa la tecla de ataque y el cooldown permite disparar:
+        if (sf::Keyboard::isKeyPressed(ataque) && p->puedeDisparar()) {
+
+            //Obtenemos hacia dónde está mirando la pieza:
+            sf::Vector2f dirDisparo = p->getultimadireccion();
+
+            //Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
+            float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
+
+            //Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
+            dirDisparo = (magnitud != 0) ? (dirDisparo / magnitud) : dirPorDefecto;
+
+            //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee:
+
+            if (p->stats.esRango) {
+                //Generamos un proyectil en la posición de la pieza:
+                proyectiles.emplace_back(p->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, p, p->stats.ataque);
             }
+
+            else {
+                //Generamos un ataque melee delante de la pieza:
+                ataquesMelee.emplace_back(p->getPosicionAbsoluta() + (dirDisparo * 40.f), p, p->stats.ataque);
+            }
+
+            //Reiniciamos el cooldown interno de la pieza:
+            p->reiniciarRelojProyectil();
         }
-        pLuz->procesarMovimientoArena(dirLuz, dt, this->arena);
 
-        // Movimiento oscuridad
-        sf::Vector2f dirOsc(0.f, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) dirOsc.y -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) dirOsc.y += 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) dirOsc.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) dirOsc.x += 1.f;
+        //Movemos físicamente la pieza en la arena aplicando colisiones:
 
-        // 1. Guardamos la última dirección en la que intentó moverse
-        pOsc->setultimadireccion(dirOsc);
-        //Ataque bando Oscuridad
-        // Ataque bando Oscuridad (Enter)
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-            if (pOsc->puedeDisparar()) {
-                sf::Vector2f dirDisparo = pOsc->getultimadireccion();
+        p->procesarMovimientoArena(dir, dt, this->arena);
 
-                float magnitud = std::sqrt(dirDisparo.x * dirDisparo.x + dirDisparo.y * dirDisparo.y);
-                if (magnitud != 0) dirDisparo /= magnitud;
-                else dirDisparo = sf::Vector2f(-1.f, 0.f);
+        };
 
-                if (pOsc->stats.esRango) {
-                    proyectiles.emplace_back(pOsc->getPosicionAbsoluta(), dirDisparo, 15.0, Colores::ColorProyectil, pOsc, pOsc->stats.ataque);
-                }
-                else {
-                    sf::Vector2f posMelee = pOsc->getPosicionAbsoluta() + (dirDisparo * 35.f);
-                    ataquesMelee.emplace_back(posMelee, pOsc, pOsc->stats.ataque);
-                }
+    //Aplicamos la función reutilizable lambda para el caso de jugador Luz y jugador Oscuridad:
 
-                // Reinicia el reloj para que no pueda disparar hasta el siguiente ciclo de cooldown
-                pOsc->reiniciarRelojProyectil();
-            }
-        }
-        pOsc->procesarMovimientoArena(dirOsc, dt, this->arena);
+    //LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
+    procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
 
-        // Proyectiles
-        for (auto& p : proyectiles) {
-            p.ActualizarProyectil();
+    //OSCURIDAD: FLECHAS, disparo con ENTER, inicialmente mira hacia la izq:
+    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1, 0));
 
-            sf::Vector2f posP = p.getPosicionProyectil();
-            float radioP = p.getFormaProyectil().getRadius();
-            bool haImpactado = false;
+    //ACTUALIZACIÓN DE PROYECTILES:
 
-            // Umbral de colisión circular: (Radio 16 + Radio 20)^2 = 1296
-            float limiteColisionSq = 1300.f;
+    //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
+    auto comprobarColision = [](const sf::Vector2f pos1, const sf::Vector2f pos2, double limite) {
+        return (std::sqrt(std::pow((pos1.x - pos2.x), 2) + std::pow((pos1.y - pos2.y), 2))) < limite;
+        };
 
-            if (p.getEstadoProyectil()) {
-                // 1. Verificar impacto contra Atacante (si el proyectil no es suyo)
-                if (piezaAtacante && p.getDisparador() != piezaAtacante) { //comprobacion de ¿eres tú el que dispara?
-                    sf::Vector2f posE = piezaAtacante->getPosicionAbsoluta();
-                    float distSq = std::pow(posP.x - posE.x, 2) + std::pow(posP.y - posE.y, 2);
+    //Recorremos todos los proyectiles activos del contenedor:
+    for (auto& p : proyectiles) {
 
-                    if (distSq < limiteColisionSq) {
-                        piezaAtacante->stats.vida -= p.getDano();
-                        p.setEstadoProyectil(false);
-                        haImpactado = true;
-                    }
-                }
+        //Actualizamos su posición física en la arena:
+        p.ActualizarProyectil();
 
-                // 2. Verificar impacto contra Defensor (si no ha impactado ya)
-                if (!haImpactado && piezaDefensor && p.getDisparador() != piezaDefensor) {
-                    sf::Vector2f posE = piezaDefensor->getPosicionAbsoluta();
-                    float distSq = std::pow(posP.x - posE.x, 2) + std::pow(posP.y - posE.y, 2);
+        //Si el proyectil está inactivo pero todavía no se ha borrado del contenedor, pasar al siguiente elemento:
+        if (!p.getEstadoProyectil())continue;
 
-                    if (distSq < limiteColisionSq) {
-                        piezaDefensor->stats.vida -= p.getDano();
-                        p.setEstadoProyectil(false);
-                        haImpactado = true;
-                    }
-                }
-            }
+        //Obtenemos la posición del proyectil en el mapa:
+        sf::Vector2f posP = p.getPosicionProyectil();
+        bool impactado = false; //Booleano que registra la colisión
 
-            // 3. Colisión con entorno (solo si no dio a una pieza)
-            if (!haImpactado && p.getEstadoProyectil()) {
-                if (!arena.esPosicionValida(posP, radioP, false)) {
-                    p.setEstadoProyectil(false);
-                }
-            }
-        }
-        // Ataques melee
-        for (auto& m : ataquesMelee) {
-            m.actualizar(dt); // Resta el tiempo de vida (0.2s)
+        //Creamos un vector auxiliar "objetivos" con ambos jugadores para simplificar las comprobaciones de colisión:
+        Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
-            if (m.getEstado()) {
-                sf::Vector2f posM = m.getPosicion();
-                // Umbral: (Radio Melee 25 + Radio Pieza 20)^2 = 45^2 = 2025
-                float limiteColisionSq = 2050.f;
+        //Recorremos el vector auxiliar:
+        for (Pieza* obj : objetivos) {
 
-                // Impacto en Atacante
-                if (piezaAtacante && m.getAtacante() != piezaAtacante) {
-                    sf::Vector2f posE = piezaAtacante->getPosicionAbsoluta();
-                    float distSq = std::pow(posM.x - posE.x, 2) + std::pow(posM.y - posE.y, 2);
-                    if (distSq < limiteColisionSq) {
-                        piezaAtacante->stats.vida -= m.getDano();
-                        m.setEstado(false); // Desactiva el golpe tras acertar (no pega dos veces)
-                        std::cout << "¡Zasca de Melee al Atacante! Vida: " << piezaAtacante->stats.vida << std::endl;
-                    }
-                }
-
-                // Impacto en Defensor
-                if (m.getEstado() && piezaDefensor && m.getAtacante() != piezaDefensor) {
-                    sf::Vector2f posE = piezaDefensor->getPosicionAbsoluta();
-                    float distSq = std::pow(posM.x - posE.x, 2) + std::pow(posM.y - posE.y, 2);
-                    if (distSq < limiteColisionSq) {
-                        piezaDefensor->stats.vida -= m.getDano();
-                        m.setEstado(false);
-                        std::cout << "¡Zasca de Melee al Defensor! Vida: " << piezaDefensor->stats.vida << std::endl;
-                    }
-                }
+            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
+            if (obj && p.getDisparador() != obj && comprobarColision(posP, obj->getPosicionAbsoluta(), limitecolision)) {
+                //Restamos vida al jugador colisionado:
+                obj->stats.vida -= p.getDano();
+                //Desactivamos el proyectil:
+                p.setEstadoProyectil(false);
+                //Marcamos como true el booleano "impactado" para evitar múltiples colisiones en el mismo frame:
+                impactado = true;
+                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
+                break;
             }
         }
 
-        // Limpieza de ataques Melee expirados o que ya golpearon
-        ataquesMelee.erase(
-            std::remove_if(ataquesMelee.begin(), ataquesMelee.end(), [](const AtaqueMelee& m) {
-                return !m.getEstado();
-                }), ataquesMelee.end());
-        // Limpieza de proyectiles muertos
-        proyectiles.erase(
-            std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {
-                return !p.getEstadoProyectil();
-                }), proyectiles.end());
-
-        // Piezas muertas tras combate
-        Pieza* ganador = nullptr;
-        Pieza* perdedor = nullptr;
-
-        if (piezaAtacante->stats.vida <= 0) {
-            perdedor = piezaAtacante;
-            ganador = piezaDefensor;
-        }
-        else if (piezaDefensor->stats.vida <= 0) {
-            perdedor = piezaDefensor;
-            ganador = piezaAtacante;
-        }
-
-        if (perdedor) {
-            // Casilla del defensor
-            sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
-
-            // Eliminar pieza de la memoria y del vector
-            auto it = std::find(listaPiezas.begin(), listaPiezas.end(), perdedor);
-            if (it != listaPiezas.end()) {
-                delete* it;
-                listaPiezas.erase(it);
+        //Comprobamos la colisión con el entorno (solo si no colisionó con una pieza anteriormente)
+        if (!impactado && p.getEstadoProyectil()) {
+            //Si el proyectil ocupa una posición no válida en la arena:
+            if (!arena.esPosicionValida(posP, (p.getFormaProyectil().getRadius()), false)) {
+                //Desactivamos el proyectil
+                p.setEstadoProyectil(false);
             }
-
-            // El ganador se mueve a la casilla del defensor
-            ganador->mover(destinoFinal);
-
-            // Limpieza de estados
-            piezaAtacante = nullptr;
-            piezaDefensor = nullptr;
-            piezaSeleccionada = nullptr;
-            proyectiles.clear();
-
-            // Volver al tablero
-            estadoActual = Estado::Tablero;
-            intentarAccionJugador(jugadorActual);
         }
     }
+
+    //ACTUALIZACIÓN DE MELEE:
+
+    //Recorremos el contenedor de melee:
+    for (auto& m : ataquesMelee) {
+
+        //Actualizamos el ataque, descontamos tiempo de vida:
+        m.actualizar(dt);
+
+        //Si el ataque expiró o impactó pero no se ha borrado del contenedor, pasamos al siguiente:
+        if (!m.getEstado()) continue;
+
+        //Obtenemos la posición física del hitbox en la arena:
+        sf::Vector2f posM = m.getPosicion();
+
+        //Agrupamos a los jugadores en un vector auxiliar:
+        Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
+
+        //Recorremos el vector auxiliar:
+        for (Pieza* obj : objetivos) {
+
+            //Verificamos la existencia del jugador, eviamos autolesión y evaluamos límite de colisión:
+            if (obj && m.getAtacante() != obj && comprobarColision(posM, obj->getPosicionAbsoluta(), limitecolision)) {
+                //Restamos vida al jugador colisionado:
+                obj->stats.vida -= m.getDano();
+                //Desactivamos el proyectil:
+                m.setEstado(false);
+
+                //Rompemos el ciclo porque un proyectil sólo puede impactar un objeto por vez:
+                break;
+            }
+        }
+
+    }
+
+    //LIMPIEZA DE CONTENEDORES:
+
+    proyectiles.erase(std::remove_if(proyectiles.begin(), proyectiles.end(), [](const Proyectil& p) {return !p.getEstadoProyectil(); }), proyectiles.end());
+
+    ataquesMelee.erase(std::remove_if(ataquesMelee.begin(), ataquesMelee.end(), [](const AtaqueMelee& m) { return !m.getEstado(); }), ataquesMelee.end());
+
+    //RESOLUCIÓN DE MUERTES Y FIN DE COMBATE:
+
+    //Evaluamos si alguno de los dos combatientes tiene vida=0 tras las colisiones de proyectiles y melee:
+    if (piezaAtacante->stats.vida <= 0 || piezaDefensor->stats.vida <= 0) {
+
+        //Creamos un operador auxiliar para determinar quién es el ganador y quién el defensor:
+        Pieza* perdedor = (piezaAtacante->stats.vida <= 0) ? piezaAtacante : piezaDefensor;
+
+        //El que no es perdedor es automáticamente ganador:
+        Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
+
+        //Guardamos la coordenada del tablero donde ocurrió el conflicto:
+        sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
+
+        //Buscamos al perdedor en el contenedor global de piezas:
+        auto deteccionperdedor = std::find(listaPiezas.begin(), listaPiezas.end(), perdedor);
+
+        if (deteccionperdedor != listaPiezas.end()) {
+
+            //Eliminamos el perdedor de la lista de piezas:
+            delete* deteccionperdedor;
+
+            //Borramos el puntero nulo de la lista global de piezas:
+            listaPiezas.erase(deteccionperdedor);
+        }
+
+        //El ganador ocupa la casilla conquistada:
+        ganador->mover(destinoFinal);
+
+        //Borramos los punteros para evitar pnteros colgantes:
+        piezaAtacante = nullptr;
+        piezaDefensor = nullptr;
+        piezaSeleccionada = nullptr;
+
+        //Forzamos el borrado de los contenedores de proyectiles y melee:
+        proyectiles.clear();
+        ataquesMelee.clear();
+
+        //Cambiamos el estado del motor a tablero:
+        estadoActual = Estado::Tablero;
+
+        //Llamamos a la lógica de avance de turno:
+        intentarAccionJugador(jugadorActual);
+    }
 }
+            
+ 
