@@ -12,6 +12,8 @@ enum class Bando { LUZ, OSCURIDAD };
 
 // Enum para leer los patrones de movimiento fácilmente
 enum class PatronMovimiento { Ortogonal, Diagonal, Ambos };
+//Enum para leer los tipos de movimiento fácilmente
+enum class TipoMovimiento { Terrestre, Volador, Teletransporte };
 
 // Estructura de estadísticas que heredará cada pieza
 struct Stats {
@@ -20,11 +22,9 @@ struct Stats {
     float vida;
     float vidaMaxima;
     bool esRango;
-    bool esVolador;
     float ataque;
     float defensa;
     float velAtaque;
-    float cooldown;
 
     //Variables encargadas de la gestión de proyectiles en la arena
     sf::Clock relojHitbox;//Reloj que avanza desde que se dispara
@@ -38,8 +38,6 @@ protected:
     // Atributos protegidos: las clases hijas (Golem, Fénix) pueden usarlos directamente
     Bando bando;
     int rangoMovimiento;
-    Stats stats;
-    PatronMovimiento patronMovimiento;
     BarraVida barraSalud;
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
@@ -52,8 +50,11 @@ protected:
     // Amistades para que el Renderizador y el Motor sigan funcionando sin cambios pesados
     friend class Motor;
     friend class Generador;
-
+    friend class InterfazHUD;
 public:
+    Stats stats;
+    PatronMovimiento patronMovimiento;
+    TipoMovimiento tipoMov;
     // Constructor: Solo pide lo básico para ubicar la pieza
     Pieza(Bando b, sf::Vector2i pos);
 

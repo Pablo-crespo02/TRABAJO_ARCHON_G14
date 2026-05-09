@@ -39,3 +39,11 @@ void Hitbox::ActualizarHitbox(double dt) {
     tiempoVida -= (float)dt;
     if (tiempoVida <= 0) activo = false;
 }
+void Hitbox::rebotar() {
+    // Velocidad invertida para que rebote
+    velocidad.x = -velocidad.x;
+    velocidad.y = -velocidad.y;
+
+    //Para que no se quede rebotando dentro de la pared
+    forma.move(velocidad.x * 0.05f, velocidad.y * 0.05f);
+}

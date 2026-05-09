@@ -6,7 +6,7 @@
 #include <vector>
 #include "Pantallainicio.h"
 #include "Hitboxes.h"
-
+#include "InterfazHUD.h"
 class Motor {
 private:
 
@@ -14,6 +14,7 @@ private:
     Tablero tablero;
     Arena arena;
     PantallaInicio pantallaInicio;
+    InterfazHUD hud;
     int jugadorActual = 1;       // 1 o 2
     int cicloActual = 1;         // De 1 a 12
     int rondaActual = 1;         // Incrementa tras ciclo 12
