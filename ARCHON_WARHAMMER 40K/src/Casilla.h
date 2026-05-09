@@ -10,16 +10,24 @@ class Casilla
     int fila;
     int columna;
     bool powerpoint;
+    TipoCasilla tipocasilla;
+    ColorActual colorcasilla;
 
 public:
-
-    //Atributos que queremos que se puedan modificar libremente:
-    TipoCasilla tipocasilla;//tipo de casilla general
-    ColorActual colorcasilla;
 
     //Función que asigna valores a las casillas
     void SetValoresCasillas(int f, int c, TipoCasilla t, ColorActual C, bool Pp);
 
     //Función para dibujar por pantalla:
-    void Dibujar(sf::RenderWindow& window);    //Función dibujar, recibe la ventana "window" para...
+    void Dibujar(sf::RenderWindow& window);
+
+    //SETTERS Y GETTERS:
+
+    bool getpowerpointcasilla() const { return powerpoint;}
+    TipoCasilla gettipocasilla()const { return tipocasilla; }
+    ColorActual getcoloractualcasilla() { return colorcasilla; }
+
+    void setcoloractualcasilla(ColorActual color) { colorcasilla = color; }
+
+
 };
