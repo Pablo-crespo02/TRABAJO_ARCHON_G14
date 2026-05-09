@@ -51,10 +51,12 @@ protected:
     friend class Motor;
     friend class Generador;
     friend class InterfazHUD;
+
 public:
-    Stats stats;
+        Stats stats;
     PatronMovimiento patronMovimiento;
     TipoMovimiento tipoMov;
+    double multiplicadorArena;
     // Constructor: Solo pide lo básico para ubicar la pieza
     Pieza(Bando b, sf::Vector2i pos);
 

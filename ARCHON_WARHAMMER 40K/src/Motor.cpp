@@ -173,6 +173,34 @@ void Motor::intentarAccionJugador(int idJugador) {
     }
 }
 
+/////////////////////////  CÁLCULO DEL MODIFICADOR DEL TERRENO  //////////////////////////
+
+double calcularmodificadorterreno(Bando bando, ColorActual colorcasilla) {
+
+    double ventaja = 0; //Un valor positivo favorece a LUZ, un valor negativo favorece a OSCURIDAD
+
+    // Valores de modificador en escalera:
+    switch (colorcasilla) {
+    case ColorActual::Blanco_pico:ventaja = 30; break;   // 30%
+    case ColorActual::Blanco:ventaja = 20; break;        // 20%
+    case ColorActual::Gris_claro:ventaja = 10; break;    // 10%
+    case ColorActual::Gris_medio:ventaja = 0; break;     // 0%
+    case ColorActual::Gris_oscuro: ventaja = -10; break;
+    case ColorActual::Negro:       ventaja = -20; break;
+    case ColorActual::Negro_pico:  ventaja = -30; break;
+    }
+
+    // Cambio de signo para la ventaja de las piezas OSCURIDAD
+    if (bando == Bando::OSCURIDAD) {
+        ventaja = -ventaja;
+    }
+
+    //Convertimos el valor en un porcentaje aplicable:
+    return 1+(ventaja*0.01);
+}
+
+
+
 /////////////////////////////////  REINICIO DEL JUEGO  //////////////////////////////////
 
 void Motor::reiniciarJuego(){
@@ -243,7 +271,7 @@ void Motor::VerificarVictoria() {
     }
 
     //Condiciones OSCURIDAD:
-    else if (piezasOscuridad == 0 || powerPointsOscuridad >= 5) {
+    else if (piezasLuz == 0 || powerPointsOscuridad >= 5) {
         estadoActual = Estado::Victoria;
         ganadorPartida = 2;
         std::cout << "  VICTORIA DE LOS XENOS" << std::endl;
@@ -268,7 +296,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     //Recarga el hechizo al entrar en la arena
     piezaAtacante->setHechizoDisponible(true);
     piezaDefensor->setHechizoDisponible(true);
-
+    
     // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
     sf::Vector2f spawnDerecha(650.f, 300.f);
@@ -289,7 +317,6 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
         // --- DIRECCIÓN INICIAL ---
         piezaAtacante->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
         piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
-
     }
 
     // Preparar la Arena
@@ -298,6 +325,17 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 
     // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
     GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
+
+    //Calculamos los modificadores de daño y defnsa en función de la casilla en la que se combate:
+    sf::Vector2i posTableroCombate = piezaDefensor->getPosicionTablero();
+    ColorActual colorArenaCombate = tablero.getcoloractualcasilla(posTableroCombate);
+
+    piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
+    piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
+
+    //CHIVATOS DEBUG:
+    std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
+    std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
 
     estadoActual = Estado::Arena;
 }
@@ -494,12 +532,12 @@ void Motor::actualizar() {
             //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
             if (p->stats.esRango) {
                 //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
-                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque, 60, 15);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque*p->multiplicadorArena), 60, 15);
             }
 
             else {
                 //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
-                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, p->stats.ataque, 0.2, 35);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque*p->multiplicadorArena), 0.2, 35);
             }
 
             //Reiniciamos el cooldown interno de la pieza:
@@ -570,7 +608,7 @@ void Motor::actualizar() {
         }
 
 
-        Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
+        Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
 
         for (Pieza* obj : objetivos) {
             if (obj && h.getAtacante() != obj) {
@@ -582,11 +620,11 @@ void Motor::actualizar() {
 
                     // A) ZONA DE DAÑO CONTINUO (Torbellino)
                     if (h.getEsDanoContinuo()) {
-                        obj->stats.vida -= h.getDano() * dt;
+                        obj->stats.vida -= ((h.getDano() * dt)/(obj->multiplicadorArena));
                     }
                     // B) DAÑO INSTANTÁNEO (Balas y Melee)
                     else if (!h.getYaHizoDano()) {
-                        obj->stats.vida -= h.getDano();
+                        obj->stats.vida -= (h.getDano()/(obj->multiplicadorArena));
                         h.setYaHizoDano(true);
 
                         sf::Vector2f vel = h.getVelocidadHitbox();
@@ -648,7 +686,9 @@ void Motor::actualizar() {
         //Comprobamos si la muerte del perdedor significa que se han satisfecho las condiciones de victoria:
         VerificarVictoria();
 
-        //Llamamos a la lógica de avance de turno:
+        //Llamamos a la lógica de avance de turno sólo si no ha terminado la partida:
+        if (estadoActual != Estado::Victoria) {
         intentarAccionJugador(jugadorActual);
+        }
     }
 }
