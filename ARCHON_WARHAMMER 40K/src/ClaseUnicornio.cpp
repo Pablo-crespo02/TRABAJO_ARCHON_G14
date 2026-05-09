@@ -60,8 +60,8 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
 
     //Barra de salud
-        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
-        barraSalud.dibujar(window);
+        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
+        barrasArena.dibujar(window);
     }
 
     window.draw(formaVisual);
