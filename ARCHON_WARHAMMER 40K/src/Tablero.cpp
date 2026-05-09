@@ -26,8 +26,8 @@ void Tablero::actualizarColores(int numCiclo) {
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
             // Actualizamos solo las casillas que NO son permanentes
-            if (tablero[i][j].tipocasilla == TipoCasilla::ColorCambiante) {
-                tablero[i][j].colorcasilla = colorDelCiclo;
+            if (tablero[i][j].gettipocasilla() == TipoCasilla::ColorCambiante) {
+                tablero[i][j].setcoloractualcasilla(colorDelCiclo);
             }
         }
     }

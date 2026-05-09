@@ -18,6 +18,7 @@ private:
     int jugadorActual = 1;       // 1 o 2
     int cicloActual = 1;         // De 1 a 12
     int rondaActual = 1;         // Incrementa tras ciclo 12
+    int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
     std::string cicloNombre = "Luz";
     Estado estadoActual;
     sf::RenderWindow window;
@@ -25,7 +26,7 @@ private:
     sf::View vistaUI;
     sf::Clock reloj;
     sf::Font fuenteGlobal;
-    std::vector<Hitbox> Hitboxes;    //Contenedor para los proyectiles activos
+    std::vector<Hitbox> Hitboxes;    //Contenedor para los hitboxes activos
     //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
     double limitecolision = 36;
 
@@ -36,7 +37,7 @@ public:
     Pieza* piezaSeleccionada = nullptr; // Para saber qué pieza estamos moviendo
     Pieza* piezaAtacante = nullptr;
     Pieza* piezaDefensor = nullptr; // Lista de todas las piezas en juego...
-    //... pública porque se modificará desde otros .cpp ('Generador'), tambiémn se puede declarar amiga
+    //... pública porque se modificará desde otros .cpp ('Generador'), también se puede declarar amiga
 
     Motor(); //Declaración constructor
     ~Motor(); // Para borrar las piezas al cerrar
@@ -56,5 +57,11 @@ public:
     void imprimirEstado();
 
     void iniciarCombate(Pieza* atacante, Pieza* defensor);
+
+    //Verifica las condiciones de victoria:
+    void VerificarVictoria();
+
+    //Función de vuelta al menú principal, reiniciando todos los parámetros
+    void reiniciarJuego();
 };
 

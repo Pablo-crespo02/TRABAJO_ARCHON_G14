@@ -9,8 +9,13 @@
 Motor::Motor() {
     if (!hud.cargarFuente("fuentes/fuente_pixel.ttf")) {
         // Si entra aquí, es que no encuentra el archivo
-        std::cout << "Error: No se encontro el archivo de fuente!" << std::endl;
+        std::cout << "Error: No se encontro el archivo de fuente" << std::endl;
     }
+
+    if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
+        std::cout << "Error: No se encontro el archivo de fuente" << std::endl;
+    }
+
     // Configuración de Ventana en Pantalla Completa
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
@@ -92,6 +97,48 @@ void Motor::renderizar() {
         }
     }
 
+    // 4. PANTALLA DE VICTORIA:
+    else if (estadoActual == Estado::Victoria) {
+        window.setView(vistaUI);
+
+        sf::Text textoVictoria;
+        textoVictoria.setFont(fuenteGlobal);
+
+        //El texto de la pantalla de victoria cambia según el equipo ganador (1 = LUZ, 2 = OSCURIDAD))
+        if (ganadorPartida == 1) {
+            textoVictoria.setString("VICTORIA DEL IPERIUM");
+            textoVictoria.setFillColor(sf::Color::Yellow);
+        }
+
+        else if (ganadorPartida == 2){
+            textoVictoria.setString("VICTORIA XENOS");
+            textoVictoria.setFillColor(sf::Color::Red);
+        }
+
+        //Establecemos el tamaño del texto:
+        textoVictoria.setCharacterSize(80);
+
+        // Centramos el texto principal
+        sf::FloatRect textRect = textoVictoria.getLocalBounds();
+        textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+        textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
+
+        // Texto de "Pulsa Enter":
+        sf::Text textoContinuar;
+        textoContinuar.setFont(fuenteGlobal);
+        textoContinuar.setString("Pulsa ENTER para volver al menu");
+        textoContinuar.setCharacterSize(30);
+        textoContinuar.setFillColor(sf::Color::White);
+
+        // Centramos el texto secundario:
+        sf::FloatRect contRect = textoContinuar.getLocalBounds();
+        textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
+        textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.f);
+
+        window.draw(textoVictoria);
+        window.draw(textoContinuar);
+    }
+
     window.display();
 }
 
@@ -125,6 +172,90 @@ void Motor::intentarAccionJugador(int idJugador) {
         std::cout << "¡No es el turno del Jugador " << idJugador << "!" << std::endl;
     }
 }
+
+/////////////////////////////////  REINICIO DEL JUEGO  //////////////////////////////////
+
+void Motor::reiniciarJuego(){
+    //Se limpian los contenedores de piezas y hitboxes:
+    for (auto p : listaPiezas) {
+        delete p;
+    }
+
+    listaPiezas.clear();
+    Hitboxes.clear();
+
+    //Se resetean los estados y variables a los DEFAULT:
+    jugadorActual = 1;
+    cicloActual = 1;
+    rondaActual = 1;
+    ganadorPartida = 0;
+    piezaSeleccionada = nullptr;
+    piezaAtacante = nullptr;
+    piezaDefensor = nullptr;
+
+    //Se vuelve a generar el tablero y las piezas:
+    Generador::GenerarTablero(tablero);
+    Generador::GenerarDespliegueUnidades(*this);
+
+    estadoActual = Estado::MenuPrincipal;  
+}
+
+/////////////////////  COMPROBACIÓN DE LAS CONDICIONES DE VICTORIA  /////////////////////
+
+void Motor::VerificarVictoria() {
+    int piezasLuz = 0;
+    int piezasOscuridad = 0;
+    int powerPointsLuz = 0;
+    int powerPointsOscuridad = 0;
+
+    //Se escanean todas las piezas supervivientes del contenedor de piezas:
+    for (auto p : listaPiezas) {
+        if (p->bando == Bando::LUZ) {
+            piezasLuz++;
+
+            //Consultamos si se encuentra en un PowePoint:
+            if (tablero.getpowerpoint(p->posicionTablero)) {
+                powerPointsLuz++;
+            }
+        }
+
+        else if (p->bando == Bando::OSCURIDAD) {
+            piezasOscuridad++;
+
+            //Consultamos si se encuentra en un PowePoint:
+            if (tablero.getpowerpoint(p->posicionTablero)) {
+                powerPointsOscuridad++;
+            }
+        }
+    }
+
+    //CHIVATOS DEBUG:
+    std::cout << "[DEBUG VICTORIA] Imperium -> Piezas: " << piezasLuz << " | PowerPoints: " << powerPointsLuz << std::endl;
+    std::cout << "[DEBUG VICTORIA] Xenos -> Piezas: " << piezasOscuridad << " | PowerPoints: " << powerPointsOscuridad << std::endl;
+
+    //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
+    //Condiciones LUZ:
+    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
+        estadoActual = Estado::Victoria;
+        ganadorPartida = 1;
+        std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;
+
+    }
+
+    //Condiciones OSCURIDAD:
+    else if (piezasOscuridad == 0 || powerPointsOscuridad >= 5) {
+        estadoActual = Estado::Victoria;
+        ganadorPartida = 2;
+        std::cout << "  VICTORIA DE LOS XENOS" << std::endl;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
@@ -249,7 +380,13 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
                     piezaSeleccionada->seleccionado = false;
                     piezaSeleccionada = nullptr;
 
+                    //Verificamos si no se cumplen las condicciones de victoria pacífica por control de 5 power points:
+                    VerificarVictoria();
+
+                    //Sólo se procede con el juego si el último movimiento no supuso una victoria:
+                    if (estadoActual != Estado::Victoria) {
                     intentarAccionJugador(jugadorActual);
+                }
                 }
             }
             else {
@@ -275,7 +412,7 @@ void Motor::manejarEventos() {
         if (event.type == sf::Event::Closed)
             window.close();
 
-        // Captura los clicks en el tablero
+        // Captura los clicks en el tablero:
         if (estadoActual == Estado::Tablero && event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
                 // Pasamos la posición del ratón RELATIVA a la ventana
@@ -283,7 +420,7 @@ void Motor::manejarEventos() {
             }
         }
 
-        // Control en la arena
+        // Control en la arena:
         if (estadoActual == Estado::Arena) {
             if (event.type == sf::Event::KeyPressed) {
                 // Salir del combate manualmente
@@ -293,6 +430,16 @@ void Motor::manejarEventos() {
                 }
             }
 
+        }
+
+        //Control en la pantalla de victoria:
+        if (estadoActual == Estado::Victoria) {
+            if (event.type == sf::Event::KeyPressed) {
+                // Reinciar juego y volver a la pantalla de inicio:
+                if (event.key.code == sf::Keyboard::Enter) {
+                    reiniciarJuego();
+                }
+            }
         }
     }
 }
@@ -345,7 +492,6 @@ void Motor::actualizar() {
             sf::Vector2f puntoSpawnAtaque = (p->getPosicionAbsoluta()) + (dirAtaque * 35.f);
 
             //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
-
             if (p->stats.esRango) {
                 //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
                 Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque, 60, 15);
@@ -377,7 +523,7 @@ void Motor::actualizar() {
             pLuz->usarHechizo(Hitboxes, pOsc);
             // Lo marcamos como gastado
             pLuz->setHechizoDisponible(false);
-            std::cout << pLuz->stats.nombre << " uso su hechizo!" << std::endl;
+            std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
 
@@ -388,7 +534,7 @@ void Motor::actualizar() {
         if (pOsc->getHechizoDisponible()) {
             pOsc->usarHechizo(Hitboxes, pLuz);
             pOsc->setHechizoDisponible(false);
-            std::cout << pOsc->stats.nombre << " uso su hechizo!" << std::endl;
+            std::cout << pOsc->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
     //Proyectiles
@@ -498,6 +644,9 @@ void Motor::actualizar() {
 
         //Cambiamos el estado del motor a tablero:
         estadoActual = Estado::Tablero;
+
+        //Comprobamos si la muerte del perdedor significa que se han satisfecho las condiciones de victoria:
+        VerificarVictoria();
 
         //Llamamos a la lógica de avance de turno:
         intentarAccionJugador(jugadorActual);

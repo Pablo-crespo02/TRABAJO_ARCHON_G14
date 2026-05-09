@@ -7,8 +7,6 @@ private:
 
     Casilla tablero[9][9];
 
-    
-
 public:
     Tablero();
 
@@ -17,4 +15,7 @@ public:
     void SetValoresCasillasDesdeTablero(int fila, int columna, TipoCasilla tipo, ColorActual color, bool esPowerPoint);
     void dibujar(sf::RenderWindow& window);//Orden para dibujarse
     void actualizarColores(int numCiclo);
+
+    bool getpowerpoint(sf::Vector2i posicion)const { return tablero[posicion.x][posicion.y].getpowerpointcasilla(); };
+
 };
