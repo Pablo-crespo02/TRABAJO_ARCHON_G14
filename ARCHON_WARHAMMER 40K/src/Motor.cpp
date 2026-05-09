@@ -138,6 +138,55 @@ void Motor::renderizar() {
         window.draw(textoVictoria);
         window.draw(textoContinuar);
     }
+    //5.PANTALLA INSTRUCCIONES
+    else if (estadoActual == Estado::Instrucciones) {
+        window.setView(vistaUI); // Usamos la vista completa
+        sf::Text textoInstrucciones;
+        textoInstrucciones.setFont(fuenteGlobal);
+        textoInstrucciones.setCharacterSize(35);
+        textoInstrucciones.setFillColor(sf::Color::White);
+
+        // El \n sirve para hacer saltos de línea en el texto
+        textoInstrucciones.setString(
+            "         OBJETIVO DE LA CRUZADA\n"
+            "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
+            "         FASE ESTRATEGICA (Tablero)\n"
+            "- Raton (Click Izquierdo) para mover unidades.\n\n"
+            "         FASE DE COMBATE (Arena)\n"
+            "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
+            "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
+            "      (Pulsa ESC para volver al menu)"
+        );
+        textoInstrucciones.setPosition(100.f, 150.f);
+        window.draw(textoInstrucciones);
+    }
+    // 6. PANTALLA CREDITOS
+    else if (estadoActual == Estado::Creditos) {
+        window.setView(vistaUI);
+        sf::Text textoCreditos;
+        textoCreditos.setFont(fuenteGlobal);
+        textoCreditos.setCharacterSize(35);
+        textoCreditos.setFillColor(sf::Color::Yellow); // Color amarillo para que destaque
+
+        // Aquí es donde añadimos vuestros nombres
+        textoCreditos.setString(
+            "               DESARROLLO Y PROGRAMACION\n\n"
+            "               Javier Monrio\n"
+            "               Gonzalo Castro\n"
+            "               Pablo Crespo\n"
+            "               Javier Lerin\n"
+            "               Cecilia Barrio\n\n\n"
+            "               DISEÑO BASADO EN\n"
+            "               Archon: The Light and the Dark (1983)\n\n\n"
+            "               UNIVERSO Y LORE\n"
+            "               Warhammer 40,000 (Games Workshop)\n\n\n"
+            "      (Pulsa ESC para volver al menu)"
+        );
+
+        // Ajustamos un poco la posición para que quepan todos los nombres
+        textoCreditos.setPosition(150.f, 120.f);
+        window.draw(textoCreditos);
+        }
 
     window.display();
 }
@@ -437,29 +486,62 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
 void Motor::manejarEventos() {
     sf::Event event;
     while (window.pollEvent(event)) {
-        if (estadoActual == Estado::MenuPrincipal)
-        {
-            if (event.type == sf::Event::KeyPressed) {
-                // al pulsa enter, vamos al juego
-                if (event.key.code == sf::Keyboard::Enter) {
-                    estadoActual = Estado::Tablero;
-                    std::cout << "Iniciando partida... Al Tablero" << std::endl;
-                }
-            }
-        }
         if (event.type == sf::Event::Closed)
             window.close();
 
-        // Captura los clicks en el tablero:
-        if (estadoActual == Estado::Tablero && event.type == sf::Event::MouseButtonPressed) {
-            if (event.mouseButton.button == sf::Mouse::Left) {
-                // Pasamos la posición del ratón RELATIVA a la ventana
-                manejarClick(sf::Mouse::getPosition(window));
+        //mnu principal
+        if (estadoActual == Estado::MenuPrincipal) {
+            if (event.type == sf::Event::KeyPressed) {
+                // Navegar por las opciones con las flechas de arriba y abajo
+                if (event.key.code == sf::Keyboard::Up) {
+                    pantallaInicio.moverArriba();
+                }
+                if (event.key.code == sf::Keyboard::Down) {
+                    pantallaInicio.moverAbajo();
+                }
+
+                // Confirmar selección con Enter
+                if (event.key.code == sf::Keyboard::Enter) {
+                    int seleccion = pantallaInicio.getIndiceSeleccionado();
+
+                    if (seleccion == 0) { // op 0 : iniciar partida
+                        std::cout << "Iniciando partida... Al Tablero" << std::endl;
+                        reiniciarJuego();
+                        estadoActual = Estado::Tablero;
+                    }
+                    else if (seleccion == 1) { //op 1: reanudar partida
+                        std::cout << "Reanudando partida..." << std::endl;
+                        estadoActual = Estado::Tablero;
+                    }
+                    else if (seleccion == 2) { //op 2: INSTRUCCIONES
+                        estadoActual = Estado::Instrucciones;
+                    }
+                    else if (seleccion == 3) { //op 3: CREDITOS
+                        estadoActual = Estado::Creditos;
+                    }
+                }
+            }
+        }
+        //pulsando enter para salir de op2 y op3
+        else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Enter) {
+                    estadoActual = Estado::MenuPrincipal; // Vuelve al menú
+                }
             }
         }
 
-        // Control en la arena:
-        if (estadoActual == Estado::Arena) {
+        //tablero
+        else if (estadoActual == Estado::Tablero) {
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    manejarClick(sf::Mouse::getPosition(window));
+                }
+            }
+        }
+
+        //control arena
+        else if (estadoActual == Estado::Arena) {
             if (event.type == sf::Event::KeyPressed) {
                 // Salir del combate manualmente
                 if (event.key.code == sf::Keyboard::Escape) {
@@ -467,15 +549,14 @@ void Motor::manejarEventos() {
                     std::cout << "Volviendo al Tablero..." << std::endl;
                 }
             }
-
         }
 
-        //Control en la pantalla de victoria:
-        if (estadoActual == Estado::Victoria) {
+        // control pantalla victoria
+        else if (estadoActual == Estado::Victoria) {
             if (event.type == sf::Event::KeyPressed) {
-                // Reinciar juego y volver a la pantalla de inicio:
+                // Reiniciar juego y volver al menú principal
                 if (event.key.code == sf::Keyboard::Enter) {
-                    reiniciarJuego();
+                    reiniciarJuego(); // Resetea variables y vuelve a MenuPrincipal
                 }
             }
         }
