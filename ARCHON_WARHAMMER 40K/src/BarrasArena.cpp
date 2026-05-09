@@ -1,50 +1,58 @@
-#include "BarraVida.h"
-#include <algorithm> // Necesario para std::max
+#include "BarrasArena.h"
+#include <algorithm> // Para std::max
 
-BarraVida::BarraVida(float ancho, float alto) : anchoMaximo(ancho), alto(alto) {
-    // Configuración del fondo (la parte vacía de la barra)
+// Constructor
+BarrasArena::BarrasArena(float ancho, float alto) : anchoMaximo(ancho), alto(alto) {
+    // Fondo de salud
     fondo.setSize(sf::Vector2f(ancho, alto));
-    fondo.setFillColor(sf::Color(50, 50, 50, 200)); // Gris oscuro semitransparente
-    fondo.setOutlineThickness(1.f);
-    fondo.setOutlineColor(sf::Color::Black);
+    fondo.setFillColor(sf::Color(50, 50, 50, 200));
 
-    // Configuración de la barra de salud (la parte llena)
+    // Barra de salud
     barraActual.setSize(sf::Vector2f(ancho, alto));
     barraActual.setFillColor(sf::Color::Green);
+
+    // Barra de ataque (más delgada, color azul/cian)
+    barraAtaque.setSize(sf::Vector2f(0.f, alto / 2.f));
+    barraAtaque.setFillColor(sf::Color::Cyan);
 }
 
-void BarraVida::actualizar(float vidaActual, float vidaMaxima, sf::Vector2f posicionPieza) {
-    if (vidaMaxima <= 0.f) return; // Evitar divisiones por cero
+// Función Actualizar
+void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque, sf::Vector2f posicionPieza) {
+    // --- 1. LÓGICA DE VIDA ---
+    float porcentajeVida = (vidaMaxima > 0) ? (std::max(0.f, vidaActual) / vidaMaxima) : 0.f;
+    barraActual.setSize(sf::Vector2f(anchoMaximo * porcentajeVida, alto));
 
-    // Evitamos que la vida baje de 0 visualmente
-    float vida = std::max(0.f, vidaActual);
+    // --- 2. LÓGICA DE ATAQUE (Se detiene al final) ---
+    float tiempoTranscurrido = relojInterno.getElapsedTime().asSeconds();
+    float porcentajeAtaque = (velAtaque > 0) ? (tiempoTranscurrido / velAtaque) : 1.f;
 
-    // Calcular el porcentaje de salud restante
-    float porcentaje = vida / vidaMaxima;
-
-    // Escalar la anchura del rectángulo verde según el porcentaje
-    barraActual.setSize(sf::Vector2f(anchoMaximo * porcentaje, alto));
-
-    // Lógica dinámica de colores
-    if (porcentaje > 0.5f) {
-        barraActual.setFillColor(sf::Color::Green);
-    }
-    else if (porcentaje > 0.25f) {
-        barraActual.setFillColor(sf::Color::Yellow);
+    // CRUCIAL: Bloqueamos el porcentaje en 1.0 (100%) para que se quede llena
+    if (porcentajeAtaque > 1.f) {
+        porcentajeAtaque = 1.f;
+        barraAtaque.setFillColor(sf::Color(150, 150, 150)); // Color de "Listo"
     }
     else {
-        barraActual.setFillColor(sf::Color::Red);
+        barraAtaque.setFillColor(sf::Color(90, 90, 90)); // Color de "Cargando"
     }
 
-    // Posicionamiento: centramos la barra y la subimos por encima de la pieza
-    float offsetX = anchoMaximo / 2.f;
-    float offsetY = 35.f; // La pieza tiene radio 20, así que 35 la coloca justo encima
+    barraAtaque.setSize(sf::Vector2f(anchoMaximo * porcentajeAtaque, alto / 3.f));
 
+    // --- 3. POSICIONAMIENTO ---
+    float offsetX = anchoMaximo / 2.f;
+    float offsetY = 35.f;
     fondo.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
     barraActual.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
+    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY + alto + 2.f);
 }
 
-void BarraVida::dibujar(sf::RenderWindow& window) const {
+// La pieza llama a esto manualmente tras disparar/golpear
+void BarrasArena::reiniciarRecarga() {
+    relojInterno.restart();
+}
+
+// Función Dibujar
+void BarrasArena::dibujar(sf::RenderWindow& window) const {
     window.draw(fondo);
     window.draw(barraActual);
+    window.draw(barraAtaque);
 }

@@ -4,7 +4,7 @@
 #include "EstadoJuego.h"
 #include <vector>
 #include <string>
-#include "BarraVida.h"
+#include "BarrasArena.h"
 #include "Hitboxes.h"
 
 // Enums básicos para todo el juego
@@ -38,7 +38,7 @@ protected:
     // Atributos protegidos: las clases hijas (Golem, Fénix) pueden usarlos directamente
     Bando bando;
     int rangoMovimiento;
-    BarraVida barraSalud;
+    BarrasArena barrasArena;
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
     bool hechizoDisponible;//Hechizo sólo una vez por combate
@@ -77,7 +77,7 @@ public:
     bool detectarConflicto(const std::vector<Pieza*>& otrasPiezas);
 
     //Métodos de gestión de proyectiles en la arena:
-    bool puedeAtacar()const;   //Comprueba si ha pasado sufucuente tiempo desde el disparo anterior
+    bool puedeAtacar()const;   //Comprueba si ha pasado suficuente tiempo desde el disparo anterior
     void reiniciarRelojHitbox(); //Reinicia el reloj de disparo
 
     //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso

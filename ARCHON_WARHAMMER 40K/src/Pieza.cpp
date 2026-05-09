@@ -65,4 +65,5 @@ bool Pieza::puedeAtacar() const {
 
 void Pieza::reiniciarRelojHitbox() {
     stats.relojHitbox.restart();
+    barrasArena.reiniciarRecarga();
 };

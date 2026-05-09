@@ -229,7 +229,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             formaVisual.setPosition(posicionAbsoluta);
             window.draw(formaVisual);
         }
-        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
-        barraSalud.dibujar(window);
+        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
+        barrasArena.dibujar(window);
     }
 }

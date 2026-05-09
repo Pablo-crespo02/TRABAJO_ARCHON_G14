@@ -197,8 +197,9 @@ void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
-        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
-        barraSalud.dibujar(window);
+        // En el update/draw del Golem:
+        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
+        barrasArena.dibujar(window);
     }
 }
 void ClaseGolem::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {

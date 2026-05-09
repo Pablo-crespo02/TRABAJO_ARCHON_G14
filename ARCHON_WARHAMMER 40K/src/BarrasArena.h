@@ -1,19 +1,23 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-class BarraVida {
+class BarrasArena {
 private:
     sf::RectangleShape fondo;
     sf::RectangleShape barraActual;
+    sf::RectangleShape barraAtaque;
+    sf::Clock relojInterno;
     float anchoMaximo;
     float alto;
 
 public:
-    // El constructor define un tamaño estándar (40x6) que encaja con el radio 20 de tus piezas
-    BarraVida(float ancho = 40.f, float alto = 6.f);
+    BarrasArena(float ancho = 40.f, float alto = 6.f);
 
-    // Recibe la vida, el máximo y las coordenadas de la pieza para dibujarse justo encima
-    void actualizar(float vidaActual, float vidaMaxima, sf::Vector2f posicionPieza);
+    // Actualiza la barra pero NO la reinicia sola
+    void actualizar(float vidaActual, float vidaMaxima, float velAtaque, sf::Vector2f posicionPieza);
+
+    // Este es el método que llamará el Golem justo cuando ataque
+    void reiniciarRecarga();
 
     void dibujar(sf::RenderWindow& window) const;
 };
