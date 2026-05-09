@@ -17,5 +17,5 @@ public:
     void actualizarColores(int numCiclo);
 
     bool getpowerpoint(sf::Vector2i posicion)const { return tablero[posicion.x][posicion.y].getpowerpointcasilla(); };
-
+    ColorActual getcoloractualcasilla(sf::Vector2i posicion) { return tablero[posicion.y][posicion.x].getcoloractualcasilla(); }
 };
