@@ -106,7 +106,7 @@ void Motor::renderizar() {
 
         //El texto de la pantalla de victoria cambia según el equipo ganador (1 = LUZ, 2 = OSCURIDAD))
         if (ganadorPartida == 1) {
-            textoVictoria.setString("VICTORIA DEL IMPERIUM");
+            textoVictoria.setString("VICTORIA DEL IPERIUM");
             textoVictoria.setFillColor(sf::Color::Yellow);
         }
 
@@ -138,55 +138,6 @@ void Motor::renderizar() {
         window.draw(textoVictoria);
         window.draw(textoContinuar);
     }
-    //5.PANTALLA INSTRUCCIONES
-    else if (estadoActual == Estado::Instrucciones) {
-        window.setView(vistaUI); // Usamos la vista completa
-        sf::Text textoInstrucciones;
-        textoInstrucciones.setFont(fuenteGlobal);
-        textoInstrucciones.setCharacterSize(35);
-        textoInstrucciones.setFillColor(sf::Color::White);
-
-        // El \n sirve para hacer saltos de línea en el texto
-        textoInstrucciones.setString(
-            "         OBJETIVO DE LA CRUZADA\n"
-            "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
-            "         FASE ESTRATEGICA (Tablero)\n"
-            "- Raton (Click Izquierdo) para mover unidades.\n\n"
-            "         FASE DE COMBATE (Arena)\n"
-            "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
-            "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
-        );
-        textoInstrucciones.setPosition(100.f, 150.f);
-        window.draw(textoInstrucciones);
-    }
-    // 6. PANTALLA CREDITOS
-    else if (estadoActual == Estado::Creditos) {
-        window.setView(vistaUI);
-        sf::Text textoCreditos;
-        textoCreditos.setFont(fuenteGlobal);
-        textoCreditos.setCharacterSize(35);
-        textoCreditos.setFillColor(sf::Color::Yellow); // Color amarillo para que destaque
-
-        // Aquí es donde añadimos vuestros nombres
-        textoCreditos.setString(
-            "               DESARROLLO Y PROGRAMACION\n\n"
-            "               Javier Monrio\n"
-            "               Gonzalo Castro\n"
-            "               Pablo Crespo\n"
-            "               Javier Lerin\n"
-            "               Cecilia Barrio\n\n\n"
-            "               DISEÑO BASADO EN\n"
-            "               Archon: The Light and the Dark (1983)\n\n\n"
-            "               UNIVERSO Y LORE\n"
-            "               Warhammer 40,000 (Games Workshop)\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
-        );
-
-        // Ajustamos un poco la posición para que quepan todos los nombres
-        textoCreditos.setPosition(150.f, 120.f);
-        window.draw(textoCreditos);
-        }
 
     window.display();
 }
@@ -221,34 +172,6 @@ void Motor::intentarAccionJugador(int idJugador) {
         std::cout << "¡No es el turno del Jugador " << idJugador << "!" << std::endl;
     }
 }
-
-/////////////////////////  CÁLCULO DEL MODIFICADOR DEL TERRENO  //////////////////////////
-
-double calcularmodificadorterreno(Bando bando, ColorActual colorcasilla) {
-
-    double ventaja = 0; //Un valor positivo favorece a LUZ, un valor negativo favorece a OSCURIDAD
-
-    // Valores de modificador en escalera:
-    switch (colorcasilla) {
-    case ColorActual::Blanco_pico:ventaja = 30; break;   // 30%
-    case ColorActual::Blanco:ventaja = 20; break;        // 20%
-    case ColorActual::Gris_claro:ventaja = 10; break;    // 10%
-    case ColorActual::Gris_medio:ventaja = 0; break;     // 0%
-    case ColorActual::Gris_oscuro: ventaja = -10; break;
-    case ColorActual::Negro:       ventaja = -20; break;
-    case ColorActual::Negro_pico:  ventaja = -30; break;
-    }
-
-    // Cambio de signo para la ventaja de las piezas OSCURIDAD
-    if (bando == Bando::OSCURIDAD) {
-        ventaja = -ventaja;
-    }
-
-    //Convertimos el valor en un porcentaje aplicable:
-    return 1+(ventaja*0.01);
-}
-
-
 
 /////////////////////////////////  REINICIO DEL JUEGO  //////////////////////////////////
 
@@ -320,7 +243,7 @@ void Motor::VerificarVictoria() {
     }
 
     //Condiciones OSCURIDAD:
-    else if (piezasLuz == 0 || powerPointsOscuridad >= 5) {
+    else if (piezasOscuridad == 0 || powerPointsOscuridad >= 5) {
         estadoActual = Estado::Victoria;
         ganadorPartida = 2;
         std::cout << "  VICTORIA DE LOS XENOS" << std::endl;
@@ -345,7 +268,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     //Recarga el hechizo al entrar en la arena
     piezaAtacante->setHechizoDisponible(true);
     piezaDefensor->setHechizoDisponible(true);
-    
+
     // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
     sf::Vector2f spawnDerecha(650.f, 300.f);
@@ -366,6 +289,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
         // --- DIRECCIÓN INICIAL ---
         piezaAtacante->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
         piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
+
     }
 
     // Preparar la Arena
@@ -374,17 +298,6 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 
     // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
     GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
-
-    //Calculamos los modificadores de daño y defnsa en función de la casilla en la que se combate:
-    sf::Vector2i posTableroCombate = piezaDefensor->getPosicionTablero();
-    ColorActual colorArenaCombate = tablero.getcoloractualcasilla(posTableroCombate);
-
-    piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
-    piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
-
-    //CHIVATOS DEBUG:
-    std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
-    std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
 
     estadoActual = Estado::Arena;
 }
@@ -486,62 +399,29 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
 void Motor::manejarEventos() {
     sf::Event event;
     while (window.pollEvent(event)) {
+        if (estadoActual == Estado::MenuPrincipal)
+        {
+            if (event.type == sf::Event::KeyPressed) {
+                // al pulsa enter, vamos al juego
+                if (event.key.code == sf::Keyboard::Enter) {
+                    estadoActual = Estado::Tablero;
+                    std::cout << "Iniciando partida... Al Tablero" << std::endl;
+                }
+            }
+        }
         if (event.type == sf::Event::Closed)
             window.close();
 
-        //mnu principal
-        if (estadoActual == Estado::MenuPrincipal) {
-            if (event.type == sf::Event::KeyPressed) {
-                // Navegar por las opciones con las flechas de arriba y abajo
-                if (event.key.code == sf::Keyboard::Up) {
-                    pantallaInicio.moverArriba();
-                }
-                if (event.key.code == sf::Keyboard::Down) {
-                    pantallaInicio.moverAbajo();
-                }
-
-                // Confirmar selección con Enter
-                if (event.key.code == sf::Keyboard::Enter) {
-                    int seleccion = pantallaInicio.getIndiceSeleccionado();
-
-                    if (seleccion == 0) { // op 0 : iniciar partida
-                        std::cout << "Iniciando partida... Al Tablero" << std::endl;
-                        reiniciarJuego();
-                        estadoActual = Estado::Tablero;
-                    }
-                    else if (seleccion == 1) { //op 1: reanudar partida
-                        std::cout << "Reanudando partida..." << std::endl;
-                        estadoActual = Estado::Tablero;
-                    }
-                    else if (seleccion == 2) { //op 2: INSTRUCCIONES
-                        estadoActual = Estado::Instrucciones;
-                    }
-                    else if (seleccion == 3) { //op 3: CREDITOS
-                        estadoActual = Estado::Creditos;
-                    }
-                }
-            }
-        }
-        //pulsando enter para salir de op2 y op3
-        else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Enter) {
-                    estadoActual = Estado::MenuPrincipal; // Vuelve al menú
-                }
+        // Captura los clicks en el tablero:
+        if (estadoActual == Estado::Tablero && event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                // Pasamos la posición del ratón RELATIVA a la ventana
+                manejarClick(sf::Mouse::getPosition(window));
             }
         }
 
-        //tablero
-        else if (estadoActual == Estado::Tablero) {
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    manejarClick(sf::Mouse::getPosition(window));
-                }
-            }
-        }
-
-        //control arena
-        else if (estadoActual == Estado::Arena) {
+        // Control en la arena:
+        if (estadoActual == Estado::Arena) {
             if (event.type == sf::Event::KeyPressed) {
                 // Salir del combate manualmente
                 if (event.key.code == sf::Keyboard::Escape) {
@@ -549,14 +429,15 @@ void Motor::manejarEventos() {
                     std::cout << "Volviendo al Tablero..." << std::endl;
                 }
             }
+
         }
 
-        // control pantalla victoria
-        else if (estadoActual == Estado::Victoria) {
+        //Control en la pantalla de victoria:
+        if (estadoActual == Estado::Victoria) {
             if (event.type == sf::Event::KeyPressed) {
-                // Reiniciar juego y volver al menú principal
+                // Reinciar juego y volver a la pantalla de inicio:
                 if (event.key.code == sf::Keyboard::Enter) {
-                    reiniciarJuego(); // Resetea variables y vuelve a MenuPrincipal
+                    reiniciarJuego();
                 }
             }
         }
@@ -613,12 +494,12 @@ void Motor::actualizar() {
             //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
             if (p->stats.esRango) {
                 //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
-                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque*p->multiplicadorArena), 60, 15);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, p->stats.ataque, 60, 15);
             }
 
             else {
                 //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
-                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque*p->multiplicadorArena), 0.2, 35);
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, p->stats.ataque, 0.2, 35);
             }
 
             //Reiniciamos el cooldown interno de la pieza:
@@ -689,9 +570,8 @@ void Motor::actualizar() {
         }
 
 
-        Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
+        Pieza* objetivos[2] = { piezaAtacante, piezaDefensor };
 
-        // Gestión de los ataques
         for (Pieza* obj : objetivos) {
             if (obj && h.getAtacante() != obj) {
                 sf::Vector2f posE = obj->getPosicionAbsoluta();
@@ -700,33 +580,29 @@ void Motor::actualizar() {
 
                 if (distSq < limiteSq) {
 
-                    // Daño en el tiempo como hechizo del djinn o fenix
+                    // Daño mantenido ej: hechizo del fenix
                     if (h.getEsDanoContinuo()) {
-                        //Solo recibe daño si no es invulnerable
                         if (!obj->getInvulnerable()) {
-                            obj->stats.vida -= h.getDano() * dt;
+                            obj->stats.vida -= h.getDano();
                         }
                     }
                     // Daño de ataques básicos
                     else if (!h.getYaHizoDano()) {
-
-                        //  Solo recibe daño si NO es invulnerable
-                        if (!obj->getInvulnerable()) {
+                        if (!obj->getInvulnerable()) { //Sólo recibe daño si no es invulnerable
                             obj->stats.vida -= h.getDano();
                         }
-
-                        // Marcamos la hitbox como que ya impactó (aunque el escudo haya bloqueado el daño)
                         h.setYaHizoDano(true);
-
-                        // El escudo también debe bloquear los estados alterados (ej. parálisis del Basilisco)
-                        if (h.getCausaInmovilizacion() && !obj->getInvulnerable()) {
-                            obj->aplicarInmovilizacion(h.getDuracionCC());
+                        if (h.getVelocidadHitbox().x != 0 || h.getVelocidadHitbox().y != 0) {
+                            h.setEstadoHitbox(false);
                         }
-
-                        // Destrucción del proyectil al chocar (contra el cuerpo o contra el escudo)
+                        //Paralisis del basilisco:
+                        if (h.getCausaInmovilizacion()) {
+                            obj->aplicarInmovilizacion(h.getDuracionCC());
+                            std::cout << "¡" << obj->stats.nombre << " ha sido inmovilizado!" << std::endl;
+                        }
                         sf::Vector2f vel = h.getVelocidadHitbox();
                         if (vel.x != 0.f || vel.y != 0.f) {
-                            h.setEstadoHitbox(false);
+                            h.setEstadoHitbox(false); // Proyectil muere
                         }
                     }
                 }
@@ -783,9 +659,7 @@ void Motor::actualizar() {
         //Comprobamos si la muerte del perdedor significa que se han satisfecho las condiciones de victoria:
         VerificarVictoria();
 
-        //Llamamos a la lógica de avance de turno sólo si no ha terminado la partida:
-        if (estadoActual != Estado::Victoria) {
+        //Llamamos a la lógica de avance de turno:
         intentarAccionJugador(jugadorActual);
-        }
     }
 }

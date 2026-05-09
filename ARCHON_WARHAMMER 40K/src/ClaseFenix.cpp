@@ -181,7 +181,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             formaVisual.setPosition(posicionAbsoluta);
             window.draw(formaVisual);
         }
-        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
-        barrasArena.dibujar(window);
+        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
+        barraSalud.dibujar(window);
     }
 }

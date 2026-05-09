@@ -189,8 +189,8 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
-        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
-        barrasArena.dibujar(window);
+        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
+        barraSalud.dibujar(window);
     }
 }
 

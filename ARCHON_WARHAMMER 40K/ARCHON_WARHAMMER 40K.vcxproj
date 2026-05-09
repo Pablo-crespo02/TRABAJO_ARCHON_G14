@@ -131,7 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Arena.cpp" />
-    <ClCompile Include="src\BarrasArena.cpp" />
+    <ClCompile Include="src\BarraVida.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
     <ClCompile Include="src\ClaseArcher.cpp" />
     <ClCompile Include="src\ClaseDjinn.cpp" />
@@ -154,7 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Arena.h" />
-    <ClInclude Include="src\BarrasArena.h" />
+    <ClInclude Include="src\BarraVida.h" />
     <ClInclude Include="src\Casilla.h" />
     <ClInclude Include="src\ClaseArcher.h" />
     <ClInclude Include="src\ClaseDjinn.h" />

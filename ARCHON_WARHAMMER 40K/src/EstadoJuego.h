@@ -4,7 +4,5 @@ enum class Estado {
 	Tablero,
 	Arena,
 	Pausa,
-	Victoria,
-	Instrucciones,
-	Creditos       
+	Victoria
 };

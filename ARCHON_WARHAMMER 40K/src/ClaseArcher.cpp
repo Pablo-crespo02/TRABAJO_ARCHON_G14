@@ -46,8 +46,8 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         formaVisual.setOutlineThickness(0.0f);
         formaVisual.setOrigin(20.f, 20.f);
         //Barra de salud:
-        barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque,posicionAbsoluta);
-        barrasArena.dibujar(window);
+        barraSalud.actualizar(stats.vida, stats.vidaMaxima, posicionAbsoluta);
+        barraSalud.dibujar(window);
     }
     window.draw(formaVisual);
 }

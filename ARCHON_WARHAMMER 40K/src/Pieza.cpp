@@ -91,5 +91,4 @@ void Pieza::gestionarEstadosAlterados(double dt) {
 void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
     temporizadorInvulnerabilidad = duracion;
-    barrasArena.reiniciarRecarga();
 }
