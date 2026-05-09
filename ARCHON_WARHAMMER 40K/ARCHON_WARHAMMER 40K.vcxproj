@@ -133,9 +133,11 @@
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\BarraVida.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
+    <ClCompile Include="src\ClaseArcher.cpp" />
     <ClCompile Include="src\ClaseDjinn.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
+    <ClCompile Include="src\ClaseUnicornio.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\GenerarArena.cpp" />
     <ClCompile Include="src\InterfazHUD.cpp" />
@@ -154,9 +156,11 @@
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\BarraVida.h" />
     <ClInclude Include="src\Casilla.h" />
+    <ClInclude Include="src\ClaseArcher.h" />
     <ClInclude Include="src\ClaseDjinn.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
+    <ClInclude Include="src\ClaseUnicornio.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />

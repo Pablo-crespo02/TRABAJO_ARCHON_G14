@@ -28,10 +28,14 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
 }
 
 void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    // 1. Obtenemos el color actual de la pieza visual
+    //  Obtenemos el color actual de la pieza visual
     sf::Color colorActual = formaVisual.getFillColor();
 
-    // 2. Si NO hay teclas de movimiento pulsadas (Dirección 0,0)
+    //Parálisis del basilisco:
+    this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
+    if (this->getInmovilizado()) return;//Si está paralizado, termina
+
+    // Si NO hay teclas de movimiento pulsadas (Dirección 0,0)
     if (direccion.x == 0.f && direccion.y == 0.f) {
         // La pieza reaparece (se vuelve totalmente opaca)
         if (colorActual.a != 255) {

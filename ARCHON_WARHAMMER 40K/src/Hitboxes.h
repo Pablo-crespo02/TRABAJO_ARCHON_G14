@@ -14,15 +14,17 @@ private: // Es buena práctica encapsular esto
     bool esErratico;            // Para el torbellino del djinn
     float tiempoCambioDir;      // Temporizador interno para el movimiento errático
     float rapidezOriginal;      // Guardamos la rapidez para los cambios de dirección
-    
-    bool haHechoDano;//Para el fuego del fenix
+    //hechizo del fenix:
+    bool haHechoDano;
     bool esDanoContinuo;
+    //hechizo del basilisco:
+    bool causaInmovilizacion;
+    double duracionCC; // Duración del Crowd Control
 
 public:
     Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
         Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
-        bool esDoT = false, bool erratico = false);
-
+        bool esDoT = false, bool erratico = false, bool inmoviliza = false, double duracionControl = 0.0);
     void ActualizarHitbox(double dt);
     void rebotar();
 
@@ -33,9 +35,14 @@ public:
     Pieza* getAtacante() const { return atacante; }
     float getDano() const { return dano; }
     sf::Vector2f getVelocidadHitbox() const { return velocidad; }
+    //Fenix:
     bool getYaHizoDano() const { return haHechoDano; }
-    bool getEsDanoContinuo() const { return esDanoContinuo; }//Fenix
-    bool getEsErratico() const { return esErratico; }//Djinn
+    bool getEsDanoContinuo() const { return esDanoContinuo; }
+    //Djinn
+    bool getEsErratico() const { return esErratico; }
+    //Basilisco:
+    bool getCausaInmovilizacion() const { return causaInmovilizacion; }
+    double getDuracionCC() const { return duracionCC; }
     // setters
     void setEstadoHitbox(bool estadoHitbox) { activo = estadoHitbox; }
     void setYaHizoDano(bool valor) { haHechoDano = valor; }

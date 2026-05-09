@@ -66,3 +66,29 @@ bool Pieza::puedeAtacar() const {
 void Pieza::reiniciarRelojHitbox() {
     stats.relojHitbox.restart();
 };
+//Gestión de la inmovilización del basilisco (activación y tiempo)
+void Pieza::aplicarInmovilizacion(double duracion) {
+    inmovilizado = true;
+    temporizadorInmovilizacion = duracion;
+}
+//Gestiona inmovilización e invulnerabilidad 
+void Pieza::gestionarEstadosAlterados(double dt) {
+    if (inmovilizado) {
+        temporizadorInmovilizacion -= dt;
+        if (temporizadorInmovilizacion <= 0.0) {
+            inmovilizado = false;
+            temporizadorInmovilizacion = 0.0;
+        }
+    }
+    if (invulnerable) {
+        temporizadorInvulnerabilidad -= dt; // Restamos el tiempo por frame
+        if (temporizadorInvulnerabilidad <= 0.0) {
+            invulnerable = false;
+        }
+    }
+}
+//Invulnerabilidad del unicornio: (la activa y controla el tiempo)
+void Pieza::aplicarInvulnerabilidad(double duracion) {
+    invulnerable = true;
+    temporizadorInvulnerabilidad = duracion;
+}

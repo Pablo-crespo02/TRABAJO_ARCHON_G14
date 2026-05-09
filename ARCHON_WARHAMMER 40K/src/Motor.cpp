@@ -580,15 +580,26 @@ void Motor::actualizar() {
 
                 if (distSq < limiteSq) {
 
-                    // A) ZONA DE DAÑO CONTINUO (Torbellino)
+                    // Daño mantenido ej: hechizo del fenix
                     if (h.getEsDanoContinuo()) {
-                        obj->stats.vida -= h.getDano() * dt;
+                        if (!obj->getInvulnerable()) {
+                            obj->stats.vida -= h.getDano();
+                        }
                     }
-                    // B) DAÑO INSTANTÁNEO (Balas y Melee)
+                    // Daño de ataques básicos
                     else if (!h.getYaHizoDano()) {
-                        obj->stats.vida -= h.getDano();
+                        if (!obj->getInvulnerable()) { //Sólo recibe daño si no es invulnerable
+                            obj->stats.vida -= h.getDano();
+                        }
                         h.setYaHizoDano(true);
-
+                        if (h.getVelocidadHitbox().x != 0 || h.getVelocidadHitbox().y != 0) {
+                            h.setEstadoHitbox(false);
+                        }
+                        //Paralisis del basilisco:
+                        if (h.getCausaInmovilizacion()) {
+                            obj->aplicarInmovilizacion(h.getDuracionCC());
+                            std::cout << "¡" << obj->stats.nombre << " ha sido inmovilizado!" << std::endl;
+                        }
                         sf::Vector2f vel = h.getVelocidadHitbox();
                         if (vel.x != 0.f || vel.y != 0.f) {
                             h.setEstadoHitbox(false); // Proyectil muere

@@ -3,7 +3,8 @@
 
 //Constructor actualizado
 Hitbox::Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
-    Pieza* propietario, double danoHitbox, double tiempodevida, double radio, bool esDoT, bool erratico) {
+    Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
+    bool esDoT, bool erratico, bool inmoviliza, double duracionControl) {
     forma.setRadius(radio);
     forma.setOrigin(radio, radio);
     forma.setPosition(posicionInicial);
@@ -13,13 +14,18 @@ Hitbox::Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapi
     velocidad = direccion * rapidezOriginal;
 
     activo = true;
+    //Fenix:
     haHechoDano = false;
-    esDanoContinuo = esDoT; //Fenix
-    esErratico = erratico;      // Djinn
+    esDanoContinuo = esDoT;
+    //Djinn
+    esErratico = erratico;     
     tiempoCambioDir = 0.0f;     // Inicializar temporizador
     atacante = propietario;
     dano = (float)danoHitbox;
     tiempoVida = (float)tiempodevida;
+    //Basilisco:
+    causaInmovilizacion = inmoviliza; 
+    duracionCC = duracionControl;     
 }
 
 void Hitbox::ActualizarHitbox(double dt) {

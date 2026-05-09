@@ -25,6 +25,11 @@ bool PiezaVoladora::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& 
 }
 void PiezaVoladora::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     if (direccion == sf::Vector2f(0.f, 0.f)) return;
+
+    //Parálisis del basilisco:
+    this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
+    if (this->getInmovilizado()) return;//Si está paralizado, termina
+
     float velocidad = 250.f; // Suelen ser más rápidas
     sf::Vector2f desplazamiento = direccion * velocidad * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;

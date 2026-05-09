@@ -5,6 +5,8 @@
 #include "ClaseGolem.h"
 #include "ClaseFenix.h"
 #include "ClaseDjinn.h"
+#include "ClaseArcher.h"
+#include "ClaseUnicornio.h"
 void Generador::GenerarTablero(Tablero& tablero) {
 
     //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
@@ -64,25 +66,25 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "CULEXUS" || tipo == "GENESTEALER") {
         nuevaPieza = new ClaseDjinn(bando, pos, tipo);
     }
+    else if (tipo == "VINDICARE"|| tipo == "GOBLIN") {
+        nuevaPieza = new ClaseArcher(bando, pos, tipo);
+    }
+    else if (tipo == "PRIMARIS"||tipo=="TOXICRENO") {
+        nuevaPieza = new ClaseUnicornio(bando, pos, tipo);
+    }
     /*
 
 if (tipo == "CAPTAIN") {
     nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
 }
-else if (tipo == "LIBRARIAN") {
-    nuevaPieza = new ClaseFenix(bando, pos, "Librarian");
-}
+
 else if (tipo == "ASSAULT_MARINE") {
     nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
 }
 else if (tipo == "INTERCESSOR") {
     nuevaPieza = new ClaseKnight(bando, pos, "Intercessor");
 }
-else if (tipo == "VINDICARE") {
-    nuevaPieza = new ClaseArcher(bando, pos, "Vindicare");
-}
-else if (tipo == "THUNDERHAWK") {
-    nuevaPieza = new ClaseDjinn(bando, pos, "Thunderhawk");
+
 }
 else if (tipo == "PRIMARIS") {
     nuevaPieza = new ClaseUnicornio(bando, pos, "Primaris");
@@ -92,20 +94,14 @@ else if (tipo == "PRIMARIS") {
 else if (tipo == "HIVE_TYRANT") {
     nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
 }
-else if (tipo == "GENESTEALER") {
-    nuevaPieza = new ClaseFenix(bando, pos, "Genestealer");
-}
+
 else if (tipo == "HARPY") {
     nuevaPieza = new ClaseValkyrie(bando, pos, "Harpy");
 }
 else if (tipo == "TERMAGANT") {
     nuevaPieza = new ClaseKnight(bando, pos, "Termagant");
 }
-else if (tipo == "GOBLIN") {
-    nuevaPieza = new ClaseArcher(bando, pos, "Goblin");
-}
-else if (tipo == "TIRANOFEX") {
-    nuevaPieza = new ClaseDjinn(bando, pos, "Tiranofex");
+
 }
 else if (tipo == "TOXICRENO") {
     nuevaPieza = new ClaseUnicornio(bando, pos, "Toxicreno");
