@@ -20,35 +20,37 @@ BarrasArena::BarrasArena(float ancho, float alto) : anchoMaximo(ancho), alto(alt
 // Función Actualizar
 void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque, sf::Vector2f posicionPieza) {
     // --- 1. LÓGICA DE VIDA ---
-    float vida = std::max(0.f, vidaActual);
-    float porcentajeVida = (vidaMaxima > 0) ? vida / vidaMaxima : 0;
+    float porcentajeVida = (vidaMaxima > 0) ? (std::max(0.f, vidaActual) / vidaMaxima) : 0.f;
     barraActual.setSize(sf::Vector2f(anchoMaximo * porcentajeVida, alto));
 
-    // Colores salud
+    // Cambiar color de vida según salud
     if (porcentajeVida > 0.5f) barraActual.setFillColor(sf::Color::Green);
     else if (porcentajeVida > 0.25f) barraActual.setFillColor(sf::Color::Yellow);
     else barraActual.setFillColor(sf::Color::Red);
 
-    // --- LÓGICA DE ATAQUE ---
-    float carga = std::max(0.f, cargaAtaque);
-    float porcentajeAtaque = (ataqueMaximo > 0) ? carga / ataqueMaximo : 0;
+    // --- 2. LÓGICA DE ATAQUE ---
+    float tiempoTranscurrido = relojInterno.getElapsedTime().asSeconds();
+    float porcentajeAtaque = (velAtaque > 0) ? (tiempoTranscurrido / velAtaque) : 1.f;
 
-    if (porcentajeAtaque > 1.f) {
-        porcentajeAtaque = 1.f;
+    if (porcentajeAtaque >= 1.f) {
+        porcentajeAtaque = 1.f; // Se queda llena
+        barraAtaque.setFillColor(sf::Color(200, 200, 200)); // Gris claro: ¡LISTO!
+    }
+    else {
+        // Mientras carga, usamos el gris oscuro que querías
+        barraAtaque.setFillColor(sf::Color(100, 100, 100, 180));
     }
 
     barraAtaque.setSize(sf::Vector2f(anchoMaximo * porcentajeAtaque, alto / 3.f));
 
-    // --- POSICIONAMIENTO ---
-    float offsetX = anchoMaximo / 2.f;
-    float offsetY = 35.f;
-
     // --- 3. POSICIONAMIENTO ---
     float offsetX = anchoMaximo / 2.f;
-    float offsetY = 35.f;
-    fondo.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
-    barraActual.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
-    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY + alto + 2.f);
+    // Posicionamos el conjunto (puedes ajustar el 35.f según el tamaño de tus piezas)
+    fondo.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f);
+    barraActual.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f);
+
+    // La de ataque la ponemos justo debajo de la de vida
+    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f + alto + 2.f);
 }
 
 // La pieza llama a esto manualmente tras disparar/golpear
@@ -61,13 +63,4 @@ void BarrasArena::dibujar(sf::RenderWindow& window) const {
     window.draw(fondo);
     window.draw(barraActual);
     window.draw(barraAtaque);
-
-    // La barra de ataque la ponemos justo pegada debajo de la de salud (alto + 2px de margen)
-    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY + alto + 2.f);
-}
-
-void BarrasArena::dibujar(sf::RenderWindow& window) const {
-    window.draw(fondo);
-    window.draw(barraActual);
-    window.draw(barraAtaque); // <-- Dibujamos la nueva barra
 }

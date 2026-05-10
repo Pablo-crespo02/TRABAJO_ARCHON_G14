@@ -65,6 +65,7 @@ bool Pieza::puedeAtacar() const {
 
 void Pieza::reiniciarRelojHitbox() {
     stats.relojHitbox.restart();
+    barrasArena.reiniciarRecarga();
 };
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
@@ -91,5 +92,4 @@ void Pieza::gestionarEstadosAlterados(double dt) {
 void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
     temporizadorInvulnerabilidad = duracion;
-    barrasArena.reiniciarRecarga();
 }
