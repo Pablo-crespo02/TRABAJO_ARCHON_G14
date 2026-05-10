@@ -63,7 +63,7 @@
     <ClCompile Include="src\Hitboxes.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\BarraVida.cpp">
+    <ClCompile Include="src\BarrasArena.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="src\ClaseDjinn.cpp">
@@ -131,7 +131,7 @@
     <ClInclude Include="src\Hitboxes.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\BarraVida.h">
+    <ClInclude Include="src\BarrasArena.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="src\ClaseDjinn.h">

@@ -1,8 +1,8 @@
-
 #include "BarrasArena.h"
 #include <algorithm> // Para std::max
 
 // Constructor
+
 BarrasArena::BarrasArena(float ancho, float alto) : anchoMaximo(ancho), alto(alto) {
     // Fondo de salud
     fondo.setSize(sf::Vector2f(ancho, alto));
@@ -20,23 +20,28 @@ BarrasArena::BarrasArena(float ancho, float alto) : anchoMaximo(ancho), alto(alt
 // Función Actualizar
 void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque, sf::Vector2f posicionPieza) {
     // --- 1. LÓGICA DE VIDA ---
-    float porcentajeVida = (vidaMaxima > 0) ? (std::max(0.f, vidaActual) / vidaMaxima) : 0.f;
+    float vida = std::max(0.f, vidaActual);
+    float porcentajeVida = (vidaMaxima > 0) ? vida / vidaMaxima : 0;
     barraActual.setSize(sf::Vector2f(anchoMaximo * porcentajeVida, alto));
 
-    // --- 2. LÓGICA DE ATAQUE (Se detiene al final) ---
-    float tiempoTranscurrido = relojInterno.getElapsedTime().asSeconds();
-    float porcentajeAtaque = (velAtaque > 0) ? (tiempoTranscurrido / velAtaque) : 1.f;
+    // Colores salud
+    if (porcentajeVida > 0.5f) barraActual.setFillColor(sf::Color::Green);
+    else if (porcentajeVida > 0.25f) barraActual.setFillColor(sf::Color::Yellow);
+    else barraActual.setFillColor(sf::Color::Red);
 
-    // CRUCIAL: Bloqueamos el porcentaje en 1.0 (100%) para que se quede llena
+    // --- LÓGICA DE ATAQUE ---
+    float carga = std::max(0.f, cargaAtaque);
+    float porcentajeAtaque = (ataqueMaximo > 0) ? carga / ataqueMaximo : 0;
+
     if (porcentajeAtaque > 1.f) {
         porcentajeAtaque = 1.f;
-        barraAtaque.setFillColor(sf::Color(150, 150, 150)); // Color de "Listo"
-    }
-    else {
-        barraAtaque.setFillColor(sf::Color(90, 90, 90)); // Color de "Cargando"
     }
 
     barraAtaque.setSize(sf::Vector2f(anchoMaximo * porcentajeAtaque, alto / 3.f));
+
+    // --- POSICIONAMIENTO ---
+    float offsetX = anchoMaximo / 2.f;
+    float offsetY = 35.f;
 
     // --- 3. POSICIONAMIENTO ---
     float offsetX = anchoMaximo / 2.f;
@@ -56,4 +61,13 @@ void BarrasArena::dibujar(sf::RenderWindow& window) const {
     window.draw(fondo);
     window.draw(barraActual);
     window.draw(barraAtaque);
+
+    // La barra de ataque la ponemos justo pegada debajo de la de salud (alto + 2px de margen)
+    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY + alto + 2.f);
+}
+
+void BarrasArena::dibujar(sf::RenderWindow& window) const {
+    window.draw(fondo);
+    window.draw(barraActual);
+    window.draw(barraAtaque); // <-- Dibujamos la nueva barra
 }

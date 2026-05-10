@@ -183,5 +183,6 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
+
     }
 }
