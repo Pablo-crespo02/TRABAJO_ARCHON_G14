@@ -3,15 +3,11 @@
 
 InterfazHUD::InterfazHUD(sf::RenderWindow& win, sf::Font& font) {
     this->window = &win;
-    this->fuente = font;
-
-    // Aquí puedes configurar tus textos
-    // ejemploTexto.setFont(this->fuente);
-    // ejemploTexto.setString("Vida: 100");
+    this->fuente = &font;
 }
 
 bool InterfazHUD::cargarFuente(const std::string& ruta) {
-    return fuente.loadFromFile(ruta);
+    return fuente->loadFromFile(ruta);
 }
 
 void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int jugadorActual, Pieza* seleccionada) {
@@ -22,7 +18,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
     // --- 1. CABECERA (RONDA, CICLO, TURNO) ---
     sf::Text textoTop;
-    textoTop.setFont(fuente);
+    textoTop.setFont(*fuente);
     textoTop.setOutlineThickness(2);
     textoTop.setOutlineColor(sf::Color::Black);
 
@@ -56,7 +52,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     float yActual = 60.f;
 
     sf::Text textoPanel;
-    textoPanel.setFont(fuente);
+    textoPanel.setFont(*fuente);
     textoPanel.setCharacterSize(35);
     textoPanel.setFillColor(sf::Color(120, 120, 130));
     textoPanel.setString("UNIDAD");
@@ -83,7 +79,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     if (seleccionada != nullptr) {
         // --- TÍTULO DE LA UNIDAD (Estilo THUNDERHAWK) ---
         sf::Text textoNombre;
-        textoNombre.setFont(fuente);
+        textoNombre.setFont(*fuente);
         textoNombre.setCharacterSize(55); // Aumentado para que destaque como en la foto
         textoNombre.setFillColor(sf::Color::White);
         textoNombre.setString(seleccionada->stats.nombre);
@@ -139,7 +135,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
 void InterfazHUD::dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal) {
     sf::Text t;
-    t.setFont(fuente);
+    t.setFont(*fuente);
     t.setCharacterSize(18);
     t.setFillColor(sf::Color(140, 140, 150));
     t.setString(etiqueta);

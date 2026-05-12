@@ -32,7 +32,6 @@ private:
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
-    sf::Clock reloj;
 public:
     std::vector<Pieza*> listaPiezas;
     Pieza* piezaSeleccionada = nullptr;
@@ -46,7 +45,7 @@ public:
 
     // Funciones que se quedan porque son LÓGICA
     void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
-    void actualizar(double dt, Estado EstadoActual);
+    void actualizar(double dt);
     void renderizar();
     void setEstado(Estado nuevoEstado) { estadoActual = nuevoEstado; }
 
@@ -59,8 +58,8 @@ public:
     void manejarEventos(const sf::View& vistaTablero);
 
     // Gestión de entrada específica del juego
-    void gestionarEntrada(sf::Event& evento);
-
+    void gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero);
+    Estado getEstado() { return estadoActual; }
     int getGanador() const { return ganadorPartida; }
     friend class InterfazHUD; // Para que el HUD siga leyendo datos
 };

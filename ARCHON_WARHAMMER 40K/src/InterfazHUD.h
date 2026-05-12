@@ -5,7 +5,7 @@
 class InterfazHUD {
 private:
     sf::RenderWindow* window;
-    sf::Font fuente;
+    sf::Font* fuente;
 
     // Formatos predefinidos para optimizar
     void dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal);
