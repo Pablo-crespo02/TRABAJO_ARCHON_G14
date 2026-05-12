@@ -1,17 +1,14 @@
-#include <SFML/Graphics.hpp>
-#include "Motor.h"
-int main() {
-    // 1. Creamos el motor. 
-    // NOTA: La ventana DEBE estar dentro del Motor para que manejarEventos funcione.
-    Motor mimotor;
+#include "Coordinador.h"
 
-    // 2. Bucle principal del juego
-    // Usamos una función del motor para saber si la ventana sigue abierta
-    while (mimotor.windowAbierta()) {
-        mimotor.manejarEventos();
-        mimotor.actualizar();
-        mimotor.renderizar();
-    }
+int main() {
+    // 1. Instanciamos el Coordinador.
+    // Al crearse, él se encargará de crear la ventana y el Motor.
+    Coordinador miJuego;
+
+    // 2. Simplemente lanzamos el bucle principal.
+    // Ya no necesitamos el 'while' aquí, porque el Coordinador 
+    // tiene su propio bucle interno (ejecutar).
+    miJuego.ejecutar();
 
     return 0;
 }

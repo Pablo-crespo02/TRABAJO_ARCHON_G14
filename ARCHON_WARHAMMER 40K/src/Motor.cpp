@@ -6,42 +6,30 @@
 #include<cmath>
 
 
-Motor::Motor() {
-    if (!hud.cargarFuente("fuentes/fuente_pixel.ttf")) {
-        // Si entra aquí, es que no encuentra el archivo
-        std::cout << "Error: No se encontro el archivo de fuente" << std::endl;
-    }
+// Constructor de Motor adaptado al Coordinador
+Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
+    : window(win),           // Conectamos con la ventana del Coordinador
+    fuenteGlobal(fuente), // Conectamos con la fuente del Coordinador
+    hud(window,fuente)
+{
+    // Ya NO cargamos la fuente aquí (ya la cargó el Coordinador)
+    // Ya NO creamos la ventana aquí (ya la creó el Coordinador)
 
-    if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
-        std::cout << "Error: No se encontro el archivo de fuente" << std::endl;
-    }
-
-    // Configuración de Ventana en Pantalla Completa
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
-    window.setFramerateLimit(60);
-
-    // Configuración de la Vista del Tablero (Mundo del Juego)
-    // Definimos un tamaño lógico fijo para el tablero (ej: 800x800)
-    vistaTablero.setSize(700.f, 700.f);
-    vistaTablero.setCenter(350.f, 350.f); // Centro lógico (size / 2)
-
-    // Define dónde aparece el tablero en la pantalla (de 0.0 a 1.0)
-    // Lo situamos un poco a la izquierda (x=0.10)
-    vistaTablero.setViewport(sf::FloatRect(0.10f, 0.20f, 0.60f, 0.80f));
-
-    // Configuración de la Vista de Interfaz (HUD)
-    // Esta vista usa las coordenadas píxel a píxel de la ventana para que sea fácil posicionar elementos
-    vistaUI = window.getDefaultView();
+    // 1. Inicialización de variables de estado
     jugadorActual = 1;
     cicloActual = 1;
     rondaActual = 1;
-    estadoActual = Estado::MenuPrincipal;
-    piezaSeleccionada = nullptr; // Importante para la interfaz de la derecha
+    ganadorPartida = 0;
+    piezaSeleccionada = nullptr;
+    piezaAtacante = nullptr;
+    piezaDefensor = nullptr;
 
-    // Inicializaciones de lógica
+    // 2. Generar el mundo inicial
+    // Llamamos a tus funciones de generación
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
+
+    std::cout << "Motor inicializado correctamente vinculado al Coordinador." << std::endl;
 }
 // Destructor para evitar fugas de memoria     
 Motor::~Motor() {
@@ -50,144 +38,45 @@ Motor::~Motor() {
     }
     listaPiezas.clear();
 };
-
-void Motor::renderizar() {
-    window.clear();
-
-    // 1. PANTALLA DE INICIO (Menu principal)
-    if (estadoActual == Estado::MenuPrincipal) {
-        window.setView(vistaUI);
-        pantallaInicio.dibujar(window);
+void Motor::limpiarDatos() {
+    // 1. Borrado de memoria (Importante para evitar fugas/leaks)
+    for (auto p : listaPiezas) {
+        delete p;
     }
+    listaPiezas.clear();
+    Hitboxes.clear();
 
-    // 2. MODO TABLERO
-    else if (estadoActual == Estado::Tablero) {
-        window.setView(vistaTablero);
+    // 2. Reseteo de variables lógicas
+    jugadorActual = 1;
+    cicloActual = 1;
+    rondaActual = 1;
+    ganadorPartida = 0;
+    piezaSeleccionada = nullptr;
+    piezaAtacante = nullptr;
+    piezaDefensor = nullptr;
 
-        // El tablero se dibuja a sí mismo
+    // 3. Regeneración del mundo
+    Generador::GenerarTablero(tablero);
+    Generador::GenerarDespliegueUnidades(*this);
+}
+void Motor::renderizar() {
+
+    if (estadoActual == Estado::Tablero) {
         tablero.dibujar(window);
-
-        // Cada pieza se dibuja a sí misma
         for (auto p : listaPiezas) {
             p->dibujar(window, estadoActual);
         }
-
-        // --- VISTA DE INTERFAZ (HUD) ---
-        window.setView(vistaUI);
-        hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
     }
-
-    // 3. MODO ARENA DE COMBATE
     else if (estadoActual == Estado::Arena) {
-        window.setView(vistaTablero);
-
-        // LA ARENA SE DIBUJA A SÍ MISMA (suelo, rocas, sangre, muros)
         arena.dibujar(window);
-
-        // CAPA DE HITBOXES UNIFICADA (Proyectiles a distancia y cortes Melee)
-        // Sustituye a los dos bucles for anteriores
         for (const auto& h : Hitboxes) {
             window.draw(h.getFormaHitbox());
         }
-
-        // LAS PIEZAS COMBATIENTES SE DIBUJAN A SÍ MISMAS
-        if (piezaAtacante != nullptr && piezaDefensor != nullptr) {
+        if (piezaAtacante && piezaDefensor) {
             piezaAtacante->dibujar(window, estadoActual);
             piezaDefensor->dibujar(window, estadoActual);
         }
     }
-
-    // 4. PANTALLA DE VICTORIA:
-    else if (estadoActual == Estado::Victoria) {
-        window.setView(vistaUI);
-
-        sf::Text textoVictoria;
-        textoVictoria.setFont(fuenteGlobal);
-
-        //El texto de la pantalla de victoria cambia según el equipo ganador (1 = LUZ, 2 = OSCURIDAD))
-        if (ganadorPartida == 1) {
-            textoVictoria.setString("VICTORIA DEL IMPERIUM");
-            textoVictoria.setFillColor(sf::Color::Yellow);
-        }
-
-        else if (ganadorPartida == 2){
-            textoVictoria.setString("VICTORIA XENOS");
-            textoVictoria.setFillColor(sf::Color::Red);
-        }
-
-        //Establecemos el tamaño del texto:
-        textoVictoria.setCharacterSize(80);
-
-        // Centramos el texto principal
-        sf::FloatRect textRect = textoVictoria.getLocalBounds();
-        textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-        textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
-
-        // Texto de "Pulsa Enter":
-        sf::Text textoContinuar;
-        textoContinuar.setFont(fuenteGlobal);
-        textoContinuar.setString("Pulsa ENTER para volver al menu");
-        textoContinuar.setCharacterSize(30);
-        textoContinuar.setFillColor(sf::Color::White);
-
-        // Centramos el texto secundario:
-        sf::FloatRect contRect = textoContinuar.getLocalBounds();
-        textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
-        textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.f);
-
-        window.draw(textoVictoria);
-        window.draw(textoContinuar);
-    }
-    //5.PANTALLA INSTRUCCIONES
-    else if (estadoActual == Estado::Instrucciones) {
-        window.setView(vistaUI); // Usamos la vista completa
-        sf::Text textoInstrucciones;
-        textoInstrucciones.setFont(fuenteGlobal);
-        textoInstrucciones.setCharacterSize(35);
-        textoInstrucciones.setFillColor(sf::Color::White);
-
-        // El \n sirve para hacer saltos de línea en el texto
-        textoInstrucciones.setString(
-            "         OBJETIVO DE LA CRUZADA\n"
-            "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
-            "         FASE ESTRATEGICA (Tablero)\n"
-            "- Raton (Click Izquierdo) para mover unidades.\n\n"
-            "         FASE DE COMBATE (Arena)\n"
-            "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
-            "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
-        );
-        textoInstrucciones.setPosition(100.f, 150.f);
-        window.draw(textoInstrucciones);
-    }
-    // 6. PANTALLA CREDITOS
-    else if (estadoActual == Estado::Creditos) {
-        window.setView(vistaUI);
-        sf::Text textoCreditos;
-        textoCreditos.setFont(fuenteGlobal);
-        textoCreditos.setCharacterSize(35);
-        textoCreditos.setFillColor(sf::Color::Yellow); // Color amarillo para que destaque
-
-        // Aquí es donde añadimos vuestros nombres
-        textoCreditos.setString(
-            "               DESARROLLO Y PROGRAMACION\n\n"
-            "               Javier Monrio\n"
-            "               Gonzalo Castro\n"
-            "               Pablo Crespo\n"
-            "               Javier Lerin\n"
-            "               Cecilia Barrio\n\n\n"
-            "               BASADO EN\n" //Diseño no se puede poner porque la fuente no tiene Ñ
-            "               Archon: The Light and the Dark (1983)\n\n\n"
-            "               UNIVERSO Y LORE\n"
-            "               Warhammer 40,000 (Games Workshop)\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
-        );
-
-        // Ajustamos un poco la posición para que quepan todos los nombres
-        textoCreditos.setPosition(150.f, 120.f);
-        window.draw(textoCreditos);
-    }
-    window.display();
 }
 
 /////////////////////////  CÁLCULO DEL MODIFICADOR DEL TERRENO  //////////////////////////
@@ -241,8 +130,6 @@ void Motor::intentarAccionJugador(int idJugador) {
 
             tablero.actualizarColores(cicloActual);
         }
-
-        imprimirEstado();
     }
     else {
         //Avisar que no es su turno
@@ -389,15 +276,9 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     estadoActual = Estado::Arena;
 }
 
-void Motor::imprimirEstado() {
-    std::cout << "Ronda " << rondaActual
-        << " | Ciclo [" << cicloActual << "/12] | "
-        << "Siguiente Turno: Jugador " << jugadorActual << std::endl;
-}
-
 //MANEJO DE CLICKS EN EL TABLERO:
 
-void Motor::manejarClick(sf::Vector2i mousePos) {
+void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
     // Comprueba que el juego está en el estado tablero:
     if (estadoActual != Estado::Tablero) return;
@@ -483,7 +364,7 @@ void Motor::manejarClick(sf::Vector2i mousePos) {
     }
 }
 
-void Motor::manejarEventos() {
+void Motor::manejarEventos(const sf::View& vistaTablero) {
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
@@ -522,7 +403,7 @@ void Motor::manejarEventos() {
                 }
             }
         }
-        //pulsando enter para salir de op2 y op3
+        //pulsando enter o escape para salir 
         else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Enter) {
@@ -534,7 +415,7 @@ void Motor::manejarEventos() {
         else if (estadoActual == Estado::Tablero) {
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    manejarClick(sf::Mouse::getPosition(window));
+                    manejarClick(sf::Mouse::getPosition(window), vistaTablero);
                 }
             }
         }
@@ -566,10 +447,10 @@ void Motor::manejarEventos() {
 
 //GESTIÓN DEL TECLADO ARENA
 
-void Motor::actualizar() {
+void Motor::actualizar(double dt, Estado estadoActual) {
 
     //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
-    double dt = reloj.restart().asSeconds();
+    dt = reloj.restart().asSeconds();
 
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;

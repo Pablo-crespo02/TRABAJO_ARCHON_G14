@@ -1,11 +1,12 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include "Arena.h"
-#include "EstadoJuego.h"
 #include <vector>
 #include <string>
 #include "BarrasArena.h"
+#include "EstadoJuego.h"
 #include "Hitboxes.h"
+#include "Coordinador.h"
+
 
 // Enums básicos para todo el juego
 enum class Bando { LUZ, OSCURIDAD };
