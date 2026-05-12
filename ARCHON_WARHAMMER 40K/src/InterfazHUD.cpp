@@ -1,7 +1,14 @@
 #include "InterfazHUD.h"
 #include <string>
 
-InterfazHUD::InterfazHUD() {}
+InterfazHUD::InterfazHUD(sf::RenderWindow& win, sf::Font& font) {
+    this->window = &win;
+    this->fuente = font;
+
+    // Aquí puedes configurar tus textos
+    // ejemploTexto.setFont(this->fuente);
+    // ejemploTexto.setString("Vida: 100");
+}
 
 bool InterfazHUD::cargarFuente(const std::string& ruta) {
     return fuente.loadFromFile(ruta);

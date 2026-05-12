@@ -138,6 +138,7 @@
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
     <ClCompile Include="src\ClaseUnicornio.cpp" />
+    <ClCompile Include="src\Coordinador.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\GenerarArena.cpp" />
     <ClCompile Include="src\InterfazHUD.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="src\ClaseGolem.h" />
     <ClInclude Include="src\ClaseUnicornio.h" />
     <ClInclude Include="src\Color.h" />
+    <ClInclude Include="src\Coordinador.h" />
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
     <ClInclude Include="src\GenerarArena.h" />

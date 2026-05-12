@@ -1,67 +1,67 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include "Tablero.h"
 #include "Pieza.h"
 #include "Arena.h"
-#include "EstadoJuego.h"
-#include <vector>
-#include "Pantallainicio.h"
 #include "Hitboxes.h"
+#include "EstadoJuego.h"
 #include "InterfazHUD.h"
-class Motor {
-private:
+#include "PantallaInicio.h"
+#include <vector>
 
-    //ATRIBUTOS MOTOR:
+// Enums básicos para todo el juego
+
+class Coordinador;
+
+class Motor {
+    friend class InterfazHUD; // Para que el HUD siga leyendo datos
+
+private:
+    // --- LÓGICA DE JUEGO ---
     Tablero tablero;
     Arena arena;
-    PantallaInicio pantallaInicio;
     InterfazHUD hud;
-    int jugadorActual = 1;       // 1 o 2
-    int cicloActual = 1;         // De 1 a 12
-    int rondaActual = 1;         // Incrementa tras ciclo 12
-    int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
+    Estado estadoActual; // Copia local del estado
+    int jugadorActual = 1;
+    int cicloActual = 1;
+    int rondaActual = 1;
+    int ganadorPartida = 0;
     std::string cicloNombre = "Luz";
-    Estado estadoActual;
-    sf::RenderWindow window;
-    sf::View vistaTablero;
-    sf::View vistaUI;
-    sf::Clock reloj;
-    sf::Font fuenteGlobal;
-    std::vector<Hitbox> Hitboxes;    //Contenedor para los hitboxes activos
-    //IMPORTANTE: hacer CLEAR al vector cuando termine una batalla en la arena
+
+    std::vector<Hitbox> Hitboxes;
     double limitecolision = 36;
 
+    // Referencias externas (necesarias para dibujar y leer recursos)
+    sf::RenderWindow& window;
+    sf::Font& fuenteGlobal;
+    sf::Clock reloj;
 public:
-    bool windowAbierta() { return window.isOpen(); }
-
     std::vector<Pieza*> listaPiezas;
-    Pieza* piezaSeleccionada = nullptr; // Para saber qué pieza estamos moviendo
+    Pieza* piezaSeleccionada = nullptr;
     Pieza* piezaAtacante = nullptr;
-    Pieza* piezaDefensor = nullptr; // Lista de todas las piezas en juego...
-    //... pública porque se modificará desde otros .cpp ('Generador'), también se puede declarar amiga
+    Pieza* piezaDefensor = nullptr;
+    PantallaInicio pantallaInicio; //En la parte pública
 
-    Motor(); //Declaración constructor
-    ~Motor(); // Para borrar las piezas al cerrar
+    // El constructor ahora recibe la ventana y la fuente del Coordinador
+    Motor(sf::RenderWindow& win, sf::Font& fuente);
+    ~Motor();
 
-    static void generarMapa(Arena& arena, sf::Color cLuz = sf::Color::White, sf::Color cOsc = sf::Color(50, 50, 50));
-    void manejarClick(sf::Vector2i mousePos);
-    void manejarEventos();
-    void actualizar();
+    // Funciones que se quedan porque son LÓGICA
+    void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
+    void actualizar(double dt, Estado EstadoActual);
     void renderizar();
-    void dibujarHUD();
-    void dibujarInfoPieza(sf::RenderWindow& window, Pieza* pieza, float x, float y);
-
-    // Se llama cuando un jugador termina su acción
-    void intentarAccionJugador(int idJugador);
-
-    // Muestra el estado por consola
-    void imprimirEstado();
+    void setEstado(Estado nuevoEstado) { estadoActual = nuevoEstado; }
 
     void iniciarCombate(Pieza* atacante, Pieza* defensor);
-
-    //Verifica las condiciones de victoria:
+    void intentarAccionJugador(int idJugador);
+    void limpiarDatos();
     void VerificarVictoria();
-
-    //Función de vuelta al menú principal, reiniciando todos los parámetros
+    void dibujarHUD();
     void reiniciarJuego();
-};
+    void manejarEventos(const sf::View& vistaTablero);
 
+    // Gestión de entrada específica del juego
+    void gestionarEntrada(sf::Event& evento);
+
+    int getGanador() const { return ganadorPartida; }
+};
