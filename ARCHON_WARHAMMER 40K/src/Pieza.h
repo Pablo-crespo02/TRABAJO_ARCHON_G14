@@ -5,9 +5,8 @@
 #include "BarrasArena.h"
 #include "EstadoJuego.h"
 #include "Hitboxes.h"
-#include "Coordinador.h"
 
-
+class Coordinador;
 // Enums básicos para todo el juego
 enum class Bando { LUZ, OSCURIDAD };
 

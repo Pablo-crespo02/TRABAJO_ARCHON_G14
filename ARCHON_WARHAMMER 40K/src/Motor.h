@@ -1,21 +1,19 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <string>      // Te faltaba esta para std::string
+#include "EstadoJuego.h" 
 #include "Tablero.h"
 #include "Pieza.h"
 #include "Arena.h"
 #include "Hitboxes.h"
-#include "EstadoJuego.h"
 #include "InterfazHUD.h"
 #include "PantallaInicio.h"
-#include <vector>
 
-// Enums básicos para todo el juego
-
-class Coordinador;
+class Coordinador; // Predeclaración correcta
 
 class Motor {
-    friend class InterfazHUD; // Para que el HUD siga leyendo datos
-
+    
 private:
     // --- LÓGICA DE JUEGO ---
     Tablero tablero;
@@ -64,4 +62,5 @@ public:
     void gestionarEntrada(sf::Event& evento);
 
     int getGanador() const { return ganadorPartida; }
+    friend class InterfazHUD; // Para que el HUD siga leyendo datos
 };

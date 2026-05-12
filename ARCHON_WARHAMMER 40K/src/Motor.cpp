@@ -668,3 +668,12 @@ void Motor::actualizar(double dt, Estado estadoActual) {
         }
     }
 }
+void Motor::dibujarHUD() {
+    // Aquí es donde llamas al dibujar de tu objeto hud
+    hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);    // O si tu hud necesita parámetros: 
+    // hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+}
+void Motor::gestionarEntrada(sf::Event& evento) {
+    // Aquí irá la lógica de teclas específicas del juego si las necesitas
+    // Por ahora puede estar vacía para que el error desaparezca
+}
