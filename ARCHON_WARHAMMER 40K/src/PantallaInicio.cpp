@@ -22,7 +22,6 @@ PantallaInicio::PantallaInicio() {
 
     // 3. Configuración del Título
     textoTitulo.setFont(fuente);
-    textoTitulo.setString("MENU PRINCIPAL");
     textoTitulo.setCharacterSize(65);
     textoTitulo.setFillColor(sf::Color::Black);
     textoTitulo.setOutlineThickness(3.f);

@@ -23,10 +23,8 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
     //CARGA DE SPRITES (Chibi)
     if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
-
-        std::string rutaTablero = (tipo == "DREADNOUGHT") ? "imagenes/BASE-DREADNAUGHT-Humanidad.png" : "imagenes/BASE-CARNIFEX-TYRANIDS.png";
-        std::string rutaArena = (tipo == "DREADNOUGHT") ? "imagenes/Chibi-DREADNAUGHT-Humanidad-1.0.png" : "imagenes/Chibi-CARNIFEX-TYRANIDS-1.0.png";
-
+        std::string rutaTablero = (tipo == "DREADNOUGHT") ? "imagenes/BASE-DREADNOUGHT-Humanidad.png" : "imagenes/BASE-CARNIFEX-TYRANIDS.png";
+        std::string rutaArena = (tipo == "DREADNOUGHT") ? "imagenes/Chibi-DREADNOUGHT-Humanidad-1.0.png" : "imagenes/Chibi-CARNIFEX-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -69,7 +67,7 @@ void ClaseGolem::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     PiezaTerrestre::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
-    if (this->stats.nombre == "DREADNOUGHT" || this->stats.nombre == "CARNIFEX") {
+    if (this->stats.nombre == "DREADNOUGH" || this->stats.nombre == "CARNIFEX") {
         animar(dt, direccion);
     }
 }

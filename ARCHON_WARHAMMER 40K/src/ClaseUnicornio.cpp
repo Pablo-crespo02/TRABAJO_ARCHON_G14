@@ -1,70 +1,205 @@
 #include "ClaseUnicornio.h"
 #include <iostream>
+#include <cmath> 
+
+const float PIEZA_ALTURA_TABLERO = 90.0f;
+const float PIEZA_ALTURA_ARENA = 120.0f;
 
 ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)
 {
+    //ESTADÍSTICAS 
     this->stats.nombre = tipo;
-    this->patronMovimiento = PatronMovimiento::Diagonal;
+    this->stats.vida = 25.0f;
+    this->stats.vidaMaxima = 25.0f; // Ajusta a valores en el futuro
+    this->stats.ataque = 10.0f;
+    this->stats.defensa = 15.0f;
+    this->stats.velAtaque = 1.0f;
+    // --- Lógica de tipos ---
+    this->stats.esRango = false;    // El Golem es melee
 
-    // Estadísticas
-    this->stats.vida = 7.0f;
-    this->stats.vidaMaxima = 7.0f; // Asegúrate de inicializar vidaMaxima
-    this->stats.ataque = 8.0f;
-    this->stats.defensa = 5.0f;
-    this->rangoMovimiento = 4;
-    this->stats.velAtaque = 0.5f;
-    this->stats.esRango = true;
+    this->rangoMovimiento = 3;
+    this->patronMovimiento = PatronMovimiento::Ambos;
+    this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
+    //CARGA DE SPRITES (Chibi)
+    if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
+        std::string rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PROTOTIPO-XXX.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
+        std::string rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PROTOTIPO-XXX.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+
+        int columnas = 5;
+        int filas = 2;
+
+        if (!texturaTablero.loadFromFile(rutaTablero)) {
+            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
+        }
+        spriteTablero.setTexture(texturaTablero);
+        spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
+
+        float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
+        spriteTablero.setScale(escalaTablero, escalaTablero);
+
+        if (!texturaArena.loadFromFile(rutaArena)) {
+            std::cout << "Error: No se encontro " << rutaArena << std::endl;
+        }
+        spriteArena.setTexture(texturaArena);
+
+        anchoFrame = texturaArena.getSize().x / columnas;
+        altoFrame = texturaArena.getSize().y / filas;
+
+        spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
+        spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
+
+        float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+        if (this->bando == Bando::OSCURIDAD) {
+            spriteArena.setScale(-escalaArena, escalaArena);
+        }
+        else {
+            spriteArena.setScale(escalaArena, escalaArena);
+        }
+
+        frameActual = 0;
+        temporizadorAnimacion = 0.0f;
+    }
 }
-//Gestiona dt y permite que el escudo se apague tras 5 segundos
+
+//ENLACE DE FÍSICAS Y ANIMACIÓN
 void ClaseUnicornio::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    // Actualizamos el cronómetro del escudo y parálisis
-    this->gestionarEstadosAlterados(static_cast<double>(dt));
-
-    // Si está inmovilizado, no se mueve
-    if (this->getInmovilizado()) return;
-
-    // Ejecutamos el movimiento normal heredado
+    //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
     PiezaTerrestre::procesarMovimientoArena(direccion, dt, arena);
+
+    //Actualizamos la imagen visible con nuestra máquina de estados
+    if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+        animar(dt, direccion);
+    }
+}
+
+void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
+    int fila = 0;
+    int colInicial = 0;
+    int colFinal = 0;
+
+    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
+    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
+
+    if (estaAtacando) {
+        //FOTOGRAMA DE ATAQUE 
+        fila = 1;
+        colInicial = 2;
+        colFinal = 2;
+    }
+    else if (direccion.x != 0) {
+        //FOTOGRAMA DE CAMINAR LATERAL 
+        fila = 0;
+        colInicial = 1;
+        colFinal = 4;
+    }
+    else if (direccion.y > 0) {
+        //FOTOGRAMA DE ABAJO 
+        fila = 1;
+        colInicial = 3;
+        colFinal = 3;
+    }
+    else if (direccion.y < 0) {
+        // FOTOGRAMA DE ARRIBA 
+        fila = 1;
+        colInicial = 4;
+        colFinal = 4;
+    }
+    else {
+        //FOTOGRAMA QUIETO
+        fila = 0;
+        colInicial = 0;
+        colFinal = 0;
+    }
+
+    int posY_Textura = fila * altoFrame;
+    int posY_Actual = spriteArena.getTextureRect().top;
+
+    if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
+        frameActual = colInicial;
+        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
+        temporizadorAnimacion = 0.0f;
+    }
+
+    if (colInicial != colFinal) {
+        temporizadorAnimacion += dt;
+        float velocidadAnimacion = 0.15f;
+
+        if (temporizadorAnimacion >= velocidadAnimacion) {
+            temporizadorAnimacion = 0.0f;
+            frameActual++;
+
+            if (frameActual > colFinal) {
+                frameActual = colInicial;
+            }
+
+            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
+        }
+    }
+
+    //ARREGLO DEL EFECTO ESPEJO
+    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+    if (direccion.x < 0) {
+        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
+    }
+    else if (direccion.x > 0) {
+        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
+    }
+    else {
+        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
+        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
+        spriteArena.setScale(escalaActualX, escalaArena);
+    }
 }
 
 void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
-        formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
 
-        if (seleccionado) {
-            formaVisual.setOutlineThickness(4.0f);
-            formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
+        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+
+            //CÍRCULO DE SELECCIÓN AMARILLO
+            if (seleccionado) {
+                sf::CircleShape anilloSeleccion(25.f);
+                anilloSeleccion.setOrigin(25.f, 25.f);
+                anilloSeleccion.setPosition(posicionAbsoluta);
+                anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
+                anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
+                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
+                window.draw(anilloSeleccion);
+            }
+
+            spriteTablero.setPosition(posicionAbsoluta);
+            window.draw(spriteTablero);
         }
         else {
-            formaVisual.setOutlineThickness(0.0f);
+            formaVisual.setPosition(posicionAbsoluta);
+            formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
+            if (seleccionado) {
+                formaVisual.setOutlineThickness(4.0f);
+                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
+            }
+            else {
+                formaVisual.setOutlineThickness(0.0f);
+            }
+            window.draw(formaVisual);
         }
     }
     else if (estadoActual == Estado::Arena) {
-        formaVisual.setPosition(posicionAbsoluta);
-        formaVisual.setOutlineThickness(0.0f);
-        formaVisual.setOrigin(20.f, 20.f);
-
-        // Dibujo del Halo (Escudo)
-        if (this->getInvulnerable()) {
-            double radioDbl = 35.0;
-            sf::CircleShape halo(static_cast<float>(radioDbl));
-            halo.setOrigin(static_cast<float>(radioDbl), static_cast<float>(radioDbl));
-            halo.setPosition(posicionAbsoluta);
-
-            halo.setFillColor(sf::Color(255, 215, 0, 80));
-            halo.setOutlineColor(sf::Color(255, 255, 255, 180));
-            halo.setOutlineThickness(2.0f);
-            window.draw(halo);
+        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+            spriteArena.setPosition(posicionAbsoluta);
+            window.draw(spriteArena);
+        }
+        else {
+            formaVisual.setPosition(posicionAbsoluta);
+            window.draw(formaVisual);
         }
 
-    //Barra de salud
+        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
-    }
 
-    window.draw(formaVisual);
+    }
 }
 
 void ClaseUnicornio::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
