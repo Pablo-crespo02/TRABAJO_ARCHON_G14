@@ -199,7 +199,7 @@ void Motor::VerificarVictoria() {
 
     //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
     //Condiciones LUZ:
-    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
+    if (piezasOscuridad == 0 || powerPointsLuz >= 2) {
         estadoActual = Estado::Victoria;
         ganadorPartida = 1;
         std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;
@@ -217,14 +217,9 @@ void Motor::VerificarVictoria() {
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
-
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
-
     // Limpia estados de selección previos
     piezaAtacante->setSeleccionado(false);
     piezaDefensor->setSeleccionado(false);
@@ -273,7 +268,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
     std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
 
-    estadoActual = Estado::Arena;
+   estadoActual = Estado::Arena;
 }
 
 //MANEJO DE CLICKS EN EL TABLERO:
@@ -447,11 +442,9 @@ void Motor::manejarEventos(const sf::View& vistaTablero) {
 
 //GESTIÓN DEL TECLADO ARENA
 
-void Motor::actualizar(double dt, Estado estadoActual) {
+void Motor::actualizar(double dt) {
 
     //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
-    dt = reloj.restart().asSeconds();
-
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;
 
@@ -669,11 +662,16 @@ void Motor::actualizar(double dt, Estado estadoActual) {
     }
 }
 void Motor::dibujarHUD() {
-    // Aquí es donde llamas al dibujar de tu objeto hud
-    hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);    // O si tu hud necesita parámetros: 
-    // hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+    // Usamos el estadoActual de la CLASE, no uno pasado por fuera
+    if (this->estadoActual == Estado::Tablero) {
+        hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+    }
 }
-void Motor::gestionarEntrada(sf::Event& evento) {
-    // Aquí irá la lógica de teclas específicas del juego si las necesitas
-    // Por ahora puede estar vacía para que el error desaparezca
+void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
+    if (estadoActual == Estado::Tablero) {
+        if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
+            manejarClick(sf::Mouse::getPosition(window), vistaTablero);
+        }
+    }
+    // No pongas el movimiento aquí, ya lo tienes en Motor::actualizar con isKeyPressed
 }

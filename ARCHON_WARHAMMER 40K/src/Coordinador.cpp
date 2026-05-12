@@ -1,4 +1,4 @@
-#include "Coordinador.h"
+    #include "Coordinador.h"
 
 Coordinador::Coordinador()
     : motor(window, fuenteGlobal) 
@@ -35,20 +35,26 @@ void Coordinador::ejecutar() {
 void Coordinador::gestionarEventos() {
     sf::Event evento;
     while (window.pollEvent(evento)) {
-        if (evento.type == sf::Event::Closed) window.close();
+        // 1. Evento de cierre (siempre activo)
+        if (evento.type == sf::Event::Closed) {
+            window.close();
+        }
 
-        if (evento.type == sf::Event::KeyPressed) {
-            // --- ESTADO MENU PRINCIPAL ---
-            if (estadoActual == Estado::MenuPrincipal) {
+        // 2. Lógica PARA EL MENÚ
+        if (estadoActual == Estado::MenuPrincipal) {
+            if (evento.type == sf::Event::KeyPressed) {
+                // Navegación
                 if (evento.key.code == sf::Keyboard::Up)    pantallaInicio.moverArriba();
                 if (evento.key.code == sf::Keyboard::Down)  pantallaInicio.moverAbajo();
 
+                // Selección
                 if (evento.key.code == sf::Keyboard::Enter) {
                     int seleccion = pantallaInicio.getIndiceSeleccionado();
-
+                     
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
-                        this->reiniciarPartida(); // Tu función de limpieza
+                        this->reiniciarPartida();
+                        motor.setEstado(Estado::Tablero);
                         estadoActual = Estado::Tablero;
                         break;
                     case 1: // REANUDAR PARTIDA
@@ -60,27 +66,43 @@ void Coordinador::gestionarEventos() {
                     case 3: // CREDITOS
                         estadoActual = Estado::Creditos;
                         break;
-                    case 4: // SALIR (En tu string es la opción 4)
+                    case 4: // SALIR
                         window.close();
                         break;
                     case 5: // CARGAR PARTIDA
-                        // AQUI EL CODIGO DE CARGAR PARTIDA
+                        // Tu lógica de carga aquí
                         break;
                     }
-                    // Sincronizamos el estado con el motor
+                    // Sincronizamos el cambio de estado con el motor
                     motor.setEstado(estadoActual);
                 }
             }
-            // --- OTROS ESTADOS (VOLVER AL MENU) ---
-            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
-                if (evento.key.code == sf::Keyboard::Escape) {
+        }
+        
+        // --- LÓGICA PARA VOLVER AL MENÚ DESDE VICTORIA ---
+        else if (estadoActual == Estado::Victoria) {
+            if (evento.type == sf::Event::KeyPressed) {
+                if (evento.key.code == sf::Keyboard::Enter) {
                     estadoActual = Estado::MenuPrincipal;
+                    motor.reiniciarJuego();
                 }
             }
-            // --- JUEGO (DELEGAMOS AL MOTOR) ---
-            else {
-                motor.gestionarEntrada(evento);
+        }
+        // --- LÓGICA PARA VOLVER AL MENÚ DESDE INSTRUCCIONES O CREDITOS ---
+        else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
+            if (evento.type == sf::Event::KeyPressed) {
+                if (evento.key.code == sf::Keyboard::Escape || evento.key.code == sf::Keyboard::Enter) {
+                    estadoActual = Estado::MenuPrincipal;
+                    motor.setEstado(estadoActual);
+                }
             }
+        }
+        else {
+            // --- ESTADO TABLERO / ARENA / VICTORIA ---
+            // Aquí delegamos al motor. 
+            // Como estamos DENTRO del Coordinador, le pasamos nuestra 'vistaTablero' 
+            // directamente al motor sin que la función de arriba necesite argumentos.
+            motor.gestionarEntrada(evento, vistaTablero);
         }
     }
 }
@@ -88,61 +110,93 @@ void Coordinador::gestionarEventos() {
 void Coordinador::dibujar() {
     window.clear();
 
-    // 1. PANTALLA DE INICIO
     if (estadoActual == Estado::MenuPrincipal) {
-        window.setView(vistaUI);
-        // Pasamos el índice seleccionado al dibujar
-        motor.pantallaInicio.dibujar(window);
+        pantallaInicio.dibujar(window);
     }
-    // 2. MODO TABLERO
     else if (estadoActual == Estado::Tablero) {
         window.setView(vistaTablero);
-        motor.renderizar(); // Dibuja tablero y piezas
+        motor.renderizar();
 
         window.setView(vistaUI);
-        motor.dibujarHUD(); // HUD siempre en vista UI
+        motor.dibujarHUD();
     }
-    // 3. MODO ARENA
     else if (estadoActual == Estado::Arena) {
-        window.setView(vistaTablero);
-        motor.renderizar(); // Dibuja arena y combatientes
+        window.setView(vistaTablero); // O la vista que uses para arena
+        motor.renderizar();
 
-        // Si quieres HUD en la arena, descomenta la siguiente línea:
-        // window.setView(vistaUI); motor.dibujarHUD();
     }
-    // 4. PANTALLA DE VICTORIA
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
-        dibujarPantallaVictoria(); // La hemos movido a una función aparte
+        sf::Text textoVictoria;
+        dibujarPantallaVictoria();
     }
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
-        window.setView(vistaUI);
-        sf::Text txt;
-        txt.setFont(fuenteGlobal);
-        txt.setCharacterSize(35);
-        txt.setFillColor(sf::Color::White);
-        txt.setString("OBJETIVO DE LA CRUZADA\nDomina los 5 Nodos...\n\n(ESC para volver)");
-        txt.setPosition(100.f, 150.f);
-        window.draw(txt);
+        window.setView(vistaUI); // Usamos la vista completa
+        sf::Text textoInstrucciones;
+        textoInstrucciones.setFont(fuenteGlobal);
+        textoInstrucciones.setCharacterSize(35);
+        textoInstrucciones.setFillColor(sf::Color::White);
+
+        // El \n sirve para hacer saltos de línea en el texto
+        textoInstrucciones.setString(
+            "         OBJETIVO DE LA CRUZADA\n"
+            "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
+            "         FASE ESTRATEGICA (Tablero)\n"
+            "- Raton (Click Izquierdo) para mover unidades.\n\n"
+            "         FASE DE COMBATE (Arena)\n"
+            "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
+            "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
+            "      (Pulsa ESC para volver al menu)"
+        );
+        textoInstrucciones.setPosition(100.f, 150.f);
+        window.draw(textoInstrucciones);
     }
     // 6. PANTALLA CRÉDITOS
     else if (estadoActual == Estado::Creditos) {
         window.setView(vistaUI);
-        sf::Text txt;
-        txt.setFont(fuenteGlobal);
-        txt.setCharacterSize(35);
-        txt.setFillColor(sf::Color::Yellow);
-        txt.setString("DESARROLLO Y PROGRAMACION\n\nJavier Monrio...");
-        txt.setPosition(150.f, 120.f);
-        window.draw(txt);
+        sf::Text textoCreditos;
+        textoCreditos.setFont(fuenteGlobal);
+        textoCreditos.setCharacterSize(35);
+        textoCreditos.setFillColor(sf::Color::Yellow); // Color amarillo para que destaque
+
+        // Aquí es donde añadimos vuestros nombres
+        textoCreditos.setString(
+            "               DESARROLLO Y PROGRAMACION\n\n"
+            "               Javier Monrio\n"
+            "               Gonzalo Castro\n"
+            "               Pablo Crespo\n"
+            "               Javier Lerin\n"
+            "               Cecilia Barrio\n\n\n"
+            "               BASADO EN\n"
+            "               Archon: The Light and the Dark (1983)\n\n\n"
+            "               UNIVERSO Y LORE\n"
+            "               Warhammer 40,000 (Games Workshop)\n\n\n"
+            "      (Pulsa ESC para volver al menu)"
+        );
+
+        // Ajustamos un poco la posición para que quepan todos los nombres
+        textoCreditos.setPosition(150.f, 120.f);
+        window.draw(textoCreditos);
     }
 
     window.display();
 }
 void Coordinador::actualizar(float dt) {
-    if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
-        motor.actualizar(dt, estadoActual); // El motor solo actualiza si hay juego
+    // Llamamos al motor solo con el tiempo
+    motor.actualizar(dt);
+
+    // Sincronizamos el estado para que el Coordinador sepa qué dibujar
+    // (Asegúrate de tener el método getEstado() en Motor.h)
+    if (motor.getEstado() == Estado::Tablero && estadoActual == Estado::Arena) {
+        estadoActual = Estado::Tablero;
+    }
+    else if (motor.getEstado() == Estado::Arena && estadoActual == Estado::Tablero) {
+        estadoActual = Estado::Arena;
+    }
+    else if (motor.getEstado()== Estado::Victoria && estadoActual != Estado::Victoria) {
+        estadoActual = Estado::Victoria;
+        std::cout << "Coordinador: ¡Detectada victoria en el Motor!" << std::endl;
     }
 }
 void Coordinador::reiniciarPartida() {
