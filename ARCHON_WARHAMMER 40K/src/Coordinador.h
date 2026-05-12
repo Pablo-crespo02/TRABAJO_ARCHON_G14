@@ -1,10 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "iostream"
-#include "InterfazHUD.h"
+#include <iostream>
 #include "EstadoJuego.h"
+#include "InterfazHUD.h"
 #include "Pantallainicio.h"
-#include "Motor.h"
+// EL MOTOR DEBE IR AL FINAL de los includes de componentes
+#include "Motor.h" 
 
 class Coordinador {
 private:
