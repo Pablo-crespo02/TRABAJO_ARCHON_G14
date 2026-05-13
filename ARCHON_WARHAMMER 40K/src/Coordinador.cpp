@@ -14,6 +14,7 @@ Coordinador::Coordinador()
 
     // El estado inicial lo maneja el Coordinador
     estadoActual = Estado::MenuPrincipal;
+    menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
 
     // Inicializamos las vistas que pasaste
     vistaUI = window.getDefaultView();
@@ -35,73 +36,83 @@ void Coordinador::ejecutar() {
 void Coordinador::gestionarEventos() {
     sf::Event evento;
     while (window.pollEvent(evento)) {
-        // 1. Evento de cierre (siempre activo)
-        if (evento.type == sf::Event::Closed) {
-            window.close();
+        if (evento.type == sf::Event::Closed) window.close();
+        // Detectar la tecla ESCAPE para pausar/reanudar en cualquier momento
+        if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
+            // Si estamos jugando, guardamos el estado y pausamos
+            if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
+                estadoAnterior = estadoActual;
+                estadoActual = Estado::Pausa;
+            }
+            // Si ya estamos en pausa, volvemos a donde estábamos
+            else if (estadoActual == Estado::Pausa) {
+                estadoActual = estadoAnterior;
+            }
+            // Si estás en Instrucciones o Créditos, volver al menú
+            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
+                estadoActual = Estado::MenuPrincipal;
+            }
         }
 
-        // 2. Lógica PARA EL MENÚ
+        // Gestión del menú principal
         if (estadoActual == Estado::MenuPrincipal) {
             if (evento.type == sf::Event::KeyPressed) {
-                // Navegación
                 if (evento.key.code == sf::Keyboard::Up)    pantallaInicio.moverArriba();
                 if (evento.key.code == sf::Keyboard::Down)  pantallaInicio.moverAbajo();
 
-                // Selección
-                if (evento.key.code == sf::Keyboard::Enter) {
+                if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
                     int seleccion = pantallaInicio.getIndiceSeleccionado();
-                     
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
                         this->reiniciarPartida();
-                        motor.setEstado(Estado::Tablero);
                         estadoActual = Estado::Tablero;
+                        motor.setEstado(Estado::Tablero);
                         break;
                     case 1: // REANUDAR PARTIDA
                         estadoActual = Estado::Tablero;
+                        motor.setEstado(Estado::Tablero);
                         break;
-                    case 2: // INSTRUCCIONES
+                    case 2: estadoActual = Estado::Instrucciones; break;
+                    case 3: estadoActual = Estado::Creditos; break;
+                    case 4: window.close(); break;
+                    }
+                }
+            }
+        }
+        // Gestión de los botones dentro del Menú de Pausa
+        else if (estadoActual == Estado::Pausa) {
+            if (evento.type == sf::Event::KeyPressed) {
+                if (evento.key.code == sf::Keyboard::Up)    menuPausa->moverArriba();
+                if (evento.key.code == sf::Keyboard::Down)  menuPausa->moverAbajo();
+
+                if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
+                    int seleccion = menuPausa->getIndiceSeleccionado();
+                    switch (seleccion) {
+                    case 0: // REANUDAR
+                        estadoActual = estadoAnterior;
+                        break;
+                    case 1: // REINICIAR PARTIDA
+                        reiniciarPartida();
+                        estadoActual = Estado::Tablero;
+                        motor.setEstado(Estado::Tablero);
+                        break;
+                    case 2: // MENU PRINCIPAL
+                        estadoActual = Estado::MenuPrincipal;
+                        break;
+                    case 3: // INSTRUCCIONES
                         estadoActual = Estado::Instrucciones;
                         break;
-                    case 3: // CREDITOS
-                        estadoActual = Estado::Creditos;
+                    case 4: // GUARDAR PARTIDA (Falta tu lógica)
                         break;
-                    case 4: // SALIR
+                    case 5: // SALIR AL ESCRITORIO
                         window.close();
                         break;
-                    case 5: // CARGAR PARTIDA
-                        // Tu lógica de carga aquí
-                        break;
                     }
-                    // Sincronizamos el cambio de estado con el motor
-                    motor.setEstado(estadoActual);
                 }
             }
         }
-        
-        // --- LÓGICA PARA VOLVER AL MENÚ DESDE VICTORIA ---
-        else if (estadoActual == Estado::Victoria) {
-            if (evento.type == sf::Event::KeyPressed) {
-                if (evento.key.code == sf::Keyboard::Enter) {
-                    estadoActual = Estado::MenuPrincipal;
-                    motor.reiniciarJuego();
-                }
-            }
-        }
-        // --- LÓGICA PARA VOLVER AL MENÚ DESDE INSTRUCCIONES O CREDITOS ---
-        else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
-            if (evento.type == sf::Event::KeyPressed) {
-                if (evento.key.code == sf::Keyboard::Escape || evento.key.code == sf::Keyboard::Enter) {
-                    estadoActual = Estado::MenuPrincipal;
-                    motor.setEstado(estadoActual);
-                }
-            }
-        }
+        // 4. Gestión del motor (Juego normal)
         else {
-            // --- ESTADO TABLERO / ARENA / VICTORIA ---
-            // Aquí delegamos al motor. 
-            // Como estamos DENTRO del Coordinador, le pasamos nuestra 'vistaTablero' 
-            // directamente al motor sin que la función de arriba necesite argumentos.
             motor.gestionarEntrada(evento, vistaTablero);
         }
     }
@@ -113,17 +124,21 @@ void Coordinador::dibujar() {
     if (estadoActual == Estado::MenuPrincipal) {
         pantallaInicio.dibujar(window);
     }
-    else if (estadoActual == Estado::Tablero) {
+    // Si estamos jugando O en pausa, dibujamos el mundo
+    else if (estadoActual == Estado::Tablero || estadoAnterior == Estado::Tablero && estadoActual == Estado::Pausa) {
         window.setView(vistaTablero);
         motor.renderizar();
-
         window.setView(vistaUI);
         motor.dibujarHUD();
     }
-    else if (estadoActual == Estado::Arena) {
-        window.setView(vistaTablero); // O la vista que uses para arena
+    else if (estadoActual == Estado::Arena || estadoAnterior == Estado::Arena && estadoActual == Estado::Pausa) {
+        window.setView(vistaTablero);
         motor.renderizar();
+    }
 
+    // SI ES PAUSA, dibujamos el menú de pausa al final del todo (encima de todo)
+    if (estadoActual == Estado::Pausa) {
+        menuPausa->dibujar(window);
     }
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
@@ -182,6 +197,7 @@ void Coordinador::dibujar() {
 
     window.display();
 }
+
 void Coordinador::actualizar(float dt) {
     // Llamamos al motor solo con el tiempo
     motor.actualizar(dt);
@@ -198,16 +214,16 @@ void Coordinador::actualizar(float dt) {
         estadoActual = Estado::Victoria;
         std::cout << "Coordinador: ¡Detectada victoria en el Motor!" << std::endl;
     }
+    if (estadoActual != Estado::Pausa) {
+        motor.actualizar(dt);
+        // ... el resto de tus sincronizaciones de victoria ...
+    }
 }
+
 void Coordinador::reiniciarPartida() {
-    // Le ordenamos al motor que se resetee
+    // Solo limpiamos y regeneramos, no tocamos el estadoActual aquí
     motor.limpiarDatos();
-
-    // El coordinador se encarga de la parte visual/navegación
-    estadoActual = Estado::MenuPrincipal;
-
-    // Opcional: Si quieres que empiece el juego directamente tras ganar:
-    // estadoActual = Estado::Tablero; 
+    std::cout << "DEBUG: Datos del motor limpiados y unidades desplegadas." << std::endl;
 }
 
 void Coordinador::dibujarPantallaVictoria() {
