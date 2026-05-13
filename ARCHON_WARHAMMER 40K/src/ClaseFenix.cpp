@@ -23,18 +23,18 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->patronMovimiento = PatronMovimiento::Ambos;
 
     // CARGA DE SPRITES
-    if (tipo == "LIBRARIAN" || tipo == "HARPY") {
-        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-FENIX-Luz.png" : "imagenes/BASE-MANTICORA-Oscuridad.png";
-        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-FENIX-Luz-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
+    if (tipo == "LIBRARIAN" || tipo == "TIRANOFEX") {
+        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-MANTICORA-Oscuridad.png";
+        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
 
-        int columnas = (tipo == "LIBRARIAN") ? 8 : 10;
-        int filas = 1;
+        int columnas = 5 ;
+        int filas = 2;
 
         if (!texturaTablero.loadFromFile(rutaTablero)) {
             std::cout << "Error: No se encontro " << rutaTablero << std::endl;
         }
         spriteTablero.setTexture(texturaTablero);
-        spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
+        spriteTablero.setOrigin(texturaTablero.getSize().x /2.0f, texturaTablero.getSize().y / 2.0f);
         float escalaTablero = PIEZA_ALTURA_TABLERO_FENIX / texturaTablero.getSize().y;
         spriteTablero.setScale(escalaTablero, escalaTablero);
 
@@ -46,7 +46,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
         altoFrame = texturaArena.getSize().y / filas;
 
         spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-        spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
+        spriteArena.setOrigin(anchoFrame / 1.5f, altoFrame / 1.5f);
 
         float escalaArena = PIEZA_ALTURA_ARENA_FENIX / altoFrame;
         if (this->bando == Bando::OSCURIDAD) {
@@ -82,7 +82,7 @@ void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
-    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
+    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
         animar(dt, direccion);
     }
 }
@@ -146,7 +146,7 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
             if (seleccionado) {
                 sf::CircleShape anilloSeleccion(25.f);
                 anilloSeleccion.setOrigin(25.f, 25.f);
@@ -173,7 +173,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
