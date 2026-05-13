@@ -1,6 +1,5 @@
 #pragma once
 #include "Tablero.h"
-#pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
 
