@@ -103,7 +103,7 @@ void Coordinador::gestionarEventos() {
                     case 3: // INSTRUCCIONES
                         estadoActual = Estado::Instrucciones;
                         break;
-                    case 4: // GUARDAR PARTIDA (Falta tu lógica)
+                    case 4: // GUARDAR PARTIDA FALTA TODAVIA
                         break;
                     case 5: // SALIR AL ESCRITORIO
                         window.close();
@@ -112,12 +112,23 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
-        // 4. Gestión del motor (Juego normal)
-        else {
-            motor.gestionarEntrada(evento, vistaTablero);
+            // --- LÓGICA PARA VOLVER AL MENÚ DESDE VICTORIA ---
+            else if (estadoActual == Estado::Victoria) {
+                if (evento.type == sf::Event::KeyPressed) {
+                    if (evento.key.code == sf::Keyboard::Enter) {
+                        estadoActual = Estado::MenuPrincipal;
+                        motor.reiniciarJuego();
+                    }
+                }
+            }
+                  
+            // 4. Gestión del motor (Juego normal)
+            else {
+                motor.gestionarEntrada(evento, vistaTablero);
+            }
         }
     }
-}
+
 
 
 void Coordinador::dibujar() {
@@ -162,7 +173,7 @@ void Coordinador::dibujar() {
             "         FASE DE COMBATE (Arena)\n"
             "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
             "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
+            "      (Pulsa ESC para volver al Menu Principal)"
         );
         textoInstrucciones.setPosition(100.f, 150.f);
         window.draw(textoInstrucciones);
@@ -186,7 +197,7 @@ void Coordinador::dibujar() {
             "               Archon: The Light and the Dark (1983)\n\n\n"
             "               UNIVERSO Y LORE\n"
             "               Warhammer 40,000 (Games Workshop)\n\n\n"
-            "      (Pulsa ESC para volver al menu)"
+            "      (Pulsa ESC para volver al Menu Principal)"
         );
         textoCreditos.setPosition(150.f, 120.f);
         window.draw(textoCreditos);
