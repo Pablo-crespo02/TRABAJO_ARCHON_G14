@@ -1,7 +1,7 @@
-    #include "Coordinador.h"
+#include "Coordinador.h"
 
 Coordinador::Coordinador()
-    : motor(window, fuenteGlobal) 
+    : motor(window, fuenteGlobal)
 {
     // Cargamos la fuente una sola vez
     if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
@@ -37,6 +37,7 @@ void Coordinador::gestionarEventos() {
     sf::Event evento;
     while (window.pollEvent(evento)) {
         if (evento.type == sf::Event::Closed) window.close();
+
         // Detectar la tecla ESCAPE para pausar/reanudar en cualquier momento
         if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
             // Si estamos jugando, guardamos el estado y pausamos
@@ -118,6 +119,7 @@ void Coordinador::gestionarEventos() {
     }
 }
 
+
 void Coordinador::dibujar() {
     window.clear();
 
@@ -125,13 +127,13 @@ void Coordinador::dibujar() {
         pantallaInicio.dibujar(window);
     }
     // Si estamos jugando O en pausa, dibujamos el mundo
-    else if (estadoActual == Estado::Tablero || estadoAnterior == Estado::Tablero && estadoActual == Estado::Pausa) {
+    else if (estadoActual == Estado::Tablero || (estadoAnterior == Estado::Tablero && estadoActual == Estado::Pausa)) {
         window.setView(vistaTablero);
         motor.renderizar();
         window.setView(vistaUI);
         motor.dibujarHUD();
     }
-    else if (estadoActual == Estado::Arena || estadoAnterior == Estado::Arena && estadoActual == Estado::Pausa) {
+    else if (estadoActual == Estado::Arena || (estadoAnterior == Estado::Arena && estadoActual == Estado::Pausa)) {
         window.setView(vistaTablero);
         motor.renderizar();
     }
@@ -142,18 +144,16 @@ void Coordinador::dibujar() {
     }
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
-        sf::Text textoVictoria;
         dibujarPantallaVictoria();
     }
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
-        window.setView(vistaUI); // Usamos la vista completa
+        window.setView(vistaUI);
         sf::Text textoInstrucciones;
         textoInstrucciones.setFont(fuenteGlobal);
         textoInstrucciones.setCharacterSize(35);
         textoInstrucciones.setFillColor(sf::Color::White);
 
-        // El \n sirve para hacer saltos de línea en el texto
         textoInstrucciones.setString(
             "         OBJETIVO DE LA CRUZADA\n"
             "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
@@ -173,9 +173,8 @@ void Coordinador::dibujar() {
         sf::Text textoCreditos;
         textoCreditos.setFont(fuenteGlobal);
         textoCreditos.setCharacterSize(35);
-        textoCreditos.setFillColor(sf::Color::Yellow); // Color amarillo para que destaque
+        textoCreditos.setFillColor(sf::Color::Yellow);
 
-        // Aquí es donde añadimos vuestros nombres
         textoCreditos.setString(
             "               DESARROLLO Y PROGRAMACION\n\n"
             "               Javier Monrio\n"
@@ -189,8 +188,6 @@ void Coordinador::dibujar() {
             "               Warhammer 40,000 (Games Workshop)\n\n\n"
             "      (Pulsa ESC para volver al menu)"
         );
-
-        // Ajustamos un poco la posición para que quepan todos los nombres
         textoCreditos.setPosition(150.f, 120.f);
         window.draw(textoCreditos);
     }
@@ -199,29 +196,25 @@ void Coordinador::dibujar() {
 }
 
 void Coordinador::actualizar(float dt) {
-    // Llamamos al motor solo con el tiempo
-    motor.actualizar(dt);
-
     // Sincronizamos el estado para que el Coordinador sepa qué dibujar
-    // (Asegúrate de tener el método getEstado() en Motor.h)
     if (motor.getEstado() == Estado::Tablero && estadoActual == Estado::Arena) {
         estadoActual = Estado::Tablero;
     }
     else if (motor.getEstado() == Estado::Arena && estadoActual == Estado::Tablero) {
         estadoActual = Estado::Arena;
     }
-    else if (motor.getEstado()== Estado::Victoria && estadoActual != Estado::Victoria) {
+    else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
         std::cout << "Coordinador: ¡Detectada victoria en el Motor!" << std::endl;
     }
+
+    // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);
-        // ... el resto de tus sincronizaciones de victoria ...
     }
 }
 
 void Coordinador::reiniciarPartida() {
-    // Solo limpiamos y regeneramos, no tocamos el estadoActual aquí
     motor.limpiarDatos();
     std::cout << "DEBUG: Datos del motor limpiados y unidades desplegadas." << std::endl;
 }
@@ -230,7 +223,6 @@ void Coordinador::dibujarPantallaVictoria() {
     sf::Text textoVictoria;
     textoVictoria.setFont(fuenteGlobal);
 
-    // Le preguntamos al motor quién ganó
     int ganador = motor.getGanador();
 
     if (ganador == 1) {
@@ -241,22 +233,18 @@ void Coordinador::dibujarPantallaVictoria() {
         textoVictoria.setString("VICTORIA XENOS");
         textoVictoria.setFillColor(sf::Color::Red);
     }
-    //Establecemos el tamaño del texto:
-    textoVictoria.setCharacterSize(80);
 
-    // Centramos el texto principal
+    textoVictoria.setCharacterSize(80);
     sf::FloatRect textRect = textoVictoria.getLocalBounds();
     textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
 
-    // Texto de "Pulsa Enter":
     sf::Text textoContinuar;
     textoContinuar.setFont(fuenteGlobal);
     textoContinuar.setString("Pulsa ENTER para volver al menu");
     textoContinuar.setCharacterSize(30);
     textoContinuar.setFillColor(sf::Color::White);
 
-    // Centramos el texto secundario:
     sf::FloatRect contRect = textoContinuar.getLocalBounds();
     textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
     textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.f);
