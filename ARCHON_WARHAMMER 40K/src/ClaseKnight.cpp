@@ -10,8 +10,8 @@ ClaseKnight::ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo)
 {
     //ESTADÍSTICAS 
     this->stats.nombre = tipo;
-    this->stats.vida = 30.0f;
-    this->stats.vidaMaxima = 30.0f; // Ajusta a valores en el futuro
+    this->stats.vida = 20.0f;
+    this->stats.vidaMaxima = 20.0f; // Ajusta a valores en el futuro
     this->stats.ataque = 6.0f;
     this->stats.defensa = 20.0f;
     this->stats.velAtaque = 1.0f;
@@ -200,4 +200,27 @@ void ClaseKnight::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         barrasArena.dibujar(window);
 
     }
+}
+
+
+void ClaseKnight::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    sf::Vector2f dirAtaque = this->getultimadireccion();
+    float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+    dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : sf::Vector2f(1.f, 0.f);
+
+    sf::Vector2f puntoSpawn = this->posicionAbsoluta + (dirAtaque * 35.f);
+
+    double rapidez = 400.0;
+    double danoBase = 10.0;
+    double tiempoDeVidaTotal = 2.5;
+    double radioProyectil = 10.0;
+    double radioDeLaExplosion = 120.0;
+    hitboxes.emplace_back(
+        puntoSpawn, dirAtaque, rapidez, sf::Color(100, 100, 100), this,
+        (danoBase * this->multiplicadorArena), tiempoDeVidaTotal, radioProyectil,
+        false, false, false, 0.0,
+        true, radioDeLaExplosion
+    );
+
+    std::cout << "¡" << this->stats.nombre << " ha lanzado una Granada de Fragmentacion!" << std::endl;
 }

@@ -15,6 +15,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     formaVisual.setOrigin(20.f, 20.f);
 
     // Las stats y el rango se llenarán en el constructor de la clase hija
+    formaVisual.setFillColor(sf::Color::Magenta);
 }
 
 // SINCRONIZACIÓN VISUAL
@@ -57,16 +58,18 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 }
 
 //GESTIÓN DE PROYECTILES:
+bool Pieza::puedeAtacar()const {
+    // Por ejemplo, un cooldown de 0.5 segundos entre ataques
+    float tiempoEspera = 0.5f;
 
-bool Pieza::puedeAtacar() const {
-
-    return stats.relojHitbox.getElapsedTime().asSeconds() > stats.velAtaque;
-};
-
+    if (relojAtaque.getElapsedTime().asSeconds() >= tiempoEspera) {
+        return true;
+    }
+    return false;
+}
 void Pieza::reiniciarRelojHitbox() {
-    stats.relojHitbox.restart();
-    barrasArena.reiniciarRecarga();
-};
+   relojAtaque.restart(); // <--- Este es el nombre real de tu sf::Clock
+}
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
     inmovilizado = true;
