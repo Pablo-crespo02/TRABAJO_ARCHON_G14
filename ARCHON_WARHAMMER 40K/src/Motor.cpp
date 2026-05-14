@@ -444,15 +444,78 @@ void Motor::manejarEventos(const sf::View& vistaTablero) {
 //GESTIÓN DEL TECLADO ARENA
 void Motor::actualizar(double dt) {
     // 1. Filtro de estado obligatorio
-    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
+    //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
+    // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
+    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;   
+
+    // Identificamos quién pertenece a qué bando para asignar controles WASD o flechas:
 
     // 2. Identificación de bandos
     Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
     Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-    // 3. Llamadas al nuevo método de la clase (pasándole el dt que ahora es un float)
-    float dtFloat = static_cast<float>(dt);
-    procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1.f, 0.f), dtFloat);
+    //LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
+   //Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorrno{función}
+   //No especificamos el tipo de retorno porque en C++ no es imprescindible.
+
+    auto procesarInput = [&](Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo, sf::Keyboard::Key izqda, sf::Keyboard::Key dcha, sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto) {
+
+        //Inicializamos el vector dirección a 0 en el primer frame:
+        sf::Vector2f dir(0, 0);
+
+        //Modificación del vector director según las teclas pulsadas:
+        if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(abajo)) dir.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(izqda)) dir.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(dcha)) dir.x += 1.f;
+
+        //Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
+        p->setultimadireccion(dir);
+
+        //Si se pulsa la tecla de ataque y el cooldown permite disparar:
+        if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
+
+            //Obtenemos hacia dónde está mirando la pieza:
+            sf::Vector2f dirAtaque = p->getultimadireccion();
+
+            //Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
+            float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+
+            //Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
+            dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : dirPorDefecto;
+
+            //Instanciamos el punto de spawn del hitbox ataque desplazado 35 píxeles del origen de la pieza en dirección del vector dirección ataque:
+            sf::Vector2f puntoSpawnAtaque = (p->getPosicionAbsoluta()) + (dirAtaque * 35.f);
+
+            //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
+            if (p->stats.esRango) {
+                //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 60, 15);
+            }
+
+            else {
+                //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 0.2, 35);
+            }
+
+            //Reiniciamos el cooldown interno de la pieza:
+            p->reiniciarRelojHitbox();
+
+        }
+
+        //Movemos físicamente la pieza en la arena aplicando colisiones:
+        p->procesarMovimientoArena(dir, dt, this->arena);
+
+        // REINICIO VISUAL: Accedemos a barrasArena a través del puntero de la pieza
+       
+    };
+
+    //Aplicamos la función reutilizable lambda para el caso de jugador Luz y jugador Oscuridad:
+
+//LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
+
+    procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
+    // Lanzar Hechizo Luz (Tecla Q)
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
         if (pLuz->getHechizoDisponible()) {
@@ -461,9 +524,9 @@ void Motor::actualizar(double dt) {
             std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
-
-    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f), dtFloat);
-
+// OSCURIDAD Flechitas, disparo con ENTER, inicialmente mira a la izq
+    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f));
+    // Lanzar Hechizo Oscuridad (Tecla M)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
         if (pOsc->getHechizoDisponible()) {
             pOsc->usarHechizo(Hitboxes, pLuz);
@@ -521,7 +584,7 @@ void Motor::actualizar(double dt) {
             if (distSq < limiteSq) {
                 if (Hitboxes[i].getEsDanoContinuo()) {
                     if (!obj->getInvulnerable()) {
-                        obj->stats.vida -= Hitboxes[i].getDano() * dtFloat;
+                        obj->stats.vida -= Hitboxes[i].getDano() * dt;
                     }
                 }
                 // CASO B: GRANADA (Daño único por entidad)

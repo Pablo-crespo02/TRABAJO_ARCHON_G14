@@ -222,5 +222,5 @@ void ClaseKnight::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         true, radioDeLaExplosion
     );
 
-    std::cout << "¡" << this->stats.nombre << " ha lanzado una Granada de Fragmentacion!" << std::endl;
+    std::cout << this->stats.nombre << " ha lanzado una Granada de Fragmentacion!" << std::endl;
 }

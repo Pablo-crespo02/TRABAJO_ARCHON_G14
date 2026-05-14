@@ -58,17 +58,17 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 }
 
 //GESTIÓN DE PROYECTILES:
-bool Pieza::puedeAtacar()const {
-    // Por ejemplo, un cooldown de 0.5 segundos entre ataques
-    float tiempoEspera = 0.5f;
 
-    if (relojAtaque.getElapsedTime().asSeconds() >= tiempoEspera) {
+bool Pieza::puedeAtacar() const {
+    // Ahora usa la velocidad de ataque definida en ClaseGolem (ej: 1.0f)
+    if (stats.relojHitbox.getElapsedTime().asSeconds() >= stats.velAtaque) {
         return true;
     }
     return false;
 }
 void Pieza::reiniciarRelojHitbox() {
-   relojAtaque.restart(); // <--- Este es el nombre real de tu sf::Clock
+   stats.relojHitbox.restart();
+   barrasArena.reiniciarRecarga();
 }
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
