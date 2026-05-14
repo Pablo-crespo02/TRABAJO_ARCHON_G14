@@ -7,6 +7,8 @@
 #include "ClaseDjinn.h"
 #include "ClaseArcher.h"
 #include "ClaseUnicornio.h"
+#include "ClaseKnight.h"
+
 void Generador::GenerarTablero(Tablero& tablero) {
 
     //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
@@ -70,6 +72,9 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     }
     else if (tipo == "PRIMARIS"||tipo=="TOXICRENO") {
         nuevaPieza = new ClaseUnicornio(bando, pos, tipo);
+    }
+    else if (tipo == "INTERCESSOR") {
+        nuevaPieza = new ClaseKnight(bando, pos, "INTERCESSOR");
     }
     /*
 
@@ -148,5 +153,4 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));
     }
-    AnadirUnidad(motor, Bando::OSCURIDAD, "MANTICORA", sf::Vector2i(6, 4));
 }

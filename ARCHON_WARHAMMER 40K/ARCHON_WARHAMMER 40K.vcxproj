@@ -137,6 +137,7 @@
     <ClCompile Include="src\ClaseDjinn.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
+    <ClCompile Include="src\ClaseKnight.cpp" />
     <ClCompile Include="src\ClaseUnicornio.cpp" />
     <ClCompile Include="src\Coordinador.cpp" />
     <ClCompile Include="src\Generador.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="src\ClaseDjinn.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
+    <ClInclude Include="src\ClaseKnight.h" />
     <ClInclude Include="src\ClaseUnicornio.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\Coordinador.h" />

@@ -45,12 +45,13 @@ void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque
 
     // --- 3. POSICIONAMIENTO ---
     float offsetX = anchoMaximo / 2.f;
+    float offsetY = 60.f;
     // Posicionamos el conjunto (puedes ajustar el 35.f según el tamaño de tus piezas)
-    fondo.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f);
-    barraActual.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f);
+    fondo.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
+    barraActual.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY);
 
     // La de ataque la ponemos justo debajo de la de vida
-    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - 35.f + alto + 2.f);
+    barraAtaque.setPosition(posicionPieza.x - offsetX, posicionPieza.y - offsetY + alto + 2.f);
 }
 
 // La pieza llama a esto manualmente tras disparar/golpear
