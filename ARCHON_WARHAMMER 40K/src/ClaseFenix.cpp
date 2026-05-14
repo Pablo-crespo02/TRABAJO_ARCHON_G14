@@ -2,53 +2,55 @@
 #include <cmath> 
 #include <iostream>
 
-const float PIEZA_ALTURA_TABLERO_FENIX = 90.0f;
-const float PIEZA_ALTURA_ARENA_FENIX = 75.0f;
+const float PIEZA_ALTURA_TABLERO = 90.0f;
+const float PIEZA_ALTURA_ARENA = 180.0f;
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
-    // ESTADÍSTICAS 
+    //ESTADÍSTICAS 
     this->stats.nombre = tipo;
     this->stats.vida = 25.0f;
-    this->stats.vidaMaxima = 25.0f;
+    this->stats.vidaMaxima = 25.0f; // Ajusta a valores en el futuro
     this->stats.ataque = 12.0f;
     this->stats.defensa = 5.0f;
     this->stats.velAtaque = 1.5f;
-
-
+    // --- Lógica de tipos ---
     this->stats.esRango = true;
-    this->tipoMov = TipoMovimiento::Volador;
+
     this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
+    this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
 
-    // CARGA DE SPRITES
-    if (tipo == "LIBRARIAN" || tipo == "TIRANOFEX") {
-        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-MANTICORA-Oscuridad.png";
-        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
+    //CARGA DE SPRITES
+    if (tipo == "LIBRARIAN" || tipo == "HARPY") {
 
-        int columnas = 5 ;
+        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-CARNIFEX-TYRANIDS.png";
+        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-CARNIFEX-TYRANIDS-1.0.png";
+        int columnas = 5;
         int filas = 2;
 
         if (!texturaTablero.loadFromFile(rutaTablero)) {
             std::cout << "Error: No se encontro " << rutaTablero << std::endl;
         }
         spriteTablero.setTexture(texturaTablero);
-        spriteTablero.setOrigin(texturaTablero.getSize().x /2.0f, texturaTablero.getSize().y / 2.0f);
-        float escalaTablero = PIEZA_ALTURA_TABLERO_FENIX / texturaTablero.getSize().y;
+        spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
+
+        float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
         spriteTablero.setScale(escalaTablero, escalaTablero);
 
         if (!texturaArena.loadFromFile(rutaArena)) {
             std::cout << "Error: No se encontro " << rutaArena << std::endl;
         }
         spriteArena.setTexture(texturaArena);
+
         anchoFrame = texturaArena.getSize().x / columnas;
         altoFrame = texturaArena.getSize().y / filas;
 
         spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-        spriteArena.setOrigin(anchoFrame / 1.5f, altoFrame / 1.5f);
+        spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
 
-        float escalaArena = PIEZA_ALTURA_ARENA_FENIX / altoFrame;
+        float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
         if (this->bando == Bando::OSCURIDAD) {
             spriteArena.setScale(-escalaArena, escalaArena);
         }
@@ -59,32 +61,18 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
         frameActual = 0;
         temporizadorAnimacion = 0.0f;
     }
-} 
-
-void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    sf::Vector2f dirFija(0, 0);
-
-    // Reutilizamos la clase Hitbox para crear el área de daño continuo
-    hitboxes.emplace_back(
-        this->posicionAbsoluta,
-        dirFija,
-        0,
-        sf::Color(255, 69, 0, 150), // Color Naranja Fuego
-        this,
-        10.0f,                  // Daño por segundo
-        5.0f,                   // Duración en la arena
-        150.0f,                 // Radio enorme
-        true                    // Daño continuo
-    );
-    std::cout << "¡El Fenix desata una Supernova!" << std::endl;
 }
 
+//ENLACE DE FÍSICAS Y ANIMACIÓN
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
+    //Dejamos que la clase padre (PiezaVoladora) mueva las coordenadas físicas
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
-    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+    //Actualizamos la imagen visible con nuestra máquina de estados
+    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
         animar(dt, direccion);
     }
+
 }
 
 void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
@@ -92,23 +80,38 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
     int colInicial = 0;
     int colFinal = 0;
 
-    // Si da error en relojProyectil, asegúrate de haberlo añadido a Pieza.h
-    bool estaAtacando = (this->stats.relojProyectil.getElapsedTime().asSeconds() < 0.2f);
+    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
+    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
-        colInicial = 4; colFinal = 4;
+        //FOTOGRAMA DE ATAQUE 
+        fila = 1;
+        colInicial = 1;
+        colFinal = 1;
     }
     else if (direccion.x != 0) {
-        colInicial = 2; colFinal = 3;
+        //FOTOGRAMA DE CAMINAR LATERAL 
+        fila = 0;
+        colInicial = 1;
+        colFinal = 4;
     }
     else if (direccion.y > 0) {
-        colInicial = 5; colFinal = 6;
+        //FOTOGRAMA DE ABAJO 
+        fila = 1;
+        colInicial = 3;
+        colFinal = 3;
     }
     else if (direccion.y < 0) {
-        colInicial = 6; colFinal = 7;
+        // FOTOGRAMA DE ARRIBA 
+        fila = 1;
+        colInicial = 4;
+        colFinal = 4;
     }
     else {
-        colInicial = 0; colFinal = 0;
+        //FOTOGRAMA QUIETO
+        fila = 0;
+        colInicial = 0;
+        colFinal = 0;
     }
 
     int posY_Textura = fila * altoFrame;
@@ -116,28 +119,36 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 
     if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
         frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect((frameActual * anchoFrame) + 1, posY_Textura, anchoFrame - 2, altoFrame));
+        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
         temporizadorAnimacion = 0.0f;
     }
 
     if (colInicial != colFinal) {
         temporizadorAnimacion += dt;
-        if (temporizadorAnimacion >= 0.12f) {
+        float velocidadAnimacion = 0.15f;
+
+        if (temporizadorAnimacion >= velocidadAnimacion) {
             temporizadorAnimacion = 0.0f;
             frameActual++;
-            if (frameActual > colFinal) frameActual = colInicial;
-            spriteArena.setTextureRect(sf::IntRect((frameActual * anchoFrame) + 1, posY_Textura, anchoFrame - 2, altoFrame));
+
+            if (frameActual > colFinal) {
+                frameActual = colInicial;
+            }
+
+            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
         }
     }
 
-    float escalaArena = PIEZA_ALTURA_ARENA_FENIX / altoFrame;
+    //ARREGLO DEL EFECTO ESPEJO
+    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
     if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena);
+        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
     }
     else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);
+        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
     }
     else {
+        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
         float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
         spriteArena.setScale(escalaActualX, escalaArena);
     }
@@ -146,7 +157,7 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             if (seleccionado) {
                 sf::CircleShape anilloSeleccion(25.f);
                 anilloSeleccion.setOrigin(25.f, 25.f);
@@ -173,7 +184,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
@@ -185,4 +196,23 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         barrasArena.dibujar(window);
 
     }
+}
+
+
+void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    sf::Vector2f dirFija(0, 0);
+
+    // Reutilizamos la clase Hitbox para crear el área de daño continuo
+    hitboxes.emplace_back(
+        this->posicionAbsoluta,
+        dirFija,
+        0,
+        sf::Color(255, 69, 0, 150), // Color Naranja Fuego
+        this,
+        10.0f,                  // Daño por segundo
+        5.0f,                   // Duración en la arena
+        150.0f,                 // Radio enorme
+        true                    // Daño continuo
+    );
+    std::cout << "¡El Fenix desata una Supernova!" << std::endl;
 }
