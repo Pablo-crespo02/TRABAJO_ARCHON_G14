@@ -499,9 +499,7 @@ void Motor::actualizar(double dt) {
             }
         }
 
-        // Colisión con los combatientes
         Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
-
         for (Pieza* obj : objetivos) {
             if (!obj) continue;
 
@@ -509,19 +507,18 @@ void Motor::actualizar(double dt) {
             bool esAtacanteArena = (obj == piezaAtacante);
 
             // 2. Leemos la bandera individual correspondiente a esta pieza
-            bool yaFueDañado = esAtacanteArena ? Hitboxes[i].getYaDanoAtacante() : Hitboxes[i].getYaDanoDefensor();
-
+            bool yaFueDanado=esAtacanteArena ? Hitboxes[i].getYaDanoAtacante():Hitboxes[i].getYaDanoDefensor();
             // 3. Filtro de fuego amigo para proyectiles normales (ignoramos si es granada)
+
             if (!Hitboxes[i].esGranada && Hitboxes[i].getAtacante() == obj) {
                 continue;
             }
 
             sf::Vector2f posE = obj->getPosicionAbsoluta();
             float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
-            float limiteSq = std::pow(radioH + 20.f, 2); // 20.f es el radio aproximado de la pieza
+            float limiteSq = std::pow(radioH + 20.f, 2);
 
             if (distSq < limiteSq) {
-                // CASO A: DAÑO CONTINUO (DoT)
                 if (Hitboxes[i].getEsDanoContinuo()) {
                     if (!obj->getInvulnerable()) {
                         obj->stats.vida -= Hitboxes[i].getDano() * dtFloat;
@@ -535,26 +532,24 @@ void Motor::actualizar(double dt) {
                         posH = Hitboxes[i].getPosicionHitbox();
                         radioH = Hitboxes[i].getFormaHitbox().getRadius();
                     }
-
                     // Comprobación estricta: ¿Esta pieza ya recibió el daño de ESTA granada?
-                    if (!yaFueDañado && Hitboxes[i].getDano() > 0.0f && !obj->getInvulnerable()) {
+                    if (!yaFueDanado && Hitboxes[i].getDano() > 0.0f && !obj->getInvulnerable()) {
 
                         // Aplicar exactamente el daño base de la granada (ej: 10)
                         obj->stats.vida -= Hitboxes[i].getDano();
-                        std::cout << "¡Granada aplico " << Hitboxes[i].getDano() << " de dano a " << obj->stats.nombre << "!" << std::endl;
-
-                        // Marcar que ESTA pieza ya recibió el daño para ignorarla en los siguientes frames
                         if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                         else Hitboxes[i].setYaDanoDefensor(true);
                     }
                 }
-                // CASO C: PROYECTILES NORMALES
-                else if (!yaFueDañado) {
+                else if (!yaFueDanado) {
                     if (!obj->getInvulnerable()) {
                         obj->stats.vida -= Hitboxes[i].getDano();
                     }
-
                     // Marcar daño recibido
+                    std::cout << "Granada aplico " << Hitboxes[i].getDano() << " de dano a " << obj->stats.nombre << "!" << std::endl;
+
+                    // Marcar que ESTA pieza ya recibió el daño para ignorarla en los siguientes frames
+
                     if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                     else Hitboxes[i].setYaDanoDefensor(true);
 
