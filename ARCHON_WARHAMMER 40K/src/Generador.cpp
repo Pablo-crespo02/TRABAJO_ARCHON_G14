@@ -7,6 +7,7 @@
 #include "ClaseDjinn.h"
 #include "ClaseArcher.h"
 #include "ClaseUnicornio.h"
+#include "ClaseKnight.h"
 void Generador::GenerarTablero(Tablero& tablero) {
 
     //Se genera una matriz "monigote" para definir qué tipo de casilla es cada posición
@@ -71,6 +72,10 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "PRIMARIS"||tipo=="TOXICRENO") {
         nuevaPieza = new ClaseUnicornio(bando, pos, tipo);
     }
+    else if (tipo == "INTERCESSOR"||tipo=="TERMAGANT") {
+        nuevaPieza = new ClaseKnight(bando, pos, tipo);
+    }
+
     /*
 
 if (tipo == "CAPTAIN") {
@@ -142,11 +147,11 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 6));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));
     AnadirUnidad(motor, Bando::OSCURIDAD, "LICTOR", sf::Vector2i(8, 8));
-    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(7, 0));
-    AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(7, 8));
-
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GOBLIN", sf::Vector2i(7, 0));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GOBLIN", sf::Vector2i(7, 8));
+   
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));
     }
-    AnadirUnidad(motor, Bando::OSCURIDAD, "MANTICORA", sf::Vector2i(6, 4));
+    //AnadirUnidad(motor, Bando::OSCURIDAD, "MANTICORA", sf::Vector2i(6, 4));
 }

@@ -42,6 +42,7 @@ protected:
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
     bool seleccionado;
+    sf::Clock relojAtaque;
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
     sf::CircleShape formaVisual;

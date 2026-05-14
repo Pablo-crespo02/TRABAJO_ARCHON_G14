@@ -32,6 +32,9 @@ private:
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
+    void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
+        sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
+        sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);
 public:
     std::vector<Pieza*> listaPiezas;
     Pieza* piezaSeleccionada = nullptr;
