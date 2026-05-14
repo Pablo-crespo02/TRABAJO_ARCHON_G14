@@ -15,6 +15,7 @@ Coordinador::Coordinador()
     // El estado inicial lo maneja el Coordinador
     estadoActual = Estado::MenuPrincipal;
     menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
+    
 
     // Inicializamos las vistas que pasaste
     vistaUI = window.getDefaultView();
@@ -155,7 +156,7 @@ void Coordinador::dibujar() {
     }
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
-        dibujarPantallaVictoria();
+        pantallavictoria.dibujar(window);
     }
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
@@ -216,9 +217,10 @@ void Coordinador::actualizar(float dt) {
     }
     else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
-        std::cout << "Coordinador: ¡Detectada victoria en el Motor!" << std::endl;
+        int ganador = motor.getGanador();
+        pantallavictoria.configurarPantallaVictoria(ganador, window);
     }
-
+    
     // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);
@@ -228,38 +230,4 @@ void Coordinador::actualizar(float dt) {
 void Coordinador::reiniciarPartida() {
     motor.limpiarDatos();
     std::cout << "DEBUG: Datos del motor limpiados y unidades desplegadas." << std::endl;
-}
-
-void Coordinador::dibujarPantallaVictoria() {
-    sf::Text textoVictoria;
-    textoVictoria.setFont(fuenteGlobal);
-
-    int ganador = motor.getGanador();
-
-    if (ganador == 1) {
-        textoVictoria.setString("VICTORIA DEL IMPERIUM");
-        textoVictoria.setFillColor(sf::Color::Yellow);
-    }
-    else {
-        textoVictoria.setString("VICTORIA XENOS");
-        textoVictoria.setFillColor(sf::Color::Red);
-    }
-
-    textoVictoria.setCharacterSize(80);
-    sf::FloatRect textRect = textoVictoria.getLocalBounds();
-    textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
-
-    sf::Text textoContinuar;
-    textoContinuar.setFont(fuenteGlobal);
-    textoContinuar.setString("Pulsa ENTER para volver al menu");
-    textoContinuar.setCharacterSize(30);
-    textoContinuar.setFillColor(sf::Color::White);
-
-    sf::FloatRect contRect = textoContinuar.getLocalBounds();
-    textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
-    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.f);
-
-    window.draw(textoVictoria);
-    window.draw(textoContinuar);
 }
