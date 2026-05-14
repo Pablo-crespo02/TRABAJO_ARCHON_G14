@@ -20,7 +20,6 @@ private:
     const int NUM_OPCIONES = 6;
 public:
     PantallaInicio();
-    void inicializar(float ancho, float alto); // Para configurar posiciones según resolución
     void dibujar(sf::RenderWindow& window);
     void moverArriba();
     void moverAbajo();

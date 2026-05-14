@@ -169,8 +169,8 @@ void Motor::reiniciarJuego(){
 void Motor::VerificarVictoria() {
     int piezasLuz = 0;
     int piezasOscuridad = 0;
-    int powerPointsLuz = 0;
-    int powerPointsOscuridad = 0;
+    int powerPointsLuz = 4;
+    int powerPointsOscuridad = 4;
 
     //Se escanean todas las piezas supervivientes del contenedor de piezas:
     for (auto p : listaPiezas) {
@@ -199,7 +199,7 @@ void Motor::VerificarVictoria() {
 
     //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
     //Condiciones LUZ:
-    if (piezasOscuridad == 0 || powerPointsLuz >= 2) {
+    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
         estadoActual = Estado::Victoria;
         ganadorPartida = 1;
         std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;

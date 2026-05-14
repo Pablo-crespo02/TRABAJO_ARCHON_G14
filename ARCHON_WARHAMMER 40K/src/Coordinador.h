@@ -4,6 +4,7 @@
 #include "EstadoJuego.h"
 #include "InterfazHUD.h"
 #include "Pantallainicio.h"
+#include "PantallaVictoria.h"
 #include "MenuPausa.h"
 // EL MOTOR DEBE IR AL FINAL de los includes de componentes
 #include "Motor.h" 
@@ -23,6 +24,7 @@ private:
     // --- COMPONENTES ---
     Motor motor; // El motor se inicializa 
     PantallaInicio pantallaInicio;
+    PantallaVictoria pantallavictoria;
     Estado estadoActual;
     MenuPausa* menuPausa;
     Estado estadoAnterior;
