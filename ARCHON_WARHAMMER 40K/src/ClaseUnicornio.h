@@ -25,6 +25,14 @@ private:
 public:
     ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo);
 
+    Pieza* clonar() const override {
+        ClaseUnicornio* clon = new ClaseUnicornio(*this);
+        // Reconectamos sus propios sprites a sus propias texturas
+        clon->spriteTablero.setTexture(clon->texturaTablero);
+        clon->spriteArena.setTexture(clon->texturaArena);
+        return clon;
+    }
+
     //FUNCIONES DE MOVIMIENTO  
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;

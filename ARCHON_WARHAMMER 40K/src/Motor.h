@@ -34,10 +34,12 @@ private:
     sf::Font& fuenteGlobal;
 public:
     std::vector<Pieza*> listaPiezas;
+    std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }
+    void setListaPiezas(const std::vector<Pieza*>& nuevasPiezas) { listaPiezas = nuevasPiezas; }
     Pieza* piezaSeleccionada = nullptr;
     Pieza* piezaAtacante = nullptr;
     Pieza* piezaDefensor = nullptr;
-    PantallaInicio pantallaInicio; //En la parte pública
+    PantallaInicio pantallaInicio; 
 
     // El constructor ahora recibe la ventana y la fuente del Coordinador
     Motor(sf::RenderWindow& win, sf::Font& fuente);

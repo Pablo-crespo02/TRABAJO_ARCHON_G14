@@ -23,8 +23,8 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->patronMovimiento = PatronMovimiento::Ambos;
 
     // CARGA DE SPRITES
-    if (tipo == "LIBRARIAN" || tipo == "TIRANOFEX") {
-        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-MANTICORA-Oscuridad.png";
+    if (tipo == "LIBRARIAN" || tipo == "HARPY") {
+        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-HARPY-TYRANIDS.png";
         std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
 
         int columnas = 5 ;
@@ -82,7 +82,7 @@ void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
-    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+    if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
         animar(dt, direccion);
     }
 }
@@ -146,7 +146,7 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             if (seleccionado) {
                 sf::CircleShape anilloSeleccion(25.f);
                 anilloSeleccion.setOrigin(25.f, 25.f);
@@ -173,7 +173,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "TIRANOFEX") {
+        if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

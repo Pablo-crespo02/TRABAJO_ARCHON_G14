@@ -24,6 +24,14 @@ private:
 public:
     ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo);
 
+    Pieza* clonar() const override {
+        ClaseDjinn* clon = new ClaseDjinn(*this);
+        // Reconectamos sus propios sprites a sus propias texturas
+        clon->spriteTablero.setTexture(clon->texturaTablero);
+        clon->spriteArena.setTexture(clon->texturaArena);
+        return clon;
+    }
+
     //FUNCIONES DE MOVIMIENTO  
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
     //FUNCIONES VISUALES

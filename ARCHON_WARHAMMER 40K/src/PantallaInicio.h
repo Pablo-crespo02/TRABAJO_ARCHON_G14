@@ -13,11 +13,12 @@ private:
     std::vector<sf::Text> opciones;
     std::vector<std::string> nombres = {
         "INICIAR PARTIDA", "REANUDAR PARTIDA", "INSTRUCCIONES",
-        "CREDITOS", "CARGAR PARTIDA", "SALIR DEL JUEGO"
+        "CREDITOS","SALIR DEL JUEGO","CARGAR PARTIDA",
     };
 
     int indiceSeleccionado;
     const int NUM_OPCIONES = 6;
+    bool partidaActiva = false;
 public:
     PantallaInicio();
     void inicializar(float ancho, float alto); // Para configurar posiciones según resolución
@@ -25,4 +26,5 @@ public:
     void moverArriba();
     void moverAbajo();
     int getIndiceSeleccionado() const { return indiceSeleccionado; }
+    void setPartidaActiva(bool activa) { partidaActiva = activa; }
 };

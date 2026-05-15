@@ -3,6 +3,7 @@
 Coordinador::Coordinador()
     : motor(window, fuenteGlobal)
 {
+    pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
     // Cargamos la fuente una sola vez
     if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
         std::cout << "Error critico: Fuente no encontrada" << std::endl;
@@ -13,9 +14,10 @@ Coordinador::Coordinador()
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
 
     // El estado inicial lo maneja el Coordinador
-    estadoActual = Estado::MenuPrincipal;
+    pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
     menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
 
+    estadoActual = Estado::MenuPrincipal;
     // Inicializamos las vistas que pasaste
     vistaUI = window.getDefaultView();
     vistaTablero.setSize(700.f, 700.f);
@@ -38,25 +40,24 @@ void Coordinador::gestionarEventos() {
     while (window.pollEvent(evento)) {
         if (evento.type == sf::Event::Closed) window.close();
 
-        // Detectar la tecla ESCAPE para pausar/reanudar en cualquier momento
+        // 1. Tecla ESCAPE (Pausa/Volver)
         if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
-            // Si estamos jugando, guardamos el estado y pausamos
             if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
                 estadoAnterior = estadoActual;
                 estadoActual = Estado::Pausa;
             }
-            // Si ya estamos en pausa, volvemos a donde estábamos
             else if (estadoActual == Estado::Pausa) {
                 estadoActual = estadoAnterior;
             }
-            // Si estás en Instrucciones o Créditos, volver al menú
-            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
+            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos || estadoActual == Estado::SeleccionCarga) {
                 estadoActual = Estado::MenuPrincipal;
             }
         }
-
-        // Gestión del menú principal
+        //MENÚ PRINCIPAL
         if (estadoActual == Estado::MenuPrincipal) {
+            // Actualizamos la apariencia del botón "Reanudar" (gris o normal)
+            pantallaInicio.setPartidaActiva(partidaEnCurso);
+
             if (evento.type == sf::Event::KeyPressed) {
                 if (evento.key.code == sf::Keyboard::Up)    pantallaInicio.moverArriba();
                 if (evento.key.code == sf::Keyboard::Down)  pantallaInicio.moverAbajo();
@@ -66,45 +67,56 @@ void Coordinador::gestionarEventos() {
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
                         this->reiniciarPartida();
+                        partidaEnCurso = true; // <--- Marcamos que ya hay juego activo
                         estadoActual = Estado::Tablero;
                         motor.setEstado(Estado::Tablero);
                         break;
+
                     case 1: // REANUDAR PARTIDA
-                        estadoActual = Estado::Tablero;
-                        motor.setEstado(Estado::Tablero);
+                        if (partidaEnCurso) { // <--- Solo entra si hemos iniciado/cargado algo
+                            estadoActual = Estado::Tablero;
+                            motor.setEstado(Estado::Tablero);
+                        }
                         break;
+
                     case 2: estadoActual = Estado::Instrucciones; break;
                     case 3: estadoActual = Estado::Creditos; break;
-                    case 4: window.close(); break;
+
+                    case 4: // SALIR DEL JUEGO
+                        window.close();
+                        break;
+
+                    case 5: // CARGAR PARTIDA (Lleva al menú de ranuras)
+                        modoGuardar = false;
+                        // Actualizamos los textos para que ponga (VACÍA) o (DATOS)
+                        pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+                        estadoActual = Estado::SeleccionCarga;
+                        break;
                     }
                 }
             }
         }
-        // Gestión de los botones dentro del Menú de Pausa
+
+        //MENÚ DE PAUSA
         else if (estadoActual == Estado::Pausa) {
             if (evento.type == sf::Event::KeyPressed) {
                 if (evento.key.code == sf::Keyboard::Up)    menuPausa->moverArriba();
                 if (evento.key.code == sf::Keyboard::Down)  menuPausa->moverAbajo();
 
                 if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
-                    int seleccion = menuPausa->getIndiceSeleccionado();
-                    switch (seleccion) {
-                    case 0: // REANUDAR
-                        estadoActual = estadoAnterior;
+                    int selPausa = menuPausa->getIndiceSeleccionado();
+                    switch (selPausa) {
+                    case 0: estadoActual = estadoAnterior; break; // REANUDAR
+                    case 1: reiniciarPartida(); estadoActual = Estado::Tablero; break; // REINICIAR
+                    case 2: estadoActual = Estado::MenuPrincipal; break; // VOLVER AL MENU
+                    case 3: estadoActual = Estado::Instrucciones; break; // INSTRUCCIONES
+
+                    case 4: // GUARDAR PARTIDA (Lleva al menú de ranuras)
+                        modoGuardar = true;
+                        pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+                        estadoActual = Estado::SeleccionCarga;
                         break;
-                    case 1: // REINICIAR PARTIDA
-                        reiniciarPartida();
-                        estadoActual = Estado::Tablero;
-                        motor.setEstado(Estado::Tablero);
-                        break;
-                    case 2: // MENU PRINCIPAL
-                        estadoActual = Estado::MenuPrincipal;
-                        break;
-                    case 3: // INSTRUCCIONES
-                        estadoActual = Estado::Instrucciones;
-                        break;
-                    case 4: // GUARDAR PARTIDA FALTA TODAVIA
-                        break;
+
                     case 5: // SALIR AL ESCRITORIO
                         window.close();
                         break;
@@ -112,24 +124,43 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
-            // --- LÓGICA PARA VOLVER AL MENÚ DESDE VICTORIA ---
-            else if (estadoActual == Estado::Victoria) {
-                if (evento.type == sf::Event::KeyPressed) {
-                    if (evento.key.code == sf::Keyboard::Enter) {
-                        estadoActual = Estado::MenuPrincipal;
-                        motor.reiniciarJuego();
+        else if (estadoActual == Estado::SeleccionCarga) {
+            if (evento.type == sf::Event::KeyPressed) {
+                if (evento.key.code == sf::Keyboard::Up) pantallaCarga->moverArriba();
+                if (evento.key.code == sf::Keyboard::Down) pantallaCarga->moverAbajo();
+
+                if (evento.key.code == sf::Keyboard::Enter) {
+                    int ranura = pantallaCarga->getIndiceSeleccionado();
+                    if (ranura == 3) { // Opción "VOLVER"
+                        // Volvemos a donde estábamos
+                        estadoActual = modoGuardar ? Estado::Pausa : Estado::MenuPrincipal;
+                    }
+                    else {
+                        if (modoGuardar) {
+                            this->guardarEnRanura(ranura);
+                            pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+                            estadoActual = Estado::Pausa; // Te devuelve a la pausa tras guardar
+                        }
+                        else {
+                            this->cargarDesdeRanura(ranura);
+                            partidaEnCurso = true; // ¡Iniciamos una partida!
+                        }
                     }
                 }
             }
-                  
-            // 4. Gestión del motor (Juego normal)
-            else {
-                motor.gestionarEntrada(evento, vistaTablero);
+        } 
+        else if (estadoActual == Estado::Victoria) {
+            if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
+                estadoActual = Estado::MenuPrincipal;
+                motor.reiniciarJuego();
             }
         }
-    }
-
-
+        else {
+            // Juego normal (Tablero o Arena)
+            motor.gestionarEntrada(evento, vistaTablero);
+        }
+    } // Cierra el while
+} // Cierra la función gestionarEventos
 
 void Coordinador::dibujar() {
     window.clear();
@@ -178,7 +209,12 @@ void Coordinador::dibujar() {
         textoInstrucciones.setPosition(100.f, 150.f);
         window.draw(textoInstrucciones);
     }
-    // 6. PANTALLA CRÉDITOS
+    //6. menu cargar ranuras
+    else if (estadoActual == Estado::SeleccionCarga) {
+        pantallaInicio.dibujar(window); // Dibujamos el fondo del marine y el tiranido
+        pantallaCarga->dibujar(window); // Dibujamos las ranuras encima
+    }
+    // 7. PANTALLA CRÉDITOS
     else if (estadoActual == Estado::Creditos) {
         window.setView(vistaUI);
         sf::Text textoCreditos;
@@ -262,4 +298,47 @@ void Coordinador::dibujarPantallaVictoria() {
 
     window.draw(textoVictoria);
     window.draw(textoContinuar);
+}
+void Coordinador::guardarEnRanura(int indice) {
+    // 1. Si la ranura ya tenía una partida vieja, limpiamos su memoria para no saturar la RAM
+    for (Pieza* p : ranuras[indice].piezas) {
+        delete p;
+    }
+    ranuras[indice].piezas.clear();
+
+    // 2. Extraemos las piezas actuales del tablero
+    std::vector<Pieza*> piezasActuales = motor.getListaPiezas();
+
+    // 3. CLONACIÓN: Recorremos cada pieza y creamos una copia exacta en la ranura
+    for (Pieza* p : piezasActuales) {
+        ranuras[indice].piezas.push_back(p->clonar());
+    }
+
+    ranuras[indice].ocupada = true;
+    std::cout << "¡Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
+}
+
+void Coordinador::cargarDesdeRanura(int indice) {
+    if (ranuras[indice].ocupada) {
+        // 1. Vaciamos el tablero actual usando tu función
+        motor.limpiarDatos();
+
+        // 2. CLONACIÓN INVERSA: Copiamos las piezas desde la ranura para enviarlas al motor
+        // (Debemos clonarlas de nuevo, o la ranura se quedaría vacía tras jugar)
+        std::vector<Pieza*> piezasCargadas;
+        for (Pieza* p : ranuras[indice].piezas) {
+            piezasCargadas.push_back(p->clonar());
+        }
+
+        // 3. Inyectamos los clones en el Motor
+        motor.setListaPiezas(piezasCargadas);
+
+        // 4. Cambiamos los estados para reanudar el juego
+        estadoActual = Estado::Tablero;
+        motor.setEstado(Estado::Tablero);
+        std::cout << "¡Partida cargada desde la ranura " << indice + 1 << "!" << std::endl;
+    }
+    else {
+        std::cout << "La ranura " << indice + 1 << " esta vacia." << std::endl;
+    }
 }
