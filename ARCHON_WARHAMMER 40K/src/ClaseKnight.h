@@ -24,12 +24,19 @@ public:
 
     ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo);
 
+    Pieza* clonar() const override {
+        ClaseKnight* clon = new ClaseKnight(*this);
+        // Reconectamos sus propios sprites a sus propias texturas
+        clon->spriteTablero.setTexture(clon->texturaTablero);
+        clon->spriteArena.setTexture(clon->texturaArena);
+        return clon;
+    }
     //FUNCIONES DE MOVIMIENTO
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
 
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     //FUNCIONES VISUALES
-    void animar(float dt, sf::Vector2f direccion);
-
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
+
+    void animar(float dt, sf::Vector2f direccion);
 };
