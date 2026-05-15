@@ -146,6 +146,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MenuPausa.cpp" />
     <ClCompile Include="src\Motor.cpp" />
+    <ClCompile Include="src\PantallaCarga.cpp" />
     <ClCompile Include="src\PantallaInicio.cpp" />
     <ClCompile Include="src\PantallaVictoria.cpp" />
     <ClCompile Include="src\Pieza.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="src\InterfazHUD.h" />
     <ClInclude Include="src\MenuPausa.h" />
     <ClInclude Include="src\Motor.h" />
+    <ClInclude Include="src\PantallaCarga.h" />
     <ClInclude Include="src\PantallaInicio.h" />
     <ClInclude Include="src\PantallaVictoria.h" />
     <ClInclude Include="src\Pieza.h" />

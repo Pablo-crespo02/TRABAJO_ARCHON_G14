@@ -59,13 +59,23 @@ void PantallaInicio::dibujar(sf::RenderWindow& window) {
     window.draw(textoTitulo);
 
     for (int i = 0; i < NUM_OPCIONES; i++) {
-        if (i == indiceSeleccionado) {
+
+        // 1.Si es la opción Reanudar y no hay partida, se pinta gris
+        if (i == 1 && !partidaActiva) {
+            opciones[i].setFillColor(sf::Color(100, 100, 100));
+            opciones[i].setOutlineThickness(2.f);
+            opciones[i].setOutlineColor(sf::Color(150, 150, 150)); // Borde gris claro para que se vea bien apagada
+            opciones[i].setScale(1.0f, 1.0f);
+        }
+        // 2. SEGUNDO: Si es la opción sobre la que estamos (y no está deshabilitada)
+        else if (i == indiceSeleccionado) {
             // OPCIÓN SELECCIONADA: Amarilla, borde negro y un poco más grande
             opciones[i].setFillColor(sf::Color::Yellow);
             opciones[i].setOutlineThickness(3.f);
             opciones[i].setOutlineColor(sf::Color::Black);
-            opciones[i].setScale(1.1f, 1.1f); // Efecto visual de resaltado
+            opciones[i].setScale(1.1f, 1.1f);
         }
+        // 3. TERCERO: Para todas las demás opciones normales
         else {
             // OPCIONES NORMALES: Negras con borde blanco
             opciones[i].setFillColor(sf::Color::Black);
@@ -73,6 +83,7 @@ void PantallaInicio::dibujar(sf::RenderWindow& window) {
             opciones[i].setOutlineColor(sf::Color::White);
             opciones[i].setScale(1.0f, 1.0f);
         }
+
         window.draw(opciones[i]);
     }
 }
@@ -86,3 +97,4 @@ void PantallaInicio::moverAbajo() {
     // Navegación circular: si estamos abajo y pulsamos abajo, vamos al inicio
     indiceSeleccionado = (indiceSeleccionado + 1) % NUM_OPCIONES;
 }
+

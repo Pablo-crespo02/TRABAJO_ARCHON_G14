@@ -76,6 +76,8 @@ public:
     // La pieza recibe la ventana y el estado actual para saber cómo mostrarse
     virtual void dibujar(sf::RenderWindow& window, Estado estadoActual) = 0;
 
+    virtual Pieza* clonar() const = 0;//para clonar la listapiezas en los archivos de guardado
+
     // Métodos Comunes: Lógica que es igual para todos (implementada en Pieza.cpp)
     void mover(sf::Vector2i destino);
     void moverEnArena(float dx, float dy);

@@ -24,6 +24,16 @@ private:
 
 public:
     ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo);
+    // Función de clonación
+    Pieza* clonar() const override {
+        ClaseFenix* clon = new ClaseFenix(*this); //Copia toda la vida y estadísticas
+
+        // Reconecta los sprites a las nuevas texturas del clon porque sino salen cuadrados blancos
+        clon->spriteTablero.setTexture(clon->texturaTablero);
+        clon->spriteArena.setTexture(clon->texturaArena);
+
+        return clon;
+    }
 
     // FUNCIONES DE LÓGICA Y MOVIMIENTO
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo);
