@@ -3,7 +3,7 @@
 #include <iostream>
 
 const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 100.0f;
+const float PIEZA_ALTURA_ARENA = 80.0f;
 
 ClaseKnight::ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)

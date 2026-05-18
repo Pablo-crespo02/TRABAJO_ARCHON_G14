@@ -39,4 +39,12 @@ public:
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 
     void animar(float dt, sf::Vector2f direccion);
+    
+    //PARA QUE LOS MINIONS INVOCADOS SEAN MAS PEQUEÑOS
+    void setEscalaMinion(float porcentaje) {
+        // Obtenemos la escala que ya calculó el constructor original
+        // y la multiplicamos por el porcentaje (ej: 0.6f para un 60% del tamaño)
+        sf::Vector2f escalaActual = spriteArena.getScale();
+        spriteArena.setScale(escalaActual.x * porcentaje, escalaActual.y * porcentaje);
+    }
 };

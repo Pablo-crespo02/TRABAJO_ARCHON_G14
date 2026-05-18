@@ -8,6 +8,7 @@
 #include "ClaseArcher.h"
 #include "ClaseUnicornio.h"
 #include "ClaseKnight.h"
+#include "ClaseLider.h"
 
 void Generador::GenerarTablero(Tablero& tablero) {
 
@@ -76,12 +77,10 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "INTERCESSOR"||tipo=="TERMAGANT") {
         nuevaPieza = new ClaseKnight(bando, pos, tipo);
     }
-
-    /*
-
-if (tipo == "CAPTAIN") {
-    nuevaPieza = new ClaseWizard(bando, pos, "Captain Terminator");
-}
+    else if (tipo == "CAPTAIN"|| tipo == "HIVE_TYRANT") {
+    nuevaPieza = new ClaseLider(bando, pos, tipo);
+    }
+/*
 
 else if (tipo == "ASSAULT_MARINE") {
     nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
