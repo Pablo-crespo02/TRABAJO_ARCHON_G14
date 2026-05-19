@@ -30,7 +30,7 @@ HitboxesArena Arena::obtenerColisiones() const {
         sf::FloatRect bounds = roca.getGlobalBounds();
 
         // Calcula el radio tomando el lado más largo
-        float radio = (std::max(bounds.width, bounds.height) / 2.0f) *0.7f;
+        float radio = (std::max(bounds.width, bounds.height) / 2.0f);
 
         // Calcula el centro geométrico del objeto.
         sf::Vector2f centro(bounds.left + (bounds.width / 2.0f),
