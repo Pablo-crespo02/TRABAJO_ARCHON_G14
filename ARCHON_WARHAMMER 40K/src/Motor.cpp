@@ -31,7 +31,15 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     }
     else {
         sonidoMover.setBuffer(bufferMover);
-        sonidoMover.setVolume(70.f); // Volumen al 70% para que el golpe se note
+        sonidoMover.setVolume(70.f); 
+    }
+    //CARGA DEL SONIDO DE ERROR 
+    if (!bufferError.loadFromFile("sonidos/error.mp3")) { // Cambia la extensión si usas .mp3 o .ogg
+        std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
+    }
+    else {
+        sonidoError.setBuffer(bufferError);
+        sonidoError.setVolume(60.f);
     }
 
     // 2. Generar el mundo inicial
@@ -314,6 +322,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
                 }
                 else {
                     std::cout << "No puedes seleccionar piezas enemigas." << std::endl;
+                    sonidoError.play();
                 }
                 return;
             }
@@ -366,6 +375,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
             }
             else {
                 std::cout << "Movimiento denegado: Camino bloqueado o fuera de rango." << std::endl;
+                sonidoError.play();
             }
         }
     }
