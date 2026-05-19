@@ -46,7 +46,7 @@ void PiezaTerrestre::procesarMovimientoArena(sf::Vector2f direccion, float dt, A
     this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
     if (this->getInmovilizado()) return;//Si está paralizado, termina
 
-    float velocidad = 200.f; // Velocidad base terrestre
+    float velocidad = 250.f; // Velocidad base terrestre
     sf::Vector2f desplazamiento = direccion * velocidad * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
 
