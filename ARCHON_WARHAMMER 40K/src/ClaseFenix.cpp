@@ -3,31 +3,31 @@
 #include <iostream>
 
 const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 180.0f;
+const float PIEZA_ALTURA_ARENA = 120.0f;
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
-    //ESTADÍSTICAS 
+    // ESTADÍSTICAS 
     this->stats.nombre = tipo;
     this->stats.vida = 25.0f;
-    this->stats.vidaMaxima = 25.0f; // Ajusta a valores en el futuro
+    this->stats.vidaMaxima = 25.0f;
     this->stats.ataque = 12.0f;
     this->stats.defensa = 5.0f;
     this->stats.velAtaque = 1.5f;
-    // --- Lógica de tipos ---
     this->stats.esRango = true;
 
     this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
-    this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
+    this->tipoMov = TipoMovimiento::Volador;
+
+    // Inicializamos el puntero por seguridad
+    this->enemigoEnlazado = nullptr;
 
     // CARGA DE SPRITES
     if (tipo == "LIBRARIAN" || tipo == "HARPY") {
         std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-HARPY-TYRANIDS.png";
         std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-HARPY-TYRANIDS-1.0.png";
-
- 
 
         int columnas = 5;
         int filas = 2;
@@ -65,16 +65,11 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     }
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    //Dejamos que la clase padre (PiezaVoladora) mueva las coordenadas físicas
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
-
-    //Actualizamos la imagen visible con nuestra máquina de estados
     if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
         animar(dt, direccion);
     }
-
 }
 
 void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
@@ -82,38 +77,22 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
     int colInicial = 0;
     int colFinal = 0;
 
-    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 1;
-        colFinal = 1;
+        fila = 1; colInicial = 1; colFinal = 1;
     }
     else if (direccion.x != 0) {
-        //FOTOGRAMA DE CAMINAR LATERAL 
-        fila = 0;
-        colInicial = 1;
-        colFinal = 4;
+        fila = 0; colInicial = 1; colFinal = 4;
     }
     else if (direccion.y > 0) {
-        //FOTOGRAMA DE ABAJO 
-        fila = 1;
-        colInicial = 3;
-        colFinal = 3;
+        fila = 1; colInicial = 3; colFinal = 3;
     }
     else if (direccion.y < 0) {
-        // FOTOGRAMA DE ARRIBA 
-        fila = 1;
-        colInicial = 4;
-        colFinal = 4;
+        fila = 1; colInicial = 4; colFinal = 4;
     }
     else {
-        //FOTOGRAMA QUIETO
-        fila = 0;
-        colInicial = 0;
-        colFinal = 0;
+        fila = 0; colInicial = 0; colFinal = 0;
     }
 
     int posY_Textura = fila * altoFrame;
@@ -132,30 +111,29 @@ void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
         if (temporizadorAnimacion >= velocidadAnimacion) {
             temporizadorAnimacion = 0.0f;
             frameActual++;
-
             if (frameActual > colFinal) {
                 frameActual = colInicial;
             }
-
             spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
         }
     }
 
-    //ARREGLO DEL EFECTO ESPEJO
     float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
     if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
+        spriteArena.setScale(-escalaArena, escalaArena);
     }
     else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
+        spriteArena.setScale(escalaArena, escalaArena);
     }
     else {
-        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
         float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
         spriteArena.setScale(escalaActualX, escalaArena);
     }
 }
 
+// =========================================================================
+// INTERFAZ DE DIBUJADO (Soporta el renderizado autónomo del tentáculo)
+// =========================================================================
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
@@ -175,17 +153,48 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         else {
             formaVisual.setPosition(posicionAbsoluta);
             formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
-            if (seleccionado) {
-                formaVisual.setOutlineThickness(4.0f);
-                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
-            }
-            else {
-                formaVisual.setOutlineThickness(0.0f);
-            }
+            if (seleccionado) { formaVisual.setOutlineThickness(4.0f); formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion); }
+            else { formaVisual.setOutlineThickness(0.0f); }
             window.draw(formaVisual);
         }
     }
     else if (estadoActual == Estado::Arena) {
+
+        // --- RENDERIZADO DEL TENTÁCULO GRUESO
+        if (this->stats.nombre == "HARPY" && enemigoEnlazado) {
+            float tiempoTranscurrido = this->stats.relojHabilidad.getElapsedTime().asSeconds();
+            if (tiempoTranscurrido <= 10.0f) {
+                sf::Vector2f posHarpy = this->getPosicionAbsoluta();
+                sf::Vector2f posEnemigo = enemigoEnlazado->getPosicionAbsoluta();
+
+                float dx = posEnemigo.x - posHarpy.x;
+                float dy = posEnemigo.y - posHarpy.y;
+                float distancia = std::hypot(dx, dy);
+
+                if (distancia <= 160.f) {
+                    // Configuramos el grosor de la línea roja (puedes subirlo si lo quieres más ancho)
+                    float grosorRayo = 6.f;
+
+                    sf::RectangleShape rayoEnergia(sf::Vector2f(distancia, grosorRayo));
+
+                    // Centramos el origen en Y para que salga exactamente desde el centro de los personajes
+                    rayoEnergia.setOrigin(0.f, grosorRayo / 2.f);
+                    rayoEnergia.setPosition(posHarpy);
+
+                    // Calculamos el ángulo para que apunte directamente al enemigo
+                    float angulo = std::atan2(dy, dx) * 180.f / 3.14159265f;
+                    rayoEnergia.setRotation(angulo);
+
+                    // Rojo puro y sólido de SFML, sin mezclas
+                    rayoEnergia.setFillColor(sf::Color::Red);
+
+                    // Dibujamos el rayo en la ventana
+                    window.draw(rayoEnergia);
+                }
+            }
+        }
+
+        // Pintado tradicional de la pieza
         if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
@@ -196,25 +205,65 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
-
     }
 }
 
-
+// =========================================================================
+// ACTIVACIÓN DEL HECHIZO
+// =========================================================================
 void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    sf::Vector2f dirFija(0, 0);
+    if (!enemigo) return;
 
-    // Reutilizamos la clase Hitbox para crear el área de daño continuo
-    hitboxes.emplace_back(
-        this->posicionAbsoluta,
-        dirFija,
-        0,
-        sf::Color(255, 69, 0, 150), // Color Naranja Fuego
-        this,
-        10.0f,                  // Daño por segundo
-        5.0f,                   // Duración en la arena
-        150.0f,                 // Radio enorme
-        true                    // Daño continuo
-    );
-    std::cout << "¡El Fenix desata una Supernova!" << std::endl;
+    if (this->stats.nombre == "LIBRARIAN") {
+        sf::Vector2f dirFija(0, 0);
+        hitboxes.emplace_back(
+            this->posicionAbsoluta,
+            dirFija,
+            0,
+            sf::Color(255, 69, 0, 150),
+            this,
+            10.0f,
+            5.0f,
+            150.0f,
+            true
+        );
+        std::cout << "El Librarian desata una Supernova!" << std::endl;
+    }
+    else if (this->stats.nombre == "HARPY") {
+        // Guardamos la referencia del rival y activamos el reloj de 10 segundos
+        this->enemigoEnlazado = enemigo;
+        this->stats.relojHabilidad.restart();
+        std::cout << "El Harpy activa Enlace de Sangre por 10 segundos contra su objetivo!" << std::endl;
+    }
+}
+
+// =========================================================================
+// ACTUALIZACIÓN DE VIDA CONTINUA
+// =========================================================================
+void ClaseFenix::actualizarLogicaHechizo(float dt) {
+    if (this->stats.nombre != "HARPY" || !enemigoEnlazado) return;
+
+    // Control de tiempo: límite de 10 segundos
+    float tiempoTranscurrido = this->stats.relojHabilidad.getElapsedTime().asSeconds();
+    if (tiempoTranscurrido > 10.0f) {
+        enemigoEnlazado = nullptr; // Rompemos el enlace
+        return;
+    }
+
+    // Control de distancia máxima
+    sf::Vector2f posHarpy = this->getPosicionAbsoluta();
+    sf::Vector2f posEnemigo = enemigoEnlazado->getPosicionAbsoluta();
+    float distancia = std::hypot(posEnemigo.x - posHarpy.x, posEnemigo.y - posHarpy.y);
+
+    float rangoMaximoDrenaje = 160.f;
+
+    if (distancia <= rangoMaximoDrenaje) {
+        float danoPorSegundo = 2.0f;
+        float curaPorSegundo = 1.5f;
+
+        if (!enemigoEnlazado->getInvulnerable()) {
+            enemigoEnlazado->stats.vida -= danoPorSegundo * dt;
+        }
+        this->stats.vida = std::min(this->stats.vidaMaxima, this->stats.vida + (curaPorSegundo * dt));
+    }
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include<cmath>
+#include "ClaseFenix.h"
 
 
 // Constructor de Motor adaptado al Coordinador
@@ -463,12 +464,22 @@ void Motor::actualizar(double dt) {
         }
     }
     
-    // --- NUEVO AJUSTE: ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
     // Delegamos al Líder de la Oscuridad que actualice sus piezas auxiliares pasándole la arena y el rival
     if (pOsc != nullptr) {
         pOsc->actualizarMinions(dt, this->arena, pLuz);
     }
-    
+    // Intentamos transformar los combatientes a ClaseFenix mediante dynamic_cast.
+    // Si la transformación es exitosa, les ordenamos actualizar sus efectos continuos.
+    ClaseFenix* fenixAtacante = dynamic_cast<ClaseFenix*>(piezaAtacante);
+    if (fenixAtacante != nullptr) {
+        fenixAtacante->actualizarLogicaHechizo(dt);
+    }
+
+    ClaseFenix* fenixDefensor = dynamic_cast<ClaseFenix*>(piezaDefensor);
+    if (fenixDefensor != nullptr) {
+        fenixDefensor->actualizarLogicaHechizo(dt);
+    }
 
     //////////// 4. BUCLE DE ACTUALIZACION Y COLISIONES DE HITBOXES (LIMPIO) /////////
     for (size_t i = 0; i < Hitboxes.size(); ++i) {

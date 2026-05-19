@@ -3,7 +3,7 @@
 #include "PiezaVoladora.h"
 #include "Arena.h"
 #include "Color.h"
-#include "Hitboxes.h" // Asegúrate de tener este include para las hitboxes
+#include "Hitboxes.h" 
 #include <string>
 #include <SFML/Graphics.hpp>
 
@@ -16,6 +16,9 @@ private:
     sf::Texture texturaArena;
     sf::Sprite spriteArena;
 
+    // VARIABLES DEL ENLACE DE SANGRE (HARPY)
+    Pieza* enemigoEnlazado;
+
     // VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
@@ -24,20 +27,22 @@ private:
 
 public:
     ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo);
+
     // Función de clonación
     Pieza* clonar() const override {
-        ClaseFenix* clon = new ClaseFenix(*this); //Copia toda la vida y estadísticas
-
-        // Reconecta los sprites a las nuevas texturas del clon porque sino salen cuadrados blancos
+        ClaseFenix* clon = new ClaseFenix(*this);
         clon->spriteTablero.setTexture(clon->texturaTablero);
         clon->spriteArena.setTexture(clon->texturaArena);
-
+        clon->enemigoEnlazado = nullptr; // El clon inicia sin enlaces activos
         return clon;
     }
 
     // FUNCIONES DE LÓGICA Y MOVIMIENTO
-    void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo);
+    void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
+
+    // Método encapsulado para procesar el drenaje de vida frame a frame (se llama en motor.cpp)
+    void actualizarLogicaHechizo(float dt);
 
     // FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
