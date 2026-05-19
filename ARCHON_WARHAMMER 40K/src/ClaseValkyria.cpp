@@ -1,31 +1,31 @@
-#include "ClaseUnicornio.h"
-#include <iostream>
+#include "ClaseValkyria.h"
 #include <cmath> 
+#include <iostream>
 
 const float PIEZA_ALTURA_TABLERO = 90.0f;
 const float PIEZA_ALTURA_ARENA = 120.0f;
 
-ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
-    : PiezaTerrestre(b, pos)
+ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
+    : PiezaVoladora(b, pos)
 {
     //ESTADÍSTICAS 
     this->stats.nombre = tipo;
-    this->stats.vida = 25.0f;
-    this->stats.vidaMaxima = 25.0f; // Ajusta a valores en el futuro
-    this->stats.ataque = 10.0f;
-    this->stats.defensa = 15.0f;
-    this->stats.velAtaque = 1.0f;
+    this->stats.vida = 35.0f;
+    this->stats.vidaMaxima = 35.0f; // Ajusta a valores en el futuro
+    this->stats.ataque = 5.0f;
+    this->stats.defensa = 20.0f;
+    this->stats.velAtaque = 1.2f;
     // --- Lógica de tipos ---
     this->stats.esRango = false;    // El Golem es melee
 
-    this->rangoMovimiento = 3;
+    this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
-    this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
+    this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
     //CARGA DE SPRITES (Chibi)
-    if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
-        std::string rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIS-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
-        std::string rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIS-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+    if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
 
+        std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
+        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -63,17 +63,17 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
 }
 
 //ENLACE DE FÍSICAS Y ANIMACIÓN
-void ClaseUnicornio::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
+void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
-    PiezaTerrestre::procesarMovimientoArena(direccion, dt, arena);
+    PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
-    if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+    if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
         animar(dt, direccion);
     }
 }
 
-void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
+void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
     int fila = 0;
     int colInicial = 0;
     int colFinal = 0;
@@ -84,7 +84,7 @@ void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
     if (estaAtacando) {
         //FOTOGRAMA DE ATAQUE 
         fila = 1;
-        colInicial = 1;
+        colInicial = 2;
         colFinal = 2;
     }
     else if (direccion.x != 0) {
@@ -152,11 +152,11 @@ void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
     }
 }
 
-void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
+void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "FALTA") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -186,7 +186,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "FALTA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
@@ -201,23 +201,13 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
     }
 }
+void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    // El Golem se repara a sí mismo (Heal)
+    float curacion = 10.0f;
+    this->stats.vida += curacion;
 
-void ClaseUnicornio::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    if (this->bando == Bando::LUZ) {
-        this->aplicarInvulnerabilidad(5.0);
-        std::cout << "¡El Unicornio alza un escudo de luz impenetrable!" << std::endl;
-    }
-    else if (this->bando == Bando::OSCURIDAD) {
-        sf::Vector2f dirAtaque = this->getultimadireccion();
-        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
-        dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : sf::Vector2f(-1, 0);
-
-        sf::Vector2f puntoSpawn = this->posicionAbsoluta + (dirAtaque * 35.f);
-
-        hitboxes.emplace_back(
-            puntoSpawn, dirAtaque, 900.0, sf::Color(148, 0, 211), this,
-            1.0, 1.5, 12.0, false, false, true, 3.0
-        );
-        std::cout << "¡El Basilisco dispara un proyectil paralizante!" << std::endl;
+    // Evitamos que se cure por encima de su vida máxima
+    if (this->stats.vida > this->stats.vidaMaxima) {
+        this->stats.vida = this->stats.vidaMaxima;
     }
 }

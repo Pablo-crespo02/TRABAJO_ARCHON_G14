@@ -164,7 +164,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "CAPTAIN1" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "HIVE_TYRANT") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -194,7 +194,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "CAPTAIN1" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "HIVE_TYRANT") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

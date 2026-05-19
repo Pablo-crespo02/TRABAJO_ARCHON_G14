@@ -9,6 +9,7 @@
 #include "ClaseUnicornio.h"
 #include "ClaseKnight.h"
 #include "ClaseLider.h"
+#include "ClaseValkyria.h"
 
 void Generador::GenerarTablero(Tablero& tablero) {
 
@@ -80,11 +81,9 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "CAPTAIN"|| tipo == "HIVE_TYRANT") {
     nuevaPieza = new ClaseLider(bando, pos, tipo);
     }
-
-    /*
-else if (tipo == "ASSAULT_MARINE"|| tipo == "GARGOLA" ) {
-    nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
-}   */
+    else if (tipo == "ASSAULT_MARINE"|| tipo == "GARGOLA" ) {
+    nuevaPieza = new ClaseValkyria(bando, pos, tipo);
+    }   
 
     if (nuevaPieza != nullptr) {
         nuevaPieza->sincronizarPosicionTablero(); // Calcula la posición real en píxeles

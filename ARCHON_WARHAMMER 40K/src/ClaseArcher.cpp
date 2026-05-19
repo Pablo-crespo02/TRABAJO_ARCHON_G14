@@ -18,7 +18,8 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.esRango = true;
     // --- Lógica de tipos ---
    // Asignación del patrón de movimiento
-    this->patronMovimiento = PatronMovimiento::Ambos;
+    this->patronMovimiento = PatronMovimiento::Ortogonal;
+    this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
     this->esInvisible = false;
     this->preparandoInvisibilidad = false;
     this->tieneBoostVelocidad = false;
@@ -159,7 +160,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "LICTOR") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -189,7 +190,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "LICTOR") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
