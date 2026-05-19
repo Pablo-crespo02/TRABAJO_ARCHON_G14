@@ -84,7 +84,7 @@ void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
     if (estaAtacando) {
         //FOTOGRAMA DE ATAQUE 
         fila = 1;
-        colInicial = 2;
+        colInicial = 1;
         colFinal = 2;
     }
     else if (direccion.x != 0) {

@@ -3,6 +3,7 @@
 #include "Color.h"
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include<cmath>
 
 
@@ -208,7 +209,7 @@ void Motor::VerificarVictoria() {
 
     //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
     //Condiciones LUZ:
-    if (piezasOscuridad == 0 || powerPointsLuz >= 2) {
+    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
         estadoActual = Estado::Victoria;
         ganadorPartida = 1;
         std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;
@@ -452,88 +453,87 @@ void Motor::manejarEventos(const sf::View& vistaTablero) {
 
 
 //GESTIÓN DEL TECLADO ARENA
-
 void Motor::actualizar(double dt) {
-
-    //Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimeinto de los FPS:
+    // 1. Filtro de estado obligatorio
+    // Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimiento de los FPS:
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
-    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor)return;
+    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
 
     // Identificamos quién pertenece a qué bando para asignar controles WASD o flechas:
+
+    // 2. Identificación de bandos
     Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
     Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-    //LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
-    //Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorrno{fucnción}
-    //No especificamos el tipo de retorno porque en C++ no es imprescindible.
+    // LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
+    // Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorno{función}
+    // No especificamos el tipo de retorno porque en C++ no es imprescindible.
+
     auto procesarInput = [&](Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo, sf::Keyboard::Key izqda, sf::Keyboard::Key dcha, sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto) {
 
-        //Inicializamos el vector dirección a 0 en el primer frame:
+        // Inicializamos el vector dirección a 0 in el primer frame:
         sf::Vector2f dir(0, 0);
 
-        //Modificación del vector director según las teclas pulsadas:
+        // Modificación del vector director según las teclas pulsadas:
         if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
         if (sf::Keyboard::isKeyPressed(abajo)) dir.y += 1.f;
         if (sf::Keyboard::isKeyPressed(izqda)) dir.x -= 1.f;
-        if (sf::Keyboard::isKeyPressed(dcha)) dir.x += 1.f;
+        if (sf::Keyboard::isKeyPressed(dcha))  dir.x += 1.f;
 
-        //Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
+        // Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
         p->setultimadireccion(dir);
 
-        //Si se pulsa la tecla de ataque y el cooldown permite disparar:
+        // Si se pulsa la tecla de ataque y el cooldown permite disparar:
         if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
 
-            //Obtenemos hacia dónde está mirando la pieza:
+            // Obtenemos hacia dónde está mirando la pieza:
             sf::Vector2f dirAtaque = p->getultimadireccion();
 
-            //Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
+            // Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
             float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
 
-            //Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
+            // Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
             dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : dirPorDefecto;
 
-            //Instanciamos el punto de spawn del hitbox ataque desplazado 35 píxeles del origen de la pieza en dirección del vector dirección ataque:
+            // Instanciamos el punto de spawn del hitbox ataque desplazado 35 píxeles del origen de la pieza en dirección del vector dirección ataque:
             sf::Vector2f puntoSpawnAtaque = (p->getPosicionAbsoluta()) + (dirAtaque * 35.f);
 
-            //Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
+            // Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
             if (p->stats.esRango) {
-                //Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
+                // Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
                 Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 60, 15);
             }
-
             else {
-                //Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
+                // Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
                 Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 0.2, 35);
             }
 
-            //Reiniciamos el cooldown interno de la pieza:
+            // Reiniciamos el cooldown interno de la pieza (Lógica):
             p->reiniciarRelojHitbox();
         }
 
-        //Movemos físicamente la pieza en la arena aplicando colisiones:
-
+        // Movemos físicamente la pieza en la arena aplicando colisiones:
         p->procesarMovimientoArena(dir, dt, this->arena);
-
         };
 
-    //Aplicamos la función reutilizable lambda para el caso de jugador Luz y jugador Oscuridad:
+    // Aplicamos la función reutilizable lambda para el caso de jugador Luz y jugador Oscuridad:
 
-    //LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
+    // LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
     procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
+
     // Lanzar Hechizo Luz (Tecla Q)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
         if (pLuz->getHechizoDisponible()) {
-            // Ejecuta la lógica única de la pieza
             pLuz->usarHechizo(Hitboxes, pOsc);
-            // Lo marcamos como gastado
             pLuz->setHechizoDisponible(false);
             std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
 
-    //OSCURIDAD: FLECHAS, disparo con ENTER, inicialmente mira hacia la izq:
-    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1, 0));
-    // Lanzar Hechizo Oscuridad (RShift o la tecla que prefieras)
+    // OSCURIDAD: Flechitas, disparo con ENTER, inicialmente mira a la izq
+    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f));
+
+    // Lanzar Hechizo Oscuridad (Tecla M)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
         if (pOsc->getHechizoDisponible()) {
             pOsc->usarHechizo(Hitboxes, pLuz);
@@ -541,135 +541,181 @@ void Motor::actualizar(double dt) {
             std::cout << pOsc->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
-    //Proyectiles
+    
+    // --- NUEVO AJUSTE: ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+    // Delegamos al Líder de la Oscuridad que actualice sus piezas auxiliares pasándole la arena y el rival
+    if (pOsc != nullptr) {
+        pOsc->actualizarMinions(dt, this->arena, pLuz);
+    }
+    
 
-    //Creamos una función auxiliar "lambda" que comprueba si la distancia entre dos puntos es menor que un límte, es decir, si han colisionado:
-    auto comprobarColision = [](const sf::Vector2f pos1, const sf::Vector2f pos2, double limite) {
-        return (std::sqrt(std::pow((pos1.x - pos2.x), 2) + std::pow((pos1.y - pos2.y), 2))) < limite;
-        };
+    //////////// 4. BUCLE DE ACTUALIZACION Y COLISIONES DE HITBOXES (LIMPIO) /////////
+    for (size_t i = 0; i < Hitboxes.size(); ++i) {
 
-    //Recorremos todos los proyectiles activos del contenedor:
-    for (auto& h : Hitboxes) {
-        h.ActualizarHitbox(dt);
-        if (!h.getEstadoHitbox()) continue;
+        Hitboxes[i].ActualizarHitbox(dt);
+        if (!Hitboxes[i].getEstadoHitbox()) continue;
 
-        sf::Vector2f posH = h.getPosicionHitbox();
-        float radioH = h.getFormaHitbox().getRadius();
+        sf::Vector2f posH = Hitboxes[i].getPosicionHitbox();
+        float radioH = Hitboxes[i].getFormaHitbox().getRadius();
 
-
-        // Si la posición de la bala o el torbellino está dentro de un muro o roca:
+        // Colisión con el escenario
         if (!arena.esPosicionValida(posH, radioH, false)) {
-
-            if (h.getEsErratico()) {
-                // Si es el Torbellino, rebota y sigue vivo
-                h.rebotar();
-                // Actualizamos la variable posH para el chequeo de enemigos tras el rebote
-                posH = h.getPosicionHitbox();
+            if (Hitboxes[i].getEsErratico()) {
+                Hitboxes[i].rebotar();
+                posH = Hitboxes[i].getPosicionHitbox();
+            }
+            else if (Hitboxes[i].esGranada) {
+                if (Hitboxes[i].getTiempoVuelo() > 0.0f) { Hitboxes[i].Detonar(); }
             }
             else {
-                // Si es una bala normal, choca contra la piedra/muro y se destruye
-                h.setEstadoHitbox(false);
-                continue; // Saltamos al siguiente elemento del bucle para que no haga daño fantasma
+                Hitboxes[i].setEstadoHitbox(false);
+                continue;
             }
         }
 
-
+        // --- 4.1: COLISIÓN TRADICIONAL CONTRA LOS HÉROES (SOLO PROYECTILES/GRANADAS) ---
         Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
-
-        // Gestión de los ataques
         for (Pieza* obj : objetivos) {
-            if (obj && h.getAtacante() != obj) {
-                sf::Vector2f posE = obj->getPosicionAbsoluta();
-                float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
-                float limiteSq = std::pow(radioH + 20.f, 2);
+            if (!obj) continue;
+
+            bool esAtacanteArena = (obj == piezaAtacante);
+            bool yaFueDanado = esAtacanteArena ? Hitboxes[i].getYaDanoAtacante() : Hitboxes[i].getYaDanoDefensor();
+
+            // Filtro de fuego amigo
+            if (Hitboxes[i].getAtacante()->getBando() == obj->getBando()) {
+                continue;
+            }
+
+            sf::Vector2f posE = obj->getPosicionAbsoluta();
+            float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
+            float limiteSq = std::pow(radioH + 20.f, 2);
+
+            if (distSq < limiteSq) {
+                // Si es un proyectil/melee normal del Knight o Golem contra un héroe
+                if (Hitboxes[i].getEsDanoContinuo()) {
+                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano() * dt; }
+                }
+                else if (Hitboxes[i].esGranada) {
+                    if (Hitboxes[i].getTiempoVuelo() > 0.0f) {
+                        Hitboxes[i].Detonar();
+                        posH = Hitboxes[i].getPosicionHitbox();
+                        radioH = Hitboxes[i].getFormaHitbox().getRadius();
+                    }
+                    if (!yaFueDanado && Hitboxes[i].getDano() > 0.0f && !obj->getInvulnerable()) {
+                        obj->stats.vida -= Hitboxes[i].getDano();
+                        if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
+                        else Hitboxes[i].setYaDanoDefensor(true);
+                    }
+                }
+                else if (!yaFueDanado) {
+                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano(); }
+                    if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
+                    else Hitboxes[i].setYaDanoDefensor(true);
+
+                    if (Hitboxes[i].getCausaInmovilizacion()) { obj->aplicarInmovilizacion(Hitboxes[i].getDuracionCC()); }
+
+                    sf::Vector2f vel = Hitboxes[i].getVelocidadHitbox();
+                    if (vel.x != 0.f || vel.y != 0.f) { Hitboxes[i].setEstadoHitbox(false); }
+                }
+            }
+        }
+
+        // Si el proyectil actual fue destruido al impactar con un héroe, no evaluamos los minions
+        if (!Hitboxes[i].getEstadoHitbox()) continue;
+
+        // --- 4.2: DETECCIÓN DE HITBOXES CONTRA MINIONS ENEMIGOS ---
+        // Identificamos al líder que pertenece al bando contrario del dueño del proyectil
+        Pieza* liderConMinions = (Hitboxes[i].getAtacante()->getBando() == Bando::LUZ) ? pOsc : pLuz;
+
+        if (liderConMinions != nullptr) {
+            std::vector<Pieza*>& listaMinions = liderConMinions->getMinionsInvocados();
+
+            auto mit = listaMinions.begin();
+            while (mit != listaMinions.end()) {
+                Pieza* minion = *mit;
+
+                sf::Vector2f posMinion = minion->getPosicionAbsoluta();
+                float radioMinion = 15.f; // Ajustado a la escala reducida (0.6) de tus esbirros
+
+                float distSq = std::pow(posH.x - posMinion.x, 2) + std::pow(posH.y - posMinion.y, 2);
+                float limiteSq = std::pow(radioH + radioMinion, 2);
 
                 if (distSq < limiteSq) {
+                    // Impacto contra el esbirro
+                    minion->stats.vida -= Hitboxes[i].getDano();
 
-                    // Daño en el tiempo como hechizo del djinn o fenix
-                    if (h.getEsDanoContinuo()) {
-                        //Solo recibe daño si no es invulnerable
-                        if (!obj->getInvulnerable()) {
-                            obj->stats.vida -= h.getDano() * dt;
-                        }
+                    // Si no es daño continuo o granada, la bala normal se consume
+                    if (!Hitboxes[i].getEsDanoContinuo() && !Hitboxes[i].esGranada) {
+                        Hitboxes[i].setEstadoHitbox(false);
                     }
-                    // Daño de ataques básicos
-                    else if (!h.getYaHizoDano()) {
-                        if (!obj->getInvulnerable()) { //Sólo recibe daño si no es invulnerable
-                            obj->stats.vida -= h.getDano();
-                        }
-                        // Marcamos la hitbox como que ya impactó (aunque el escudo haya bloqueado el daño)
-                        h.setYaHizoDano(true);
-                        if (h.getVelocidadHitbox().x != 0 || h.getVelocidadHitbox().y != 0) {
-                            h.setEstadoHitbox(false);
-                        }
-                        //Paralisis del basilisco:
-                        if (h.getCausaInmovilizacion()) {
-                            obj->aplicarInmovilizacion(h.getDuracionCC());
-                            std::cout << "¡" << obj->stats.nombre << " ha sido inmovilizado!" << std::endl;
-                        }
-                        sf::Vector2f vel = h.getVelocidadHitbox();
-                        if (vel.x != 0.f || vel.y != 0.f) {
-                            h.setEstadoHitbox(false); // Proyectil muere
-                        }
+
+                    // Si el minion se queda sin vida, lo eliminamos y limpiamos su iterador
+                    if (minion->stats.vida <= 0.f) {
+                        delete minion;
+                        mit = listaMinions.erase(mit);
+                        std::cout << "Un minion Termagant ha sido pulverizado por un proyectil!" << std::endl;
                     }
+                    else {
+                        ++mit;
+                    }
+
+                    // Si el proyectil fue destruido tras impactar al esbirro, salimos del bucle de minions
+                    if (!Hitboxes[i].getEstadoHitbox()) break;
+                }
+                else {
+                    ++mit;
                 }
             }
         }
     }
 
 
-    //Limpieza de contenedores
+    // 5. Limpieza de contenedores clásica por índice inverso
+    for (int i = static_cast<int>(Hitboxes.size()) - 1; i >= 0; --i) {
+        if (!Hitboxes[i].getEstadoHitbox()) {
+            Hitboxes.erase(Hitboxes.begin() + i);
+        }
+    }
 
-    Hitboxes.erase(std::remove_if(Hitboxes.begin(), Hitboxes.end(), [](const Hitbox& h) {return !h.getEstadoHitbox(); }), Hitboxes.end());
-
-
-    //Muerte y fin de combate
-
-    //Evaluamos si alguno de los dos combatientes tiene vida=0 tras las colisiones de proyectiles y melee:
-    if (piezaAtacante->stats.vida <= 0 || piezaDefensor->stats.vida <= 0) {
-
-        //Creamos un operador auxiliar para determinar quién es el ganador y quién el defensor:
-        Pieza* perdedor = (piezaAtacante->stats.vida <= 0) ? piezaAtacante : piezaDefensor;
-
-        //El que no es perdedor es automáticamente ganador:
+    // 6. Comprobación de bajas
+    if (piezaAtacante->stats.vida <= 0.f || piezaDefensor->stats.vida <= 0.f) {
+        Pieza* perdedor = (piezaAtacante->stats.vida <= 0.f) ? piezaAtacante : piezaDefensor;
         Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
 
-        //Guardamos la coordenada del tablero donde ocurrió el conflicto:
-        sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
+        // --- SOLUCIÓN: LIMPIEZA ABSOLUTA DE MINIONS ANTES DE BORRAR AL LÍDER ---
+        // Hacemos la limpieza mientras las piezas sigan vivas en memoria.
+        if (pOsc != nullptr) {
+            pOsc->limpiarMinions();
+        }
+        if (pLuz != nullptr) {
+            pLuz->limpiarMinions(); // Por si el de la luz también tuviera minions en el futuro
+        }
 
-        //Buscamos al perdedor en el contenedor global de piezas:
+        sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
         auto deteccionperdedor = std::find(listaPiezas.begin(), listaPiezas.end(), perdedor);
 
+        // Ahora sí, borramos la pieza de la memoria de forma segura
         if (deteccionperdedor != listaPiezas.end()) {
-
-            //Eliminamos el perdedor de la lista de piezas:
             delete* deteccionperdedor;
-
-            //Borramos el puntero nulo de la lista global de piezas:
             listaPiezas.erase(deteccionperdedor);
         }
 
-        //El ganador ocupa la casilla conquistada:
         ganador->mover(destinoFinal);
 
-        //Borramos los punteros para evitar pnteros colgantes:
         piezaAtacante = nullptr;
         piezaDefensor = nullptr;
         piezaSeleccionada = nullptr;
 
-        //Forzamos el borrado de los contenedores de proyectiles y melee:
         Hitboxes.clear();
-
-        //Cambiamos el estado del motor a tablero:
         estadoActual = Estado::Tablero;
 
-        //Comprobamos si la muerte del perdedor significa que se han satisfecho las condiciones de victoria:
         VerificarVictoria();
 
-        //Llamamos a la lógica de avance de turno sólo si no ha terminado la partida:
         if (estadoActual != Estado::Victoria) {
             intentarAccionJugador(jugadorActual);
         }
+
+        return; // Salimos del método inmediatamente para que no intente ejecutar nada más de la arena en este frame
     }
 }
 void Motor::dibujarHUD() {
@@ -684,5 +730,37 @@ void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
             manejarClick(sf::Mouse::getPosition(window), vistaTablero);
         }
     }
-    // No pongas el movimiento aquí, ya lo tienes en Motor::actualizar con isKeyPressed
+
+}
+void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
+    sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
+    sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt)
+{
+    sf::Vector2f dir(0.f, 0.f);
+
+    if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
+    if (sf::Keyboard::isKeyPressed(abajo))  dir.y += 1.f;
+    if (sf::Keyboard::isKeyPressed(izqda))  dir.x -= 1.f;
+    if (sf::Keyboard::isKeyPressed(dcha))   dir.x += 1.f;
+
+    p->setultimadireccion(dir);
+
+    if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
+        sf::Vector2f dirAtaque = p->getultimadireccion();
+        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+        dirAtaque = (magnitud != 0.f) ? (dirAtaque / magnitud) : dirPorDefecto;
+
+        sf::Vector2f puntoSpawnAtaque = p->getPosicionAbsoluta() + (dirAtaque * 35.f);
+
+        if (p->stats.esRango) {
+            Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 60, 15);
+        }
+        else {
+            Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 0.2, 35);
+        }
+
+        p->reiniciarRelojHitbox();
+    }
+
+    p->procesarMovimientoArena(dir, dt, this->arena);
 }

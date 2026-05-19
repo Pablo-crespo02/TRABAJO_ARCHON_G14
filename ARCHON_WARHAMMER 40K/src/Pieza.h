@@ -25,10 +25,13 @@ struct Stats {
     float ataque;
     float defensa;
     float velAtaque;
+    //ROL VA A PERMITIR SABER SI ES CAZADOR O PERSEGUIDOR PARA LOS MINIONS CON IA
+    int rol;
 
     //Variables encargadas de la gestión de proyectiles en la arena
     sf::Clock relojHitbox;//Reloj que avanza desde que se dispara
     sf::Clock relojProyectil;//para que cambie de fotograma al atacar
+    sf::Clock relojHabilidad; //para Animacion hechizo
 
 };
 
@@ -42,6 +45,7 @@ protected:
 
     sf::Vector2f ultimadireccion; //Memoria de la última dirección a la que miró la pieza, para "apuntar" los proyectiles
     bool seleccionado;
+    sf::Clock relojAtaque;
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
     sf::CircleShape formaVisual;
@@ -146,4 +150,25 @@ public:
     // OJO: Le ponemos "{}" al final y no "= 0" para que sea opcional. Así las piezas a las 
     // que aún no les hayas programado hechizo no darán error de compilación.
     virtual void usarHechizo(std::vector<Hitbox>& contenedordeAtaques, Pieza* enemigo) {}
+    virtual void actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {}
+    virtual void limpiarMinions() {}
+    virtual std::vector<Pieza*>& getMinionsInvocados() {
+        static std::vector<Pieza*> vacio;
+        return vacio; // Las piezas normales devuelven una lista vacía
+    }
+
+    sf::Vector2f getUltimaDireccion() const { return ultimadireccion; }
+
+    // Método público para actualizar las barras de la arena de los minions 
+    void gestionarBarraAtaqueMinion(float vidaActual, float vidaMax, float velAtaque, const sf::Vector2f& posicion, bool reiniciarReloj) {
+        // Al estar DENTRO de Pieza, tenemos acceso total y directo a 'barrasArena'
+
+        // Si el motor o el líder dicen que ha atacado, reiniciamos el reloj visual
+        if (reiniciarReloj) {
+            this->barrasArena.reiniciarRecarga();
+        }
+
+        // Llamamos a la función nativa de tu clase BarrasArena
+        this->barrasArena.actualizar(vidaActual, vidaMax, velAtaque, posicion);
+    }
 };

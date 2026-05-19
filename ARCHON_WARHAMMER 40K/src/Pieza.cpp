@@ -15,6 +15,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     formaVisual.setOrigin(20.f, 20.f);
 
     // Las stats y el rango se llenarán en el constructor de la clase hija
+    formaVisual.setFillColor(sf::Color::Magenta);
 }
 
 // SINCRONIZACIÓN VISUAL
@@ -59,14 +60,16 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 //GESTIÓN DE PROYECTILES:
 
 bool Pieza::puedeAtacar() const {
-
-    return stats.relojHitbox.getElapsedTime().asSeconds() > stats.velAtaque;
-};
-
+    // Ahora usa la velocidad de ataque definida en ClaseGolem (ej: 1.0f)
+    if (stats.relojHitbox.getElapsedTime().asSeconds() >= stats.velAtaque) {
+        return true;
+    }
+    return false;
+}
 void Pieza::reiniciarRelojHitbox() {
-    stats.relojHitbox.restart();
-    barrasArena.reiniciarRecarga();
-};
+   stats.relojHitbox.restart();
+   barrasArena.reiniciarRecarga();
+}
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
     inmovilizado = true;

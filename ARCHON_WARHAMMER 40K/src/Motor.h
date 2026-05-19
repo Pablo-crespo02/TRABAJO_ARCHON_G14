@@ -36,6 +36,9 @@ private:
     //sonido
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
+    void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
+        sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
+        sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);
 public:
     std::vector<Pieza*> listaPiezas;
     std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }

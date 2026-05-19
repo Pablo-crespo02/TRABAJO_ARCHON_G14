@@ -24,6 +24,7 @@ Coordinador::Coordinador()
     // 4. INICIALIZAMOS LAS PANTALLAS
     pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
     menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
+    
 
     // 5. CONFIGURACIÓN FINAL
     estadoActual = Estado::MenuPrincipal;
@@ -219,7 +220,7 @@ void Coordinador::dibujar() {
     }
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
-        dibujarPantallaVictoria();
+        pantallavictoria.dibujar(window);
     }
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
@@ -285,9 +286,10 @@ void Coordinador::actualizar(float dt) {
     }
     else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
-        std::cout << "Coordinador: ¡Detectada victoria en el Motor!" << std::endl;
+        int ganador = motor.getGanador();
+        pantallavictoria.configurarPantallaVictoria(ganador, window);
     }
-
+    
     // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);
@@ -299,39 +301,7 @@ void Coordinador::reiniciarPartida() {
     std::cout << "DEBUG: Datos del motor limpiados y unidades desplegadas." << std::endl;
 }
 
-void Coordinador::dibujarPantallaVictoria() {
-    sf::Text textoVictoria;
-    textoVictoria.setFont(fuenteGlobal);
 
-    int ganador = motor.getGanador();
-
-    if (ganador == 1) {
-        textoVictoria.setString("VICTORIA DEL IMPERIUM");
-        textoVictoria.setFillColor(sf::Color::Yellow);
-    }
-    else {
-        textoVictoria.setString("VICTORIA XENOS");
-        textoVictoria.setFillColor(sf::Color::Red);
-    }
-
-    textoVictoria.setCharacterSize(80);
-    sf::FloatRect textRect = textoVictoria.getLocalBounds();
-    textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
-
-    sf::Text textoContinuar;
-    textoContinuar.setFont(fuenteGlobal);
-    textoContinuar.setString("Pulsa ENTER para volver al menu");
-    textoContinuar.setCharacterSize(30);
-    textoContinuar.setFillColor(sf::Color::White);
-
-    sf::FloatRect contRect = textoContinuar.getLocalBounds();
-    textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
-    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.f);
-
-    window.draw(textoVictoria);
-    window.draw(textoContinuar);
-}
 void Coordinador::guardarEnRanura(int indice) {
     // 1. Si la ranura ya tenía una partida vieja, limpiamos su memoria para no saturar la RAM
     for (Pieza* p : ranuras[indice].piezas) {
@@ -348,7 +318,7 @@ void Coordinador::guardarEnRanura(int indice) {
     }
 
     ranuras[indice].ocupada = true;
-    std::cout << "¡Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
+    std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
 }
 
 void Coordinador::cargarDesdeRanura(int indice) {
@@ -369,7 +339,7 @@ void Coordinador::cargarDesdeRanura(int indice) {
         // 4. Cambiamos los estados para reanudar el juego
         estadoActual = Estado::Tablero;
         motor.setEstado(Estado::Tablero);
-        std::cout << "¡Partida cargada desde la ranura " << indice + 1 << "!" << std::endl;
+        std::cout << "Partida cargada desde la ranura " << indice + 1 << "!" << std::endl;
     }
     else {
         std::cout << "La ranura " << indice + 1 << " esta vacia." << std::endl;
