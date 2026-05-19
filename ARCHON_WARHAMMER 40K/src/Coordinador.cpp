@@ -3,22 +3,30 @@
 Coordinador::Coordinador()
     : motor(window, fuenteGlobal)
 {
-    pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
-    // Cargamos la fuente una sola vez
+    // 1. CARGAMOS LA FUENTE
     if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
         std::cout << "Error critico: Fuente no encontrada" << std::endl;
     }
 
-    // Creamos la ventana
+    // 2. CARGAMOS EL SONIDO
+    if (!bufferClick.loadFromFile("sonidos/click.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido click.wav" << std::endl;
+    }
+    else {
+        sonidoClick.setBuffer(bufferClick);
+        sonidoClick.setVolume(50.f);
+    }
+
+    // 3. CREAMOS LA VENTANA
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
 
-    // El estado inicial lo maneja el Coordinador
+    // 4. INICIALIZAMOS LAS PANTALLAS
     pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
     menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
 
+    // 5. CONFIGURACIÓN FINAL
     estadoActual = Estado::MenuPrincipal;
-    // Inicializamos las vistas que pasaste
     vistaUI = window.getDefaultView();
     vistaTablero.setSize(700.f, 700.f);
     vistaTablero.setCenter(350.f, 350.f);
@@ -58,22 +66,31 @@ void Coordinador::gestionarEventos() {
             // Actualizamos la apariencia del botón "Reanudar" (gris o normal)
             pantallaInicio.setPartidaActiva(partidaEnCurso);
 
+            //sonido cuando te mueves arriba y abajo en el menu principal
             if (evento.type == sf::Event::KeyPressed) {
-                if (evento.key.code == sf::Keyboard::Up)    pantallaInicio.moverArriba();
-                if (evento.key.code == sf::Keyboard::Down)  pantallaInicio.moverAbajo();
+                if (evento.key.code == sf::Keyboard::Up)
+                {
+                    pantallaInicio.moverArriba();
+                    sonidoClick.play();
+                }
+                if (evento.key.code == sf::Keyboard::Down)
+                {
+                    pantallaInicio.moverAbajo();
+                    sonidoClick.play();
+                }
 
                 if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
                     int seleccion = pantallaInicio.getIndiceSeleccionado();
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
                         this->reiniciarPartida();
-                        partidaEnCurso = true; // <--- Marcamos que ya hay juego activo
+                        partidaEnCurso = true; 
                         estadoActual = Estado::Tablero;
                         motor.setEstado(Estado::Tablero);
                         break;
 
                     case 1: // REANUDAR PARTIDA
-                        if (partidaEnCurso) { // <--- Solo entra si hemos iniciado/cargado algo
+                        if (partidaEnCurso) {
                             estadoActual = Estado::Tablero;
                             motor.setEstado(Estado::Tablero);
                         }
@@ -88,7 +105,6 @@ void Coordinador::gestionarEventos() {
 
                     case 5: // CARGAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = false;
-                        // Actualizamos los textos para que ponga (VACÍA) o (DATOS)
                         pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
                         estadoActual = Estado::SeleccionCarga;
                         break;
@@ -100,8 +116,16 @@ void Coordinador::gestionarEventos() {
         //MENÚ DE PAUSA
         else if (estadoActual == Estado::Pausa) {
             if (evento.type == sf::Event::KeyPressed) {
-                if (evento.key.code == sf::Keyboard::Up)    menuPausa->moverArriba();
-                if (evento.key.code == sf::Keyboard::Down)  menuPausa->moverAbajo();
+                if (evento.key.code == sf::Keyboard::Up)
+                {
+                    menuPausa->moverArriba();
+                    sonidoClick.play();
+                }
+                if (evento.key.code == sf::Keyboard::Down)
+                {
+                    menuPausa->moverAbajo();
+                    sonidoClick.play();
+                }
 
                 if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
                     int selPausa = menuPausa->getIndiceSeleccionado();
@@ -124,26 +148,35 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
+        //MENU DE CARGA
         else if (estadoActual == Estado::SeleccionCarga) {
             if (evento.type == sf::Event::KeyPressed) {
-                if (evento.key.code == sf::Keyboard::Up) pantallaCarga->moverArriba();
-                if (evento.key.code == sf::Keyboard::Down) pantallaCarga->moverAbajo();
+                if (evento.key.code == sf::Keyboard::Up)
+                {
+                    pantallaCarga->moverArriba();
+                    sonidoClick.play();
+                }
+                if (evento.key.code == sf::Keyboard::Down)
+                {
+                    pantallaCarga->moverAbajo();
+                    sonidoClick.play();
+                }
 
                 if (evento.key.code == sf::Keyboard::Enter) {
                     int ranura = pantallaCarga->getIndiceSeleccionado();
                     if (ranura == 3) { // Opción "VOLVER"
-                        // Volvemos a donde estábamos
+                        
                         estadoActual = modoGuardar ? Estado::Pausa : Estado::MenuPrincipal;
                     }
                     else {
                         if (modoGuardar) {
                             this->guardarEnRanura(ranura);
                             pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
-                            estadoActual = Estado::Pausa; // Te devuelve a la pausa tras guardar
+                            estadoActual = Estado::Pausa;
                         }
                         else {
                             this->cargarDesdeRanura(ranura);
-                            partidaEnCurso = true; // ¡Iniciamos una partida!
+                            partidaEnCurso = true;
                         }
                     }
                 }

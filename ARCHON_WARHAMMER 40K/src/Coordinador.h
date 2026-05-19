@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include "EstadoJuego.h"
 #include "InterfazHUD.h"
@@ -29,6 +30,10 @@ private:
     bool modoGuardar = false;
     bool partidaEnCurso = false;
     DatosGuardados ranuras[3];
+
+    // --- AUDIO ---
+    sf::SoundBuffer bufferClick;
+    sf::Sound sonidoClick;
 
 
     // --- COMPONENTES ---

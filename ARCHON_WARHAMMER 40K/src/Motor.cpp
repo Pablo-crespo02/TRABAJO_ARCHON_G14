@@ -24,6 +24,15 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
+    //  CARGA DE SONIDO
+    if (!bufferMover.loadFromFile("sonidos/mover.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido mover.wav" << std::endl;
+    }
+    else {
+        sonidoMover.setBuffer(bufferMover);
+        sonidoMover.setVolume(70.f); // Volumen al 70% para que el golpe se note
+    }
+
     // 2. Generar el mundo inicial
     // Llamamos a tus funciones de generación
     Generador::GenerarTablero(tablero);
@@ -339,6 +348,8 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
                     piezaSeleccionada->sincronizarPosicionTablero(); // Actualiza los píxeles visuales
 
                     std::cout << "Movimiento realizado con exito." << std::endl;
+
+                    sonidoMover.play();
 
                     piezaSeleccionada->seleccionado = false;
                     piezaSeleccionada = nullptr;

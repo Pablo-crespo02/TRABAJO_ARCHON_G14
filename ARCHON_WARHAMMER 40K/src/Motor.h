@@ -1,7 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <vector>
-#include <string>      // Te faltaba esta para std::string
+#include <string>     
 #include "EstadoJuego.h" 
 #include "Tablero.h"
 #include "Pieza.h"
@@ -32,6 +33,9 @@ private:
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
+    //sonido
+    sf::SoundBuffer bufferMover;
+    sf::Sound sonidoMover;
 public:
     std::vector<Pieza*> listaPiezas;
     std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }

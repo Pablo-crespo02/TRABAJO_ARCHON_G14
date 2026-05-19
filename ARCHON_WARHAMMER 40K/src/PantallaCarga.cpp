@@ -30,7 +30,7 @@ PantallaCarga::PantallaCarga(sf::Font& font, sf::Vector2u tamano) {
 void PantallaCarga::dibujar(sf::RenderWindow& window) {
     window.draw(textoTitulo);
     for (int i = 0; i < NUM_RANURAS; i++) {
-        if (i == indiceSeleccionado) { // <--- Cambiado a indiceSeleccionado
+        if (i == indiceSeleccionado) { 
             opciones[i].setFillColor(sf::Color::Yellow);
         }
         else {

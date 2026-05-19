@@ -25,7 +25,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     // CARGA DE SPRITES
     if (tipo == "LIBRARIAN" || tipo == "HARPY") {
         std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-HARPY-TYRANIDS.png";
-        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-MANTICORA-Oscuridad-1.0.png";
+        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-HARPY-TYRANIDS-1.0.png";
 
         int columnas = 5 ;
         int filas = 2;
