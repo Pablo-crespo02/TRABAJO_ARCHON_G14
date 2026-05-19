@@ -14,6 +14,9 @@
 struct DatosGuardados {
     bool ocupada = false;
     std::vector<Pieza*> piezas;
+    int ronda = 1;      
+    int ciclo = 1;    
+    int jugador = 1;
 };
 
 

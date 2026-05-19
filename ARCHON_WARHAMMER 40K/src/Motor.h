@@ -43,6 +43,21 @@ public:
     std::vector<Pieza*> listaPiezas;
     std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }
     void setListaPiezas(const std::vector<Pieza*>& nuevasPiezas) { listaPiezas = nuevasPiezas; }
+
+    //FUNCIONES EXTRA PARA GUARDADO Y CARGA
+    //para que el Coordinador pueda leer las variables al guardar
+    int getRondaActual() const { return rondaActual; }
+    int getCicloActual() const { return cicloActual; }
+    int getJugadorActual() const { return jugadorActual; }
+
+    // para que el Coordinador pueda escribir las variables al cargar
+    void setRondaActual(int r) { rondaActual = r; }
+    void setJugadorActual(int j) { jugadorActual = j; }
+
+    void setCicloActual(int c) {
+        cicloActual = c;
+        tablero.actualizarColores(c);
+    }
     Pieza* piezaSeleccionada = nullptr;
     Pieza* piezaAtacante = nullptr;
     Pieza* piezaDefensor = nullptr;

@@ -317,6 +317,10 @@ void Coordinador::guardarEnRanura(int indice) {
         ranuras[indice].piezas.push_back(p->clonar());
     }
 
+    ranuras[indice].ronda = motor.getRondaActual();
+    ranuras[indice].ciclo = motor.getCicloActual();
+    ranuras[indice].jugador = motor.getJugadorActual();
+
     ranuras[indice].ocupada = true;
     std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
 }
@@ -335,6 +339,10 @@ void Coordinador::cargarDesdeRanura(int indice) {
 
         // 3. Inyectamos los clones en el Motor
         motor.setListaPiezas(piezasCargadas);
+
+        motor.setRondaActual(ranuras[indice].ronda);
+        motor.setCicloActual(ranuras[indice].ciclo);
+        motor.setJugadorActual(ranuras[indice].jugador);
 
         // 4. Cambiamos los estados para reanudar el juego
         estadoActual = Estado::Tablero;
