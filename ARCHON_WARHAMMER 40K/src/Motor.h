@@ -34,11 +34,20 @@ private:
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
 
+
     //sonido
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
 
     //sonido error
+    sf::SoundBuffer bufferError;
+    sf::Sound sonidoError;
+
+
+    //sonido mover pieza tablero
+    sf::SoundBuffer bufferMover;
+    sf::Sound sonidoMover;
+    //sonido mover pieza de forma incorrecta
     sf::SoundBuffer bufferError;
     sf::Sound sonidoError;
 

@@ -25,21 +25,13 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
-    //  CARGA DE SONIDO
+    //  CARGA DE SONIDO MOVER
     if (!bufferMover.loadFromFile("sonidos/mover.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido mover.wav" << std::endl;
     }
     else {
         sonidoMover.setBuffer(bufferMover);
-        sonidoMover.setVolume(70.f); 
-    }
-    //CARGA DEL SONIDO DE ERROR 
-    if (!bufferError.loadFromFile("sonidos/error.mp3")) { // Cambia la extensión si usas .mp3 o .ogg
-        std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
-    }
-    else {
-        sonidoError.setBuffer(bufferError);
-        sonidoError.setVolume(60.f);
+        sonidoMover.setVolume(70.f); // Volumen al 70% para que el golpe se note
     }
 
     // 2. Generar el mundo inicial
