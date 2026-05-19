@@ -26,7 +26,7 @@ private:
     sf::View vistaTablero;
     sf::View vistaUI;
     sf::RenderWindow window;
-    sf::Font fuenteGlobal;
+    sf::Font fuente;
     sf::Clock reloj;
     int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
     int indiceSeleccionado = 0;
@@ -55,7 +55,6 @@ public:
     void ejecutar();
     void gestionarEventos();
     void reiniciarPartida();
-    void dibujarPantallaVictoria();
     void actualizar(float dt);
     void dibujar();
 

@@ -1,8 +1,14 @@
 #include "Coordinador.h"
 
-Coordinador::Coordinador():motor(window, fuenteGlobal)
+Coordinador::Coordinador():motor(window, fuente)
 {
-    // 1. INIIALIZAMOS LOS MENÚS:
+    // CARGA DE LA FUENTE:
+    if (!fuente.loadFromFile("fuentes/fuente_pixel.ttf")) {
+        std::cout << "Error cargando fuente" << std::endl;
+        return;
+    }
+
+    // 1. INIIALIZAMOS LOS MENÚS NO INTERACTIVOS:
     pantallainfo.inicializarTextos();  
 
     // 2. CARGAMOS EL SONIDO
@@ -19,8 +25,8 @@ Coordinador::Coordinador():motor(window, fuenteGlobal)
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
 
     // 4. INICIALIZAMOS LAS PANTALLAS
-    pantallaCarga = new PantallaCarga(fuenteGlobal, window.getSize());
-    menuPausa = new MenuPausa(fuenteGlobal, window.getSize());
+    pantallaCarga = new PantallaCarga(fuente, window.getSize());
+    menuPausa = new MenuPausa(fuente, window.getSize());
     
 
     // 5. CONFIGURACIÓN FINAL

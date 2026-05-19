@@ -13,8 +13,6 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     fuenteGlobal(fuente), // Conectamos con la fuente del Coordinador
     hud(window,fuente)
 {
-    // Ya NO cargamos la fuente aquí (ya la cargó el Coordinador)
-    // Ya NO creamos la ventana aquí (ya la creó el Coordinador)
 
     // 1. Inicialización de variables de estado
     jugadorActual = 1;
@@ -33,17 +31,13 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoMover.setBuffer(bufferMover);
         sonidoMover.setVolume(70.f); 
     }
-    //CARGA DEL SONIDO DE ERROR 
-    if (!bufferError.loadFromFile("sonidos/error.mp3")) { // Cambia la extensión si usas .mp3 o .ogg
-        sonidoMover.setVolume(70.f);
-    }
-    //CARGA DEL SONIDO DE ERROR (NUEVO)
+    
+    //CARGA DEL SONIDO DE ERROR
     if (!bufferError.loadFromFile("sonidos/error.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
     }
     else {
         sonidoError.setBuffer(bufferError);
-        sonidoError.setVolume(60.f);
         sonidoError.setVolume(50.f); 
     }
 
@@ -216,10 +210,6 @@ void Motor::VerificarVictoria() {
         }
     }
 
-    //CHIVATOS DEBUG:
-    std::cout << "[DEBUG VICTORIA] Imperium -> Piezas: " << piezasLuz << " | PowerPoints: " << powerPointsLuz << std::endl;
-    std::cout << "[DEBUG VICTORIA] Xenos -> Piezas: " << piezasOscuridad << " | PowerPoints: " << powerPointsOscuridad << std::endl;
-
     //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
     //Condiciones LUZ:
     if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
@@ -273,10 +263,6 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
         piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
 
     }
-
-    // Preparar la Arena
-    sf::Color colorA = piezaAtacante->getColorVisual();
-    sf::Color colorD = piezaDefensor->getColorVisual();
 
     // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
     GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
@@ -381,86 +367,6 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
             else {
                 std::cout << "Movimiento denegado: Camino bloqueado o fuera de rango." << std::endl;
                 sonidoError.play();
-            }
-        }
-    }
-}
-
-void Motor::manejarEventos(const sf::View& vistaTablero) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
-            window.close();
-
-        //menu principal
-        if (estadoActual == Estado::MenuPrincipal) {
-            if (event.type == sf::Event::KeyPressed) {
-                // Navegar por las opciones con las flechas de arriba y abajo
-                if (event.key.code == sf::Keyboard::Up) {
-                    pantallaInicio.moverArriba();
-                }
-                if (event.key.code == sf::Keyboard::Down) {
-                    pantallaInicio.moverAbajo();
-                }
-
-                // Confirmar selección con Enter
-                if (event.key.code == sf::Keyboard::Enter) {
-                    int seleccion = pantallaInicio.getIndiceSeleccionado();
-
-                    if (seleccion == 0) { // op 0 : iniciar partida
-                        std::cout << "Iniciando partida... Al Tablero" << std::endl;
-                        reiniciarJuego();
-                        estadoActual = Estado::Tablero;
-                    }
-                    else if (seleccion == 1) { //op 1: reanudar partida
-                        std::cout << "Reanudando partida..." << std::endl;
-                        estadoActual = Estado::Tablero;
-                    }
-                    else if (seleccion == 2) { //op 2: INSTRUCCIONES
-                        estadoActual = Estado::Instrucciones;
-                    }
-                    else if (seleccion == 3) { //op 3: CREDITOS
-                        estadoActual = Estado::Creditos;
-                    }
-                }
-            }
-        }
-        //pulsando enter o escape para salir 
-        else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos) {
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::Enter) {
-                    estadoActual = Estado::MenuPrincipal; // Vuelve al menú
-                }
-            }
-        }
-        //tablero
-        else if (estadoActual == Estado::Tablero) {
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    manejarClick(sf::Mouse::getPosition(window), vistaTablero);
-                }
-            }
-        }
-
-        //control arena
-        else if (estadoActual == Estado::Arena) {
-            if (event.type == sf::Event::KeyPressed) {
-                // Salir del combate manualmente
-                if (event.key.code == sf::Keyboard::Escape) {
-                    estadoActual = Estado::Tablero;
-                    std::cout << "Volviendo al Tablero..." << std::endl;
-                }
-            }
-
-        }
-
-        //control pantalla victoria
-        else if (estadoActual == Estado::Victoria) {
-            if (event.type == sf::Event::KeyPressed) {
-                // Reiniciar juego y volver al menú principal
-                if (event.key.code == sf::Keyboard::Enter) {
-                    reiniciarJuego(); // Resetea variables y vuelve a MenuPrincipal
-                }
             }
         }
     }
