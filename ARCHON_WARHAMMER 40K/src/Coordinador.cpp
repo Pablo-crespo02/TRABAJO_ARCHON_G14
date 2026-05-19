@@ -54,6 +54,7 @@ void Coordinador::gestionarEventos() {
 
         // 1. Tecla ESCAPE (Pausa/Volver)
         if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
+
             if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
                 estadoAnterior = estadoActual;
                 estadoActual = Estado::Pausa;
@@ -62,9 +63,9 @@ void Coordinador::gestionarEventos() {
                 estadoActual = estadoAnterior;
             }
             else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos || estadoActual == Estado::SeleccionCarga) {
-                estadoActual = Estado::MenuPrincipal;
+                estadoActual = estadoAnterior; }
             }
-        }
+        
         //MENÚ PRINCIPAL
         if (estadoActual == Estado::MenuPrincipal) {
             // Actualizamos la apariencia del botón "Reanudar" (gris o normal)
@@ -88,7 +89,7 @@ void Coordinador::gestionarEventos() {
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
                         this->reiniciarPartida();
-                        partidaEnCurso = true; 
+                        partidaEnCurso = true;
                         estadoActual = Estado::Tablero;
                         motor.setEstado(Estado::Tablero);
                         break;
@@ -100,8 +101,16 @@ void Coordinador::gestionarEventos() {
                         }
                         break;
 
-                    case 2: estadoActual = Estado::Instrucciones; break;
-                    case 3: estadoActual = Estado::Creditos; break;
+                    case 2: {
+                        estadoAnterior = Estado::MenuPrincipal;
+                          estadoActual = Estado::Instrucciones; 
+                          break;
+                    }
+                    case 3: {
+                        estadoAnterior = Estado::MenuPrincipal;
+                        estadoActual = Estado::Creditos; 
+                        break;
+                    }
 
                     case 4: // SALIR DEL JUEGO
                         window.close();
@@ -137,7 +146,10 @@ void Coordinador::gestionarEventos() {
                     case 0: estadoActual = estadoAnterior; break; // REANUDAR
                     case 1: reiniciarPartida(); estadoActual = Estado::Tablero; break; // REINICIAR
                     case 2: estadoActual = Estado::MenuPrincipal; break; // VOLVER AL MENU
-                    case 3: estadoActual = Estado::Instrucciones; break; // INSTRUCCIONES
+                    case 3: { 
+                        estadoAnterior = Estado::Pausa;
+                        estadoActual = Estado::Instrucciones; break; 
+                    } // INSTRUCCIONES
 
                     case 4: // GUARDAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = true;
