@@ -33,9 +33,12 @@ private:
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
-    //sonido
+    //sonido mover pieza tablero
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
+    //sonido mover pieza de forma incorrecta
+    sf::SoundBuffer bufferError;
+    sf::Sound sonidoError;
     void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
         sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);
