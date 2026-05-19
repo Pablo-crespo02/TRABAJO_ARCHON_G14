@@ -31,7 +31,20 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     }
     else {
         sonidoMover.setBuffer(bufferMover);
-        sonidoMover.setVolume(70.f); // Volumen al 70% para que el golpe se note
+        sonidoMover.setVolume(70.f); 
+    }
+    //CARGA DEL SONIDO DE ERROR 
+    if (!bufferError.loadFromFile("sonidos/error.mp3")) { // Cambia la extensión si usas .mp3 o .ogg
+        sonidoMover.setVolume(70.f);
+    }
+    //CARGA DEL SONIDO DE ERROR (NUEVO)
+    if (!bufferError.loadFromFile("sonidos/error.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
+    }
+    else {
+        sonidoError.setBuffer(bufferError);
+        sonidoError.setVolume(60.f);
+        sonidoError.setVolume(50.f); 
     }
 
     // 2. Generar el mundo inicial
