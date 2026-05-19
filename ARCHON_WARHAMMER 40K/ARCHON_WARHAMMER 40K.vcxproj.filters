@@ -84,7 +84,16 @@
     <ClCompile Include="src\MenuPausa.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\PantallaVictoria.cpp">
+    <ClCompile Include="src\MenusNoInteractivos.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClaseKnight.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClaseLider.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PantallaCarga.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,7 +170,16 @@
     <ClInclude Include="src\MenuPausa.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\PantallaVictoria.h">
+    <ClInclude Include="src\MenusNoInteractivos.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClaseKnight.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ClaseLider.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PantallaCarga.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

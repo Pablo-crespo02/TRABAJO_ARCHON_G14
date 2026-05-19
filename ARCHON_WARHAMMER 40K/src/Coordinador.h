@@ -5,7 +5,7 @@
 #include "EstadoJuego.h"
 #include "InterfazHUD.h"
 #include "Pantallainicio.h"
-#include "PantallaVictoria.h"
+#include "MenusNoInteractivos.h"
 #include "MenuPausa.h"
 #include "PantallaCarga.h"
 // EL MOTOR DEBE IR AL FINAL de los includes de componentes
@@ -43,7 +43,7 @@ private:
     // --- COMPONENTES ---
     Motor motor; // El motor se inicializa 
     PantallaInicio pantallaInicio;
-    PantallaVictoria pantallavictoria;
+    MenuNoInteractivo pantallainfo;
     Estado estadoActual;
     MenuPausa* menuPausa;
     Estado estadoAnterior;

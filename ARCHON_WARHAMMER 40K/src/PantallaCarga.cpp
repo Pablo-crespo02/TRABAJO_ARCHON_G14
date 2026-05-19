@@ -1,3 +1,4 @@
+
 #include "PantallaCarga.h"
 
 PantallaCarga::PantallaCarga(sf::Font& font, sf::Vector2u tamano) {

@@ -1,12 +1,9 @@
 #include "Coordinador.h"
 
-Coordinador::Coordinador()
-    : motor(window, fuenteGlobal)
+Coordinador::Coordinador():motor(window, fuenteGlobal)
 {
-    // 1. CARGAMOS LA FUENTE
-    if (!fuenteGlobal.loadFromFile("fuentes/fuente_pixel.ttf")) {
-        std::cout << "Error critico: Fuente no encontrada" << std::endl;
-    }
+    // 1. INIIALIZAMOS LOS MENÚS:
+    pantallainfo.inicializarTextos();  
 
     // 2. CARGAMOS EL SONIDO
     if (!bufferClick.loadFromFile("sonidos/click.mp3")) {
@@ -220,28 +217,12 @@ void Coordinador::dibujar() {
     }
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
-        pantallavictoria.dibujar(window);
+        pantallainfo.dibujarPantallaVictoria(window);
     }
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
         window.setView(vistaUI);
-        sf::Text textoInstrucciones;
-        textoInstrucciones.setFont(fuenteGlobal);
-        textoInstrucciones.setCharacterSize(35);
-        textoInstrucciones.setFillColor(sf::Color::White);
-
-        textoInstrucciones.setString(
-            "         OBJETIVO DE LA CRUZADA\n"
-            "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
-            "         FASE ESTRATEGICA (Tablero)\n"
-            "- Raton (Click Izquierdo) para mover unidades.\n\n"
-            "         FASE DE COMBATE (Arena)\n"
-            "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
-            "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
-            "      (Pulsa ESC para volver al Menu Principal)"
-        );
-        textoInstrucciones.setPosition(100.f, 150.f);
-        window.draw(textoInstrucciones);
+        pantallainfo.dibujarPantallaInstrucciones(window);
     }
     //6. menu cargar ranuras
     else if (estadoActual == Estado::SeleccionCarga) {
@@ -251,26 +232,7 @@ void Coordinador::dibujar() {
     // 7. PANTALLA CRÉDITOS
     else if (estadoActual == Estado::Creditos) {
         window.setView(vistaUI);
-        sf::Text textoCreditos;
-        textoCreditos.setFont(fuenteGlobal);
-        textoCreditos.setCharacterSize(35);
-        textoCreditos.setFillColor(sf::Color::Yellow);
-
-        textoCreditos.setString(
-            "               DESARROLLO Y PROGRAMACION\n\n"
-            "               Javier Monrio\n"
-            "               Gonzalo Castro\n"
-            "               Pablo Crespo\n"
-            "               Javier Lerin\n"
-            "               Cecilia Barrio\n\n\n"
-            "               BASADO EN\n"
-            "               Archon: The Light and the Dark (1983)\n\n\n"
-            "               UNIVERSO Y LORE\n"
-            "               Warhammer 40,000 (Games Workshop)\n\n\n"
-            "      (Pulsa ESC para volver al Menu Principal)"
-        );
-        textoCreditos.setPosition(150.f, 120.f);
-        window.draw(textoCreditos);
+        pantallainfo.dibujarPantallaCreditos(window);
     }
 
     window.display();
@@ -287,7 +249,7 @@ void Coordinador::actualizar(float dt) {
     else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
         int ganador = motor.getGanador();
-        pantallavictoria.configurarPantallaVictoria(ganador, window);
+        pantallainfo.configurarPantallaVictoria(ganador, window);
     }
     
     // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
