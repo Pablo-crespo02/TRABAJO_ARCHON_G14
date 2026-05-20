@@ -8,7 +8,6 @@
 #include "MenusNoInteractivos.h"
 #include "MenuPausa.h"
 #include "PantallaCarga.h"
-// EL MOTOR DEBE IR AL FINAL de los includes de componentes
 #include "Motor.h" 
 
 struct DatosGuardados {
@@ -17,6 +16,8 @@ struct DatosGuardados {
     int ronda = 1;      
     int ciclo = 1;    
     int jugador = 1;
+    int puntosLuz = 0;        // Guardar puntos Imperium
+    int puntosOscuridad = 0;  // Guardar puntos Xenos
 };
 
 

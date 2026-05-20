@@ -59,8 +59,7 @@ public:
     int getRondaActual() const { return rondaActual; }
     int getCicloActual() const { return cicloActual; }
     int getJugadorActual() const { return jugadorActual; }
-
-    // para que el Coordinador pueda escribir las variables al cargar
+    // Para que el Coordinador pueda escribir las variables al cargar
     void setRondaActual(int r) { rondaActual = r; }
     void setJugadorActual(int j) { jugadorActual = j; }
 
@@ -80,6 +79,9 @@ public:
     // Sistema de puntuacion
     int getPuntosLuz() const { return puntosLuz; }
     int getPuntosOscuridad() const { return puntosOscuridad; }
+
+    void setPuntosLuz(int p) { puntosLuz = p; }
+    void setPuntosOscuridad(int p) { puntosOscuridad = p; }
 
     // Funciones que se quedan porque son LÓGICA
     void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
