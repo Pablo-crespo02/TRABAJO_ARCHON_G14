@@ -72,10 +72,15 @@ void Motor::limpiarDatos() {
     piezaSeleccionada = nullptr;
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
+    //Reseteo de puntos
+    puntosLuz = 0;
+    puntosOscuridad = 0;
 
     // 3. Regeneración del mundo
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
+
+    
 }
 void Motor::renderizar() {
 
@@ -174,6 +179,10 @@ void Motor::reiniciarJuego(){
     piezaSeleccionada = nullptr;
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
+
+    //Reseteo de puntos 
+    puntosLuz = 0;
+    puntosOscuridad = 0;
 
     //Se vuelve a generar el tablero y las piezas:
     Generador::GenerarTablero(tablero);
@@ -614,6 +623,15 @@ void Motor::actualizar(double dt) {
         Pieza* perdedor = (piezaAtacante->stats.vida <= 0.f) ? piezaAtacante : piezaDefensor;
         Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
 
+        // --- NUEVO: SUMAR PUNTOS AL BANDO DEL GANADOR ---
+        int puntosObtenidos = calcularPuntosPieza(perdedor->stats.nombre);
+        if (ganador->getBando() == Bando::LUZ) {
+            puntosLuz += puntosObtenidos;
+        }
+        else {
+            puntosOscuridad += puntosObtenidos;
+        }
+
         // --- SOLUCIÓN: LIMPIEZA ABSOLUTA DE MINIONS ANTES DE BORRAR AL LÍDER ---
         // Hacemos la limpieza mientras las piezas sigan vivas en memoria.
         if (pOsc != nullptr) {
@@ -695,4 +713,16 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
     }
 
     p->procesarMovimientoArena(dir, dt, this->arena);
+}
+//Calulamos los puntos de la pieza
+int Motor::calcularPuntosPieza(const std::string& nombre) {
+    if (nombre == "CAPTAIN" || nombre == "HIVE_TYRANT") return 2000;
+    if (nombre == "LIBRARIAN" || nombre == "HARPY") return 750;
+    if (nombre == "CULEXUS" || nombre == "GENESTEALER") return 750;
+    if (nombre == "ASSAULT_MARINE" || nombre == "GARGOLA") return 300; 
+    if (nombre == "DREADNOUGHT" || nombre == "CARNIFEX") return 300;
+    if (nombre == "PRIMARIS" || nombre == "TOXICRENO") return 300;
+    if (nombre == "VINDICARE" || nombre == "LICTOR") return 150;
+    if (nombre == "INTERCESSOR" || nombre == "TERMAGANT") return 100;
+    return 0; // Por seguridad
 }

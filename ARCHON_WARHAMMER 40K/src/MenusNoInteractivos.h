@@ -17,13 +17,13 @@ private:
 
     sf::Text textoCreditos;
     sf::Text textoInstrucciones;
-        
+    sf::Text textoPuntuaciones;
 public:
     MenuNoInteractivo() {};
     void inicializarTextos();
-    void configurarPantallaVictoria(int ganador, sf::RenderWindow& window);
+    void configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, sf::RenderWindow& window);
     void dibujarPantallaVictoria(sf::RenderWindow& window);
     void dibujarPantallaCreditos(sf::RenderWindow& window);
     void dibujarPantallaInstrucciones(sf::RenderWindow& window);
-
+  
 };

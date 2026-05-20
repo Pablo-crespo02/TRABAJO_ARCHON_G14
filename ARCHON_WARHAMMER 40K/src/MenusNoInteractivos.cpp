@@ -62,8 +62,8 @@ void MenuNoInteractivo::inicializarTextos() {
 
    }
 
-void MenuNoInteractivo::configurarPantallaVictoria(int ganador, sf::RenderWindow& window) {
-
+void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, sf::RenderWindow& window) 
+{
     //CARGA DE RECURSOS Y MENSAJE EN CASO DE ERROR, FUENTE:
     if (!fuente.loadFromFile("fuentes/fuente_pixel.ttf")) {
         std::cout << "Error cargando fuente" << std::endl;
@@ -112,16 +112,30 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, sf::RenderWindow
 
 
     //CONFIGURACIÓN DEL TEXTO:
-
-    //Texto principal:
+    // Texto principal:
     sf::FloatRect textRect = textoVictoria.getLocalBounds();
     textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 50.f);
+    textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 120.f); // Lo subimos un poco
 
-    //Texto de volver al menú:
+    // --- NUEVO: CONFIGURACIÓN TEXTO DE PUNTUACIONES ---
+    textoPuntuaciones.setFont(fuente);
+    textoPuntuaciones.setCharacterSize(45);
+    textoPuntuaciones.setOutlineColor(sf::Color::Black);
+    textoPuntuaciones.setOutlineThickness(3.0f);
+    textoPuntuaciones.setFillColor(sf::Color::White);
+
+    std::string txtPuntos = "PUNTUACION IMPERIUM: " + std::to_string(ptosLuz) + "\n" +
+        "PUNTUACION XENOS: " + std::to_string(ptosOscuridad);
+    textoPuntuaciones.setString(txtPuntos);
+
+    sf::FloatRect ptRect = textoPuntuaciones.getLocalBounds();
+    textoPuntuaciones.setOrigin(ptRect.left + ptRect.width / 2.0f, ptRect.top + ptRect.height / 2.0f);
+    textoPuntuaciones.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 20.f);
+
+    // Texto de volver al menú:
     sf::FloatRect contRect = textoContinuar.getLocalBounds();
     textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
-    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 50.0f);
+    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 150.0f); // Lo bajamos un poco
 }
 
 void MenuNoInteractivo::dibujarPantallaVictoria(sf::RenderWindow& window) {
@@ -131,6 +145,7 @@ void MenuNoInteractivo::dibujarPantallaVictoria(sf::RenderWindow& window) {
 
     window.draw(spriteFondo);
     window.draw(textoVictoria);
+    window.draw(textoPuntuaciones);
     window.draw(textoContinuar);
 }
 
