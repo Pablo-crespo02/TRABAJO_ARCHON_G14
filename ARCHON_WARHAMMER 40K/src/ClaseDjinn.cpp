@@ -214,5 +214,5 @@ void ClaseDjinn::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         true                         // ¡ES ERRÁTICO!
     );
 
-    std::cout << "¡El Djinn invoca un Torbellino Erratico!" << std::endl;
+    std::cout << "El Djinn invoca un Torbellino Erratico!" << std::endl;
 }
