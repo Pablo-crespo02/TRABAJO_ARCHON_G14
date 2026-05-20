@@ -1,27 +1,31 @@
-#include "ClaseDjinn.h"
+#include "ClaseValkyria.h"
+#include <cmath> 
 #include <iostream>
 
 const float PIEZA_ALTURA_TABLERO = 90.0f;
 const float PIEZA_ALTURA_ARENA = 120.0f;
-ClaseDjinn::ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo)
-    : PiezaTeletransporte(b, pos) // Llama al constructor de la clase intermedia
+
+ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
+    : PiezaVoladora(b, pos)
 {
+    //ESTADÍSTICAS 
     this->stats.nombre = tipo;
-    this->stats.vida = 18.0f;
-    this->stats.vidaMaxima = 18.0f;
-    this->stats.defensa = 3.0f;
-    this->stats.ataque = 15.0f;
+    this->stats.vida = 35.0f;
+    this->stats.vidaMaxima = 35.0f; // Ajusta a valores en el futuro
+    this->stats.ataque = 5.0f;
+    this->stats.defensa = 20.0f;
     this->stats.velAtaque = 1.2f;
+    // --- Lógica de tipos ---
+    this->stats.esRango = false;    // El Golem es melee
+
     this->rangoMovimiento = 4;
-    this->stats.esRango = true;
-    // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ambos;
+    this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
     //CARGA DE SPRITES (Chibi)
-    if (tipo == "CULEXUS" || tipo == "GENESTEALER") {
+    if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
 
-        std::string rutaTablero = (tipo == "CULEXUS") ? "imagenes/BASE-CULEXUS-Humanidad.png" : "imagenes/BASE-GENESTEALER-TYRANIDS.png";
-        std::string rutaArena = (tipo == "CULEXUS") ? "imagenes/Chibi-CULEXUS-Humanidad-1.0.png" : "imagenes/Chibi-GENESTEALER-TYRANIDS-1.0.png";
-
+        std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
+        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -57,17 +61,19 @@ ClaseDjinn::ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo)
         temporizadorAnimacion = 0.0f;
     }
 }
-void ClaseDjinn::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
+
+//ENLACE DE FÍSICAS Y ANIMACIÓN
+void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
-    PiezaTeletransporte::procesarMovimientoArena(direccion, dt, arena);
+    PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
-    if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
+    if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
         animar(dt, direccion);
     }
 }
 
-void ClaseDjinn::animar(float dt, sf::Vector2f direccion) {
+void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
     int fila = 0;
     int colInicial = 0;
     int colFinal = 0;
@@ -145,11 +151,12 @@ void ClaseDjinn::animar(float dt, sf::Vector2f direccion) {
         spriteArena.setScale(escalaActualX, escalaArena);
     }
 }
-void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
+
+void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
+        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "FALTA") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -179,7 +186,7 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "FALTA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
@@ -189,30 +196,18 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
-
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
+
     }
 }
+void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
+    // El Golem se repara a sí mismo (Heal)
+    float curacion = 10.0f;
+    this->stats.vida += curacion;
 
-
-void ClaseDjinn::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // Dirección inicial aleatoria para el torbellino
-    float anguloInicial = static_cast<float>(std::rand() % 360) * 3.14159f / 180.f;
-    sf::Vector2f dirInicial(std::cos(anguloInicial), std::sin(anguloInicial));
-
-    hitboxes.emplace_back(
-        this->posicionAbsoluta,      // Origen: la posición del Djinn
-        dirInicial,                  // Dirección inicial
-        150.0f,                      // Rapidez (se moverá por la arena)
-        sf::Color(0, 255, 255, 120), // Color Cian (místico) con transparencia
-        this,                        // Propietario
-        8.0f,                        // Daño por segundo (DoT)
-        10.0f,                       // Dura 10 segundos
-        60.0f,                       // Radio del torbellino
-        true,                        // Es Daño Continuo (DoT)
-        true                         // ¡ES ERRÁTICO!
-    );
-
-    std::cout << "El Djinn invoca un Torbellino Erratico!" << std::endl;
+    // Evitamos que se cure por encima de su vida máxima
+    if (this->stats.vida > this->stats.vidaMaxima) {
+        this->stats.vida = this->stats.vidaMaxima;
+    }
 }

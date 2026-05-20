@@ -23,8 +23,8 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
     //CARGA DE SPRITES (Chibi)
     if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
-        std::string rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PROTOTIPO-XXX.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
-        std::string rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PROTOTIPO-XXX.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+        std::string rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIS-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
+        std::string rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIS-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
 
         int columnas = 5;
         int filas = 2;
@@ -85,7 +85,7 @@ void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
         //FOTOGRAMA DE ATAQUE 
         fila = 1;
         colInicial = 1;
-        colFinal = 2;
+        colFinal = 1;
     }
     else if (direccion.x != 0) {
         //FOTOGRAMA DE CAMINAR LATERAL 
@@ -156,7 +156,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -186,7 +186,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

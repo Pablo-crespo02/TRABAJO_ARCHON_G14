@@ -150,7 +150,7 @@ public:
     // OJO: Le ponemos "{}" al final y no "= 0" para que sea opcional. Así las piezas a las 
     // que aún no les hayas programado hechizo no darán error de compilación.
     virtual void usarHechizo(std::vector<Hitbox>& contenedordeAtaques, Pieza* enemigo) {}
-    virtual void actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {}
+    virtual void actualizarMinions(float dt, Arena& arena, Pieza* enemigo,std::vector<Hitbox>& hitboxes) {}
     virtual void limpiarMinions() {}
     virtual std::vector<Pieza*>& getMinionsInvocados() {
         static std::vector<Pieza*> vacio;

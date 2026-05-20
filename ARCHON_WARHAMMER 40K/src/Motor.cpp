@@ -465,7 +465,11 @@ void Motor::actualizar(double dt) {
             std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
-
+    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+   // Delegamos al Líder de la Luz que actualice sus piezas auxiliares pasándole la arena y el rival
+    if (pLuz != nullptr) {
+        pLuz->actualizarMinions(dt, this->arena, pOsc, Hitboxes); 
+    }
     // OSCURIDAD: Flechitas, disparo con ENTER, inicialmente mira a la izq
     procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f));
 
@@ -481,7 +485,7 @@ void Motor::actualizar(double dt) {
     // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
     // Delegamos al Líder de la Oscuridad que actualice sus piezas auxiliares pasándole la arena y el rival
     if (pOsc != nullptr) {
-        pOsc->actualizarMinions(dt, this->arena, pLuz);
+        pOsc->actualizarMinions(dt, this->arena, pLuz, Hitboxes);
     }
     // Intentamos transformar los combatientes a ClaseFenix mediante dynamic_cast.
     // Si la transformación es exitosa, les ordenamos actualizar sus efectos continuos.

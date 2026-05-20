@@ -212,7 +212,6 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 // ACTIVACIÓN DEL HECHIZO
 // =========================================================================
 void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    if (!enemigo) return;
 
     if (this->stats.nombre == "LIBRARIAN") {
         sf::Vector2f dirFija(0, 0);

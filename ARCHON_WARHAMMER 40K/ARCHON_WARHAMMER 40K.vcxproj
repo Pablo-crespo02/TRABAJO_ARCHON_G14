@@ -137,9 +137,11 @@
     <ClCompile Include="src\ClaseDjinn.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
+    <ClCompile Include="src\ClaseHelicoptero.cpp" />
     <ClCompile Include="src\ClaseKnight.cpp" />
     <ClCompile Include="src\ClaseLider.cpp" />
     <ClCompile Include="src\ClaseUnicornio.cpp" />
+    <ClCompile Include="src\ClaseValkyria.cpp" />
     <ClCompile Include="src\Coordinador.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\GenerarArena.cpp" />
@@ -166,9 +168,11 @@
     <ClInclude Include="src\ClaseDjinn.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
+    <ClInclude Include="src\ClaseHelicoptero.h" />
     <ClInclude Include="src\ClaseKnight.h" />
     <ClInclude Include="src\ClaseLider.h" />
     <ClInclude Include="src\ClaseUnicornio.h" />
+    <ClInclude Include="src\ClaseValkyria.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\Coordinador.h" />
     <ClInclude Include="src\EstadoJuego.h" />

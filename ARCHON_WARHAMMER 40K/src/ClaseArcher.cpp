@@ -18,7 +18,8 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.esRango = true;
     // --- Lógica de tipos ---
    // Asignación del patrón de movimiento
-    this->patronMovimiento = PatronMovimiento::Ambos;
+    this->patronMovimiento = PatronMovimiento::Ortogonal;
+    this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
     this->esInvisible = false;
     this->preparandoInvisibilidad = false;
     this->tieneBoostVelocidad = false;
@@ -200,8 +201,10 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
-        barrasArena.dibujar(window);
-
+        if (!esInvisible) {
+            barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
+            barrasArena.dibujar(window);
+        }
     }
 }
 //Hechizo 
