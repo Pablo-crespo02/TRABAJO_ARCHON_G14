@@ -257,6 +257,11 @@ void Coordinador::dibujar() {
 }
 
 void Coordinador::actualizar(float dt) {
+    //  EL TEMPORIZADOR GLOBAL 
+    if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
+        motor.setTiempoJugado(motor.getTiempoJugado() + dt);
+    }
+
     // Sincronizamos el estado para que el Coordinador sepa qué dibujar
     if (motor.getEstado() == Estado::Tablero && estadoActual == Estado::Arena) {
         estadoActual = Estado::Tablero;
@@ -267,8 +272,8 @@ void Coordinador::actualizar(float dt) {
     else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
         int ganador = motor.getGanador();
-        // Pasamos las puntuaciones 
-        pantallainfo.configurarPantallaVictoria(ganador, motor.getPuntosLuz(), motor.getPuntosOscuridad(), window);
+        // Pasamos las puntuaciones y el tiempo
+        pantallainfo.configurarPantallaVictoria(ganador, motor.getPuntosLuz(), motor.getPuntosOscuridad(), motor.getTiempoJugado(), window);
     }
     // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
@@ -300,9 +305,10 @@ void Coordinador::guardarEnRanura(int indice) {
     ranuras[indice].ciclo = motor.getCicloActual();
     ranuras[indice].jugador = motor.getJugadorActual();
 
-    //  Guardamos partidas actuales
+    //  Guardamos en las partidas actuales puntos y tiempo
     ranuras[indice].puntosLuz = motor.getPuntosLuz();
     ranuras[indice].puntosOscuridad = motor.getPuntosOscuridad();
+    ranuras[indice].tiempoJugado = motor.getTiempoJugado();
     // 5. Sloth ocupado
     ranuras[indice].ocupada = true;
     std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
@@ -327,10 +333,10 @@ void Coordinador::cargarDesdeRanura(int indice) {
         motor.setCicloActual(ranuras[indice].ciclo);
         motor.setJugadorActual(ranuras[indice].jugador);
 
-        //4: Restauramos partidas guardadas
+        //4: Restauramos puntos y tiempo de las partidas guardadas
         motor.setPuntosLuz(ranuras[indice].puntosLuz);
         motor.setPuntosOscuridad(ranuras[indice].puntosOscuridad);
-     
+        motor.setTiempoJugado(ranuras[indice].tiempoJugado);
         // 5. Cambiamos los estados para reanudar el juego
         estadoActual = Estado::Tablero;
         motor.setEstado(Estado::Tablero);

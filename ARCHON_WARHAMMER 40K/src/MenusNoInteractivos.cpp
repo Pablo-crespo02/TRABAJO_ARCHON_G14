@@ -62,7 +62,7 @@ void MenuNoInteractivo::inicializarTextos() {
 
    }
 
-void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, sf::RenderWindow& window) 
+void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, float tiempoJugado, sf::RenderWindow& window)
 {
     //CARGA DE RECURSOS Y MENSAJE EN CASO DE ERROR, FUENTE:
     if (!fuente.loadFromFile("fuentes/fuente_pixel.ttf")) {
@@ -117,7 +117,7 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int
     textoVictoria.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     textoVictoria.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 120.f); // Lo subimos un poco
 
-    // --- NUEVO: CONFIGURACIÓN TEXTO DE PUNTUACIONES ---
+    // CONFIGURACIÓN TEXTO DE PUNTUACIONES
     textoPuntuaciones.setFont(fuente);
     textoPuntuaciones.setCharacterSize(45);
     textoPuntuaciones.setOutlineColor(sf::Color::Black);
@@ -131,11 +131,31 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int
     sf::FloatRect ptRect = textoPuntuaciones.getLocalBounds();
     textoPuntuaciones.setOrigin(ptRect.left + ptRect.width / 2.0f, ptRect.top + ptRect.height / 2.0f);
     textoPuntuaciones.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 20.f);
+    //CONFIGURACIÓN TEXTO DE TIEMPO
+    textoTiempo.setFont(fuente);
+    textoTiempo.setCharacterSize(40);
+    textoTiempo.setOutlineColor(sf::Color::Black);
+    textoTiempo.setOutlineThickness(3.0f);
+    textoTiempo.setFillColor(sf::Color::Cyan); // Color cian para que destaque
 
-    // Texto de volver al menú:
+    // Cálculo matemático de minutos y segundos
+    int minutos = static_cast<int>(tiempoJugado) / 60;
+    int segundos = static_cast<int>(tiempoJugado) % 60;
+
+    // Formato con cero a la izquierda si los segundos son menos de 10 (ej: 05)
+    std::string strSegundos = (segundos < 10 ? "0" : "") + std::to_string(segundos);
+    std::string strTiempo = "TIEMPO DE PARTIDA: " + std::to_string(minutos) + ":" + strSegundos;
+
+    textoTiempo.setString(strTiempo);
+
+    sf::FloatRect tiemRect = textoTiempo.getLocalBounds();
+    textoTiempo.setOrigin(tiemRect.left + tiemRect.width / 2.0f, tiemRect.top + tiemRect.height / 2.0f);
+    textoTiempo.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 90.f);
+
+ // Texto de volver al menú:
     sf::FloatRect contRect = textoContinuar.getLocalBounds();
     textoContinuar.setOrigin(contRect.left + contRect.width / 2.0f, contRect.top + contRect.height / 2.0f);
-    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 150.0f); // Lo bajamos un poco
+    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 180.0f); 
 }
 
 void MenuNoInteractivo::dibujarPantallaVictoria(sf::RenderWindow& window) {
@@ -146,6 +166,7 @@ void MenuNoInteractivo::dibujarPantallaVictoria(sf::RenderWindow& window) {
     window.draw(spriteFondo);
     window.draw(textoVictoria);
     window.draw(textoPuntuaciones);
+    window.draw(textoTiempo);
     window.draw(textoContinuar);
 }
 

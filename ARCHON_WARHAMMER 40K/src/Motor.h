@@ -29,11 +29,14 @@ private:
 
     std::vector<Hitbox> Hitboxes;
     double limitecolision = 36;
+
     //--Sistema de puntuación
     int puntosLuz = 0;
     int puntosOscuridad = 0;
 
     int calcularPuntosPieza(const std::string& nombre);
+    //Tenporizador
+    float tiempoJugado = 0.0f;
 
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
@@ -82,7 +85,9 @@ public:
 
     void setPuntosLuz(int p) { puntosLuz = p; }
     void setPuntosOscuridad(int p) { puntosOscuridad = p; }
-
+    //Gestion de tiempo
+    float getTiempoJugado() const { return tiempoJugado; }
+    void setTiempoJugado(float t) { tiempoJugado = t; }
     // Funciones que se quedan porque son LÓGICA
     void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
     void actualizar(double dt);

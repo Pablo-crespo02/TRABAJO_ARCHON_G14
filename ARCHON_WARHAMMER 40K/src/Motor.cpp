@@ -56,6 +56,7 @@ Motor::~Motor() {
     }
     listaPiezas.clear();
 };
+
 void Motor::limpiarDatos() {
     // 1. Borrado de memoria (Importante para evitar fugas/leaks)
     for (auto p : listaPiezas) {
@@ -72,9 +73,10 @@ void Motor::limpiarDatos() {
     piezaSeleccionada = nullptr;
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
-    //Reseteo de puntos
+    //Reseteo de puntos y temporizador
     puntosLuz = 0;
     puntosOscuridad = 0;
+    tiempoJugado = 0.0f;
 
     // 3. Regeneración del mundo
     Generador::GenerarTablero(tablero);
@@ -82,6 +84,7 @@ void Motor::limpiarDatos() {
 
     
 }
+
 void Motor::renderizar() {
 
     if (estadoActual == Estado::Tablero) {
@@ -180,10 +183,10 @@ void Motor::reiniciarJuego(){
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
-    //Reseteo de puntos 
+    //Reseteo de puntos y temporizador
     puntosLuz = 0;
     puntosOscuridad = 0;
-
+    tiempoJugado = 0.0f;
     //Se vuelve a generar el tablero y las piezas:
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
@@ -385,10 +388,12 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
 //GESTIÓN DEL TECLADO ARENA
 void Motor::actualizar(double dt) {
+ 
     // 1. Filtro de estado obligatorio
     // Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimiento de los FPS:
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
+
 
     // Identificamos quién pertenece a qué bando para asignar controles WASD o flechas:
 
@@ -668,11 +673,13 @@ void Motor::actualizar(double dt) {
         return; // Salimos del método inmediatamente para que no intente ejecutar nada más de la arena en este frame
     }
 }
+
 void Motor::dibujarHUD() {
-    hud.setPuntuaciones(puntosLuz, puntosOscuridad);
+    hud.setDatosHUD(puntosLuz, puntosOscuridad, tiempoJugado);
 
     hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
 }
+
 void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
     if (estadoActual == Estado::Tablero) {
         if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
@@ -681,6 +688,7 @@ void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
     }
 
 }
+
 void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
     sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
     sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt)
@@ -714,6 +722,7 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
     p->procesarMovimientoArena(dir, dt, this->arena);
 }
 //Calulamos los puntos de la pieza
+
 int Motor::calcularPuntosPieza(const std::string& nombre) {
     if (nombre == "CAPTAIN" || nombre == "HIVE_TYRANT") return 2000;
     if (nombre == "LIBRARIAN" || nombre == "HARPY") return 750;

@@ -18,6 +18,7 @@ struct DatosGuardados {
     int jugador = 1;
     int puntosLuz = 0;        // Guardar puntos Imperium
     int puntosOscuridad = 0;  // Guardar puntos Xenos
+    float tiempoJugado = 0.0f; // Temporizador
 };
 
 
@@ -40,7 +41,7 @@ private:
     sf::SoundBuffer bufferClick;
     sf::Sound sonidoClick;
 
-
+    
     // --- COMPONENTES ---
     Motor motor; // El motor se inicializa 
     PantallaInicio pantallaInicio;

@@ -115,6 +115,23 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
     textoPuntosHUD.setPosition(40.f, alto - 90.f);
     window.draw(textoPuntosHUD);
+
+    //4.CRONOMETRO DE LA PARTIDA 
+    sf::Text textoTiempoHUD;
+    textoTiempoHUD.setFont(*fuente);
+    textoTiempoHUD.setCharacterSize(28);
+    textoTiempoHUD.setFillColor(sf::Color::Cyan);
+    textoTiempoHUD.setOutlineColor(sf::Color::Black);
+    textoTiempoHUD.setOutlineThickness(2.f);
+
+    int minutos = static_cast<int>(this->tiempoJugado) / 60;
+    int segundos = static_cast<int>(this->tiempoJugado) % 60;
+
+    std::string strSegundos = (segundos < 10 ? "0" : "") + std::to_string(segundos);
+    textoTiempoHUD.setString("TIEMPO: " + std::to_string(minutos) + ":" + strSegundos);
+
+    textoTiempoHUD.setPosition(450.f, alto - 75.f);
+    window.draw(textoTiempoHUD);
 }
 
 void InterfazHUD::dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal) {
