@@ -160,7 +160,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "LICTOR") {
+        if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -190,7 +190,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "LICTOR") {
+        if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

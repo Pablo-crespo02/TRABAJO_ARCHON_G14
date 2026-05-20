@@ -85,7 +85,7 @@ void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
         //FOTOGRAMA DE ATAQUE 
         fila = 1;
         colInicial = 1;
-        colFinal = 2;
+        colFinal = 1;
     }
     else if (direccion.x != 0) {
         //FOTOGRAMA DE CAMINAR LATERAL 
