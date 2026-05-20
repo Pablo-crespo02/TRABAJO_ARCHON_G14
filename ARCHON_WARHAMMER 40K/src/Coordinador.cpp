@@ -267,9 +267,9 @@ void Coordinador::actualizar(float dt) {
     else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
         estadoActual = Estado::Victoria;
         int ganador = motor.getGanador();
-        pantallainfo.configurarPantallaVictoria(ganador, window);
+        // Pasamos las puntuaciones 
+        pantallainfo.configurarPantallaVictoria(ganador, motor.getPuntosLuz(), motor.getPuntosOscuridad(), window);
     }
-    
     // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);

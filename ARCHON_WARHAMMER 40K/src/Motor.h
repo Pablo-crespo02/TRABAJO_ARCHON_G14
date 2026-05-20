@@ -29,6 +29,11 @@ private:
 
     std::vector<Hitbox> Hitboxes;
     double limitecolision = 36;
+    //--Sistema de puntuación
+    int puntosLuz = 0;
+    int puntosOscuridad = 0;
+
+    int calcularPuntosPieza(const std::string& nombre);
 
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
@@ -71,6 +76,10 @@ public:
     // El constructor ahora recibe la ventana y la fuente del Coordinador
     Motor(sf::RenderWindow& win, sf::Font& fuente);
     ~Motor();
+
+    // Sistema de puntuacion
+    int getPuntosLuz() const { return puntosLuz; }
+    int getPuntosOscuridad() const { return puntosOscuridad; }
 
     // Funciones que se quedan porque son LÓGICA
     void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
