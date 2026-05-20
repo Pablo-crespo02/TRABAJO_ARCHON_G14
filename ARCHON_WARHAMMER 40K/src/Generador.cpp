@@ -68,8 +68,8 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "CULEXUS" || tipo == "GENESTEALER") {
         nuevaPieza = new ClaseDjinn(bando, pos, tipo);
     }
-    else if (tipo == "VINDICARE"|| tipo == "GOBLIN") {
-        nuevaPieza = new ClaseArcher(bando, pos, tipo);
+    else if (tipo == "VINDICARE"|| tipo == "LICTOR") {
+        nuevaPieza = new  ClaseArcher(bando, pos, tipo);
     }
     else if (tipo == "PRIMARIS"||tipo=="TOXICRENO") {
         nuevaPieza = new ClaseUnicornio(bando, pos, tipo);
@@ -80,37 +80,12 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "CAPTAIN"|| tipo == "HIVE_TYRANT") {
     nuevaPieza = new ClaseLider(bando, pos, tipo);
     }
-/*
 
-else if (tipo == "ASSAULT_MARINE") {
+    /*
+else if (tipo == "ASSAULT_MARINE"|| tipo == "GARGOLA" ) {
     nuevaPieza = new ClaseValkyrie(bando, pos, "Assault Marine");
-}
-else if (tipo == "INTERCESSOR") {
-    nuevaPieza = new ClaseKnight(bando, pos, "Intercessor");
-}
+}   */
 
-}
-else if (tipo == "PRIMARIS") {
-    nuevaPieza = new ClaseUnicornio(bando, pos, "Primaris");
-}
-
-
-else if (tipo == "HIVE_TYRANT") {
-    nuevaPieza = new ClaseWizard(bando, pos, "Hive Tyrant");
-}
-
-else if (tipo == "HARPY") {
-    nuevaPieza = new ClaseValkyrie(bando, pos, "Harpy");
-}
-else if (tipo == "TERMAGANT") {
-    nuevaPieza = new ClaseKnight(bando, pos, "Termagant");
-}
-
-}
-else if (tipo == "TOXICRENO") {
-    nuevaPieza = new ClaseUnicornio(bando, pos, "Toxicreno");
-}
-*/
     if (nuevaPieza != nullptr) {
         nuevaPieza->sincronizarPosicionTablero(); // Calcula la posición real en píxeles
         motor.listaPiezas.push_back(nuevaPieza);  // La mete en la lista para que el Motor la dibuje
@@ -129,6 +104,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 6));
     AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
     AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 8));
+
     AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 0));
     AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 8));
 
@@ -138,7 +114,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::LUZ, "FENIX", sf::Vector2i(2, 4));
 
     //BANDO OSCURIDAD DESPLIEGUE
-    AnadirUnidad(motor, Bando::OSCURIDAD, "LICTOR", sf::Vector2i(8, 0));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GARGOLA", sf::Vector2i(8, 0));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 1));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 2));
     AnadirUnidad(motor, Bando::OSCURIDAD, "GENESTEALER", sf::Vector2i(8, 3));
@@ -146,10 +122,10 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 5));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 6));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));
-    AnadirUnidad(motor, Bando::OSCURIDAD, "LICTOR", sf::Vector2i(8, 8));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "GARGOLA", sf::Vector2i(8, 8));
 
-    AnadirUnidad(motor, Bando::OSCURIDAD, "GARGOLA", sf::Vector2i(7, 0));
-    AnadirUnidad(motor, Bando::OSCURIDAD, "GARGOLA", sf::Vector2i(7, 8));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "LICTOR", sf::Vector2i(7, 0));
+    AnadirUnidad(motor, Bando::OSCURIDAD, "LICTOR", sf::Vector2i(7, 8));
 
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::OSCURIDAD, "TERMAGANT", sf::Vector2i(7, i));

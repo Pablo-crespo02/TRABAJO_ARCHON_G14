@@ -11,15 +11,16 @@
 #include "InterfazHUD.h"
 #include "PantallaInicio.h"
 
-class Coordinador; // Predeclaración
+class Coordinador; // Predeclaración correcta
 
 class Motor {
+
 private:
     // --- LÓGICA DE JUEGO ---
     Tablero tablero;
     Arena arena;
     InterfazHUD hud;
-    Estado estadoActual;
+    Estado estadoActual; // Copia local del estado
     int jugadorActual = 1;
     int cicloActual = 1;
     int rondaActual = 1;
@@ -28,46 +29,38 @@ private:
 
     std::vector<Hitbox> Hitboxes;
     double limitecolision = 36;
+    //--Sistema de puntuación
+    int puntosLuz = 0;
+    int puntosOscuridad = 0;
 
-    // Referencias externas 
+    int calcularPuntosPieza(const std::string& nombre);
+
+    // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
-
-    // Sonidos
+    //sonido
     sf::SoundBuffer bufferError;
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
-    sf::Sound sonidoError;
 
-    // Sistema de Historial Local
-    sf::Clock relojPartida;
-    int puntuacionImperium = 0;
-    int puntuacionTyranidos = 0;
-    void guardarPartidaEnHistorial(std::string bandoGanador);
+    //sonido error
+    sf::Sound sonidoError;
 
     void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
         sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);
-
 public:
     std::vector<Pieza*> listaPiezas;
-    Pieza* piezaSeleccionada = nullptr;
-    Pieza* piezaAtacante = nullptr;
-    Pieza* piezaDefensor = nullptr;
-    PantallaInicio pantallaInicio;
-
-    Motor(sf::RenderWindow& win, sf::Font& fuente);
-    ~Motor();
-
-    Estado getEstado() const { return estadoActual; }
-    int getGanador() const { return ganadorPartida; }
-    std::vector<Pieza*>& getListaPiezas() { return listaPiezas; }
+    std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }
     void setListaPiezas(const std::vector<Pieza*>& nuevasPiezas) { listaPiezas = nuevasPiezas; }
 
+    //FUNCIONES EXTRA PARA GUARDADO Y CARGA
+    //para que el Coordinador pueda leer las variables al guardar
     int getRondaActual() const { return rondaActual; }
     int getCicloActual() const { return cicloActual; }
     int getJugadorActual() const { return jugadorActual; }
 
+    // para que el Coordinador pueda escribir las variables al cargar
     void setRondaActual(int r) { rondaActual = r; }
     void setJugadorActual(int j) { jugadorActual = j; }
 
@@ -75,7 +68,20 @@ public:
         cicloActual = c;
         tablero.actualizarColores(c);
     }
+    Pieza* piezaSeleccionada = nullptr;
+    Pieza* piezaAtacante = nullptr;
+    Pieza* piezaDefensor = nullptr;
+    PantallaInicio pantallaInicio;
 
+    // El constructor ahora recibe la ventana y la fuente del Coordinador
+    Motor(sf::RenderWindow& win, sf::Font& fuente);
+    ~Motor();
+
+    // Sistema de puntuacion
+    int getPuntosLuz() const { return puntosLuz; }
+    int getPuntosOscuridad() const { return puntosOscuridad; }
+
+    // Funciones que se quedan porque son LÓGICA
     void manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero);
     void actualizar(double dt);
     void renderizar();
@@ -88,5 +94,10 @@ public:
     void dibujarHUD();
     void reiniciarJuego();
     void manejarEventos(const sf::View& vistaTablero);
-    void gestionarEntrada(const sf::Event& evento, const sf::View& vistaTablero);
+
+    // Gestión de entrada específica del juego
+    void gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero);
+    Estado getEstado() { return estadoActual; }
+    int getGanador() const { return ganadorPartida; }
+    friend class InterfazHUD; // Para que el HUD siga leyendo datos
 };

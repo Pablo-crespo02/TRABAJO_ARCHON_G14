@@ -5,9 +5,10 @@
 #include "EstadoJuego.h"
 #include "InterfazHUD.h"
 #include "Pantallainicio.h"
-#include "PantallaVictoria.h"
+#include "MenusNoInteractivos.h"
 #include "MenuPausa.h"
 #include "PantallaCarga.h"
+// EL MOTOR DEBE IR AL FINAL de los includes de componentes
 #include "Motor.h" 
 
 struct DatosGuardados {
@@ -18,15 +19,16 @@ struct DatosGuardados {
     int jugador = 1;
 };
 
+
 class Coordinador {
 private:
     // --- INFRAESTRUCTURA ---
     sf::View vistaTablero;
     sf::View vistaUI;
     sf::RenderWindow window;
-    sf::Font fuenteGlobal;
+    sf::Font fuente;
     sf::Clock reloj;
-    int ganadorPartida = 0;
+    int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
     int indiceSeleccionado = 0;
     const int MAX_OPCIONES = 6;
     bool modoGuardar = false;
@@ -37,23 +39,26 @@ private:
     sf::SoundBuffer bufferClick;
     sf::Sound sonidoClick;
 
+
     // --- COMPONENTES ---
-    Motor motor;
+    Motor motor; // El motor se inicializa 
     PantallaInicio pantallaInicio;
-    PantallaVictoria pantallavictoria;
-    MenuPausa* menuPausa;
-    PantallaCarga* pantallaCarga;
+    MenuNoInteractivo pantallainfo;
     Estado estadoActual;
+    MenuPausa* menuPausa;
     Estado estadoAnterior;
+    PantallaCarga* pantallaCarga;
 
 public:
+
     Coordinador();
     void ejecutar();
     void gestionarEventos();
+    void reiniciarPartida();
     void actualizar(float dt);
     void dibujar();
 
-    void reiniciarPartida();
     void guardarEnRanura(int indice);
     void cargarDesdeRanura(int indice);
+
 };

@@ -1,10 +1,9 @@
 #pragma once
-#include "Pieza.h"
+#include "PiezaTerrestre.h"
 #include "Arena.h"
 #include "Color.h"
-#include "PiezaTerrestre.h"
 #include <string>
-#include <vector>
+#include <SFML/Graphics.hpp> 
 
 class ClaseArcher : public PiezaTerrestre {
 private:
@@ -22,16 +21,16 @@ private:
     int anchoFrame;
     int altoFrame;
 
-    //Control de la invisibilidad (bando luminoso)
+    // --- VARIABLES DE INVISIBILIDAD (LICTOR - OSCURIDAD) ---
     bool esInvisible;
+    bool preparandoInvisibilidad; // Nuevo: rastrea si está en el medio segundo de carga
     double temporizadorInvisibilidad;
-    double duracionInvisibilidad;
 
-    //Boost de velocidad (bando oscuridad)
+    // --- VARIABLES DE BOOST (LUZ) ---
     bool tieneBoostVelocidad;
     double temporizadorBoost;
-    double duracionBoost;
-    double multiplicadorVelocidad;
+    float multiplicadorVelocidad;
+
 public:
     ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo);
 
@@ -46,7 +45,9 @@ public:
     }
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
-    void dibujar(sf::RenderWindow& window, Estado estadoActual);
+    void animar(float dt, sf::Vector2f direccion);
+    void dibujar(sf::RenderWindow& window, Estado estadoActual)override;
+
     void gestionarInvisibilidad(double dt);//sirve para controlar el tiempo que permanece invisible en función del tiempo "dt"
     void gestionarBoostVelocidad(double dt); //controla el tiempo que dura el boost de velocidad
 };

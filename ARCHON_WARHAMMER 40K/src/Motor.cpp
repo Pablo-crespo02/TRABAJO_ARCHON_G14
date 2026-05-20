@@ -1,24 +1,21 @@
 #include "Motor.h"
 #include "Generador.h"
 #include "Color.h"
-#include <fstream>
-#include <cmath>
-#include <algorithm> 
 #include <iostream>
 #include <vector>
-
-// 🚨 Visibilidad de clases para los casteos
-#include "ClaseLider.h"
+#include <algorithm>
+#include<cmath>
 #include "ClaseFenix.h"
-#include "ClaseDjinn.h"
-#include "ClaseGolem.h"
-#include "ClaseUnicornio.h"
-#include "ClaseArcher.h"
-#include "ClaseKnight.h"
 
+
+// Constructor de Motor adaptado al Coordinador
 Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
-    : window(win), fuenteGlobal(fuente), hud(window, fuente)
+    : window(win),           // Conectamos con la ventana del Coordinador
+    fuenteGlobal(fuente), // Conectamos con la fuente del Coordinador
+    hud(window, fuente)
 {
+
+    // 1. Inicialización de variables de estado
     jugadorActual = 1;
     cicloActual = 1;
     rondaActual = 1;
@@ -27,237 +24,664 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
+    //  CARGA DE SONIDO MOVER
     if (!bufferMover.loadFromFile("sonidos/mover.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido mover.mp3" << std::endl;
+        std::cout << "Aviso: No se pudo cargar el sonido mover.wav" << std::endl;
     }
     else {
         sonidoMover.setBuffer(bufferMover);
         sonidoMover.setVolume(70.f);
     }
 
+    //CARGA DEL SONIDO DE ERROR
     if (!bufferError.loadFromFile("sonidos/error.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido error.mp3" << std::endl;
+        std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
     }
     else {
         sonidoError.setBuffer(bufferError);
-        sonidoError.setVolume(70.f);
+        sonidoError.setVolume(50.f);
     }
 
-    puntuacionImperium = 0;
-    puntuacionTyranidos = 0;
-    relojPartida.restart();
-}
+    // 2. Generar el mundo inicial
+    // Llamamos a tus funciones de generación
+    Generador::GenerarTablero(tablero);
+    Generador::GenerarDespliegueUnidades(*this);
 
+    std::cout << "Motor inicializado correctamente vinculado al Coordinador." << std::endl;
+}
+// Destructor para evitar fugas de memoria     
 Motor::~Motor() {
-    limpiarDatos();
-}
-
-void Motor::limpiarDatos() {
-    for (Pieza* p : listaPiezas) {
+    for (auto p : listaPiezas) {
         delete p;
     }
     listaPiezas.clear();
+};
+void Motor::limpiarDatos() {
+    // 1. Borrado de memoria (Importante para evitar fugas/leaks)
+    for (auto p : listaPiezas) {
+        delete p;
+    }
+    listaPiezas.clear();
+    Hitboxes.clear();
+
+    // 2. Reseteo de variables lógicas
     jugadorActual = 1;
-    rondaActual = 1;
     cicloActual = 1;
+    rondaActual = 1;
+    ganadorPartida = 0;
+    piezaSeleccionada = nullptr;
+    piezaAtacante = nullptr;
+    piezaDefensor = nullptr;
+    //Reseteo de puntos
+    puntosLuz = 0;
+    puntosOscuridad = 0;
+
+    // 3. Regeneración del mundo
+    Generador::GenerarTablero(tablero);
+    Generador::GenerarDespliegueUnidades(*this);
+
+
+}
+void Motor::renderizar() {
+
+    if (estadoActual == Estado::Tablero) {
+        tablero.dibujar(window);
+        for (auto p : listaPiezas) {
+            p->dibujar(window, estadoActual);
+        }
+    }
+    else if (estadoActual == Estado::Arena) {
+        arena.dibujar(window);
+        for (const auto& h : Hitboxes) {
+            window.draw(h.getFormaHitbox());
+        }
+        if (piezaAtacante && piezaDefensor) {
+            piezaAtacante->dibujar(window, estadoActual);
+            piezaDefensor->dibujar(window, estadoActual);
+        }
+    }
+}
+
+/////////////////////////  CÁLCULO DEL MODIFICADOR DEL TERRENO  //////////////////////////
+
+double calcularmodificadorterreno(Bando bando, ColorActual colorcasilla) {
+
+    double ventaja = 0; //Un valor positivo favorece a LUZ, un valor negativo favorece a OSCURIDAD
+
+    // Valores de modificador en escalera:
+    switch (colorcasilla) {
+    case ColorActual::Blanco_pico:ventaja = 30; break;   // 30%
+    case ColorActual::Blanco:ventaja = 20; break;        // 20%
+    case ColorActual::Gris_claro:ventaja = 10; break;    // 10%
+    case ColorActual::Gris_medio:ventaja = 0; break;     // 0%
+    case ColorActual::Gris_oscuro: ventaja = -10; break;
+    case ColorActual::Negro:       ventaja = -20; break;
+    case ColorActual::Negro_pico:  ventaja = -30; break;
+    }
+
+    // Cambio de signo para la ventaja de las piezas OSCURIDAD
+    if (bando == Bando::OSCURIDAD) {
+        ventaja = -ventaja;
+    }
+
+    //Convertimos el valor en un porcentaje aplicable:
+    return 1 + (ventaja * 0.01);
+}
+
+
+
+
+void Motor::intentarAccionJugador(int idJugador) {
+    // Solo hacemos algo si el ID del jugador que pulsó coincide con el turno actual
+    if (idJugador == jugadorActual) {
+
+        std::cout << "Accion validada para Jugador " << idJugador << std::endl;
+
+        if (jugadorActual == 1) {
+            jugadorActual = 2;
+        }
+        else {
+            // Si el 2 termina, reseteamos a 1 y avanzamos ciclo
+            jugadorActual = 1;
+            cicloActual++;
+
+            if (cicloActual > 12) {
+                cicloActual = 1;
+                rondaActual++;
+                std::cout << "\n--- NUEVA RONDA: " << rondaActual << " ---\n" << std::endl;
+            }
+
+            tablero.actualizarColores(cicloActual);
+        }
+    }
+    else {
+        //Avisar que no es su turno
+        std::cout << "¡No es el turno del Jugador " << idJugador << "!" << std::endl;
+    }
+}
+
+/////////////////////////////////  REINICIO DEL JUEGO  //////////////////////////////////
+
+void Motor::reiniciarJuego() {
+    //Se limpian los contenedores de piezas y hitboxes:
+    for (auto p : listaPiezas) {
+        delete p;
+    }
+
+    listaPiezas.clear();
+    Hitboxes.clear();
+
+    //Se resetean los estados y variables a los DEFAULT:
+    jugadorActual = 1;
+    cicloActual = 1;
+    rondaActual = 1;
     ganadorPartida = 0;
     piezaSeleccionada = nullptr;
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
-    puntuacionImperium = 0;
-    puntuacionTyranidos = 0;
-    relojPartida.restart();
-}
+    //Reseteo de puntos 
+    puntosLuz = 0;
+    puntosOscuridad = 0;
 
-void Motor::reiniciarJuego() {
-    limpiarDatos();
+    //Se vuelve a generar el tablero y las piezas:
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
-    estadoActual = Estado::Tablero;
 
-    puntuacionImperium = 0;
-    puntuacionTyranidos = 0;
-    relojPartida.restart();
+    estadoActual = Estado::MenuPrincipal;
 }
 
-void Motor::guardarPartidaEnHistorial(std::string bandoGanador) {
-    std::ofstream archivo("historial.txt", std::ios::app);
-    if (archivo.is_open()) {
-        int tiempoTotalSegundos = static_cast<int>(relojPartida.getElapsedTime().asSeconds());
-        int minutos = tiempoTotalSegundos / 60;
-        int segundos = tiempoTotalSegundos % 60;
+/////////////////////  COMPROBACIÓN DE LAS CONDICIONES DE VICTORIA  /////////////////////
 
-        archivo << "Ganador: " << bandoGanador
-            << " | Tiempo: " << minutos << "m " << segundos << "s"
-            << " | Ptos Imperium: " << puntuacionImperium
-            << " | Ptos Tyranidos: " << puntuacionTyranidos << "\n";
-        archivo.close();
-        std::cout << "DEBUG: Registro guardado en historial.txt" << std::endl;
+void Motor::VerificarVictoria() {
+    int piezasLuz = 0;
+    int piezasOscuridad = 0;
+    int powerPointsLuz = 0;
+    int powerPointsOscuridad = 0;
+
+    //Se escanean todas las piezas supervivientes del contenedor de piezas:
+    for (auto p : listaPiezas) {
+        if (p->bando == Bando::LUZ) {
+            piezasLuz++;
+
+            //Consultamos si se encuentra en un PowePoint:
+            if (tablero.getpowerpoint(p->posicionTablero)) {
+                powerPointsLuz++;
+            }
+        }
+
+        else if (p->bando == Bando::OSCURIDAD) {
+            piezasOscuridad++;
+
+            //Consultamos si se encuentra en un PowePoint:
+            if (tablero.getpowerpoint(p->posicionTablero)) {
+                powerPointsOscuridad++;
+            }
+        }
     }
-    else {
-        std::cout << "Error: No se pudo escribir en historial.txt" << std::endl;
+
+    //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
+    //Condiciones LUZ:
+    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
+        estadoActual = Estado::Victoria;
+        ganadorPartida = 1;
+        std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;
+
+    }
+
+    //Condiciones OSCURIDAD:
+    else if (piezasLuz == 0 || powerPointsOscuridad >= 5) {
+        estadoActual = Estado::Victoria;
+        ganadorPartida = 2;
+        std::cout << "  VICTORIA DE LOS XENOS" << std::endl;
     }
 }
 
-void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
-    sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
-    int col = static_cast<int>(worldPos.x / 60.f);
-    int fila = static_cast<int>(worldPos.y / 60.f);
+/////////////////////////////////////////////////////////////////////////////////////////
 
-    if (col < 0 || col >= 9 || fila < 0 || fila >= 9) return;
-    sf::Vector2i posClic(col, fila);
-
-    Pieza* piezaClickeada = nullptr;
-    for (Pieza* p : listaPiezas) {
-        if (p->getPosicionTablero() == posClic) {
-            piezaClickeada = p;
-            break;
-        }
-    }
-
-    if (piezaSeleccionada == nullptr) {
-        if (piezaClickeada != nullptr) {
-            Bando bandoActual = (jugadorActual == 1) ? Bando::LUZ : Bando::OSCURIDAD;
-            if (piezaClickeada->getBando() == bandoActual) {
-                piezaSeleccionada = piezaClickeada;
-                piezaSeleccionada->setSeleccionado(true);
-                sonidoMover.play();
-            }
-            else {
-                sonidoError.play();
-            }
-        }
-    }
-    else {
-        if (piezaClickeada != nullptr && piezaClickeada->getBando() == piezaSeleccionada->getBando()) {
-            piezaSeleccionada->setSeleccionado(false);
-            piezaSeleccionada = piezaClickeada;
-            piezaSeleccionada->setSeleccionado(true);
-            sonidoMover.play();
-        }
-        else {
-            bool esOcupado = (piezaClickeada != nullptr);
-            if (piezaSeleccionada->poderMover(posClic, listaPiezas, esOcupado)) {
-                if (esOcupado) {
-                    iniciarCombate(piezaSeleccionada, piezaClickeada);
-                }
-                else {
-                    piezaSeleccionada->posicionTablero = posClic;
-                    piezaSeleccionada->sincronizarPosicionTablero();
-                    sonidoMover.play();
-                    piezaSeleccionada->setSeleccionado(false);
-                    piezaSeleccionada = nullptr;
-                    intentarAccionJugador(jugadorActual);
-                }
-            }
-            else {
-                sonidoError.play();
-                piezaSeleccionada->setSeleccionado(false);
-                piezaSeleccionada = nullptr;
-            }
-        }
-    }
-}
 
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
+    // Limpia estados de selección previos
+    piezaAtacante->setSeleccionado(false);
+    piezaDefensor->setSeleccionado(false);
 
-    sf::Color colorCasillaCombate = sf::Color::White;
-    ColorActual colEnum = tablero.getcoloractualcasilla(defensor->getPosicionTablero());
+    //Recarga el hechizo al entrar en la arena
+    piezaAtacante->setHechizoDisponible(true);
+    piezaDefensor->setHechizoDisponible(true);
 
-    if (colEnum == ColorActual::Blanco_pico || colEnum == ColorActual::Blanco) colorCasillaCombate = sf::Color::White;
-    else if (colEnum == ColorActual::Negro_pico || colEnum == ColorActual::Negro) colorCasillaCombate = sf::Color(50, 50, 50);
-    else colorCasillaCombate = sf::Color(128, 128, 128);
+    // Definine los puntos de spawn fijos
+    sf::Vector2f spawnIzquierda(150.f, 300.f);
+    sf::Vector2f spawnDerecha(650.f, 300.f);
 
-    GeneradorArena::generarMapa(this->arena, sf::Color(200, 200, 200), sf::Color(80, 80, 80));
-
+    // LÓGICA DE POSICIONAMIENTO: Luz siempre a la izquierda
     if (piezaAtacante->getBando() == Bando::LUZ) {
-        piezaAtacante->setPosicionAbsoluta(sf::Vector2f(200.f, 300.f));
-        piezaDefensor->setPosicionAbsoluta(sf::Vector2f(600.f, 300.f));
+        piezaAtacante->setPosicionAbsoluta(spawnIzquierda);
+        piezaDefensor->setPosicionAbsoluta(spawnDerecha);
+        //Inicialización:
+        piezaAtacante->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
+        piezaDefensor->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
     }
     else {
-        piezaAtacante->setPosicionAbsoluta(sf::Vector2f(600.f, 300.f));
-        piezaDefensor->setPosicionAbsoluta(sf::Vector2f(200.f, 300.f));
+        // Si el atacante es oscuridad, él va a la derecha y el defensor (Luz) a la izquierda
+        piezaAtacante->setPosicionAbsoluta(spawnDerecha);
+        piezaDefensor->setPosicionAbsoluta(spawnIzquierda);
+        //Inicialización:
+        // --- DIRECCIÓN INICIAL ---
+        piezaAtacante->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
+        piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
+
     }
 
-    piezaAtacante->multiplicadorArena = 1.0f;
-    piezaDefensor->multiplicadorArena = 1.0f;
+    // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
+    GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
+    //Calculamos los modificadores de daño y defnsa en función de la casilla en la que se combate:
+    sf::Vector2i posTableroCombate = piezaDefensor->getPosicionTablero();
+    ColorActual colorArenaCombate = tablero.getcoloractualcasilla(posTableroCombate);
 
-    Hitboxes.clear();
+    piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
+    piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
+
+    //CHIVATOS DEBUG:
+    std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
+    std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
+
     estadoActual = Estado::Arena;
 }
 
-void Motor::intentarAccionJugador(int idJugador) {
-    jugadorActual = (jugadorActual == 1) ? 2 : 1;
-    if (jugadorActual == 1) {
-        cicloActual++;
-        if (cicloActual > 12) cicloActual = 1;
-        tablero.actualizarColores(cicloActual);
-        rondaActual++;
+//MANEJO DE CLICKS EN EL TABLERO:
+
+void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
+
+    // Comprueba que el juego está en el estado tablero:
+    if (estadoActual != Estado::Tablero) return;
+
+    //Creación de un vector que indica la posición en el mundo del ratón:
+    sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
+
+    // Conversión de posición en el mundo a coodenadas de tablero (0-8):
+    int tableroX = static_cast<int>(worldPos.x / 60.f);
+    int tableroY = static_cast<int>(worldPos.y / 60.f);
+
+    //Si se pulsa fuera del tablero:
+    if (tableroX < 0 || tableroX > 8 || tableroY < 0 || tableroY > 8) return;
+
+    //Para la posición del ratón en coordenadas de tablero con las coordenadasde las piezas:
+    sf::Vector2i celdaClickeada(tableroX, tableroY);
+
+    //Selección de pieza:
+    if (!piezaSeleccionada) {
+        // Accedemos directamente a la lista de piezas y sus miembros
+        for (auto p : listaPiezas) {
+            if (p->posicionTablero == celdaClickeada) {
+                // Comprobación de turno usando acceso directo a p->bando
+                if ((jugadorActual == 1 && p->bando == Bando::LUZ) || (jugadorActual == 2 && p->bando == Bando::OSCURIDAD)) {
+                    piezaSeleccionada = p;
+                    piezaSeleccionada->seleccionado = true;
+                    std::cout << "Seleccionado: " << p->stats.nombre << std::endl;
+                }
+                else {
+                    std::cout << "No puedes seleccionar piezas enemigas." << std::endl;
+                    sonidoError.play();
+                }
+                return;
+            }
+        }
     }
-    VerificarVictoria();
-}
-
-void Motor::VerificarVictoria() {
-    int piezasLuz = 0, piezasOscuridad = 0;
-    int powerPointsLuz = 0, powerPointsOscuridad = 0;
-
-    for (Pieza* p : listaPiezas) {
-        if (p->getBando() == Bando::LUZ) {
-            piezasLuz++;
-            if (tablero.getpowerpoint(p->getPosicionTablero())) powerPointsLuz++;
+    else {
+        // LÓGICA CON PIEZA SELECCIONADA
+        if (celdaClickeada == piezaSeleccionada->posicionTablero) {
+            piezaSeleccionada->seleccionado = false;
+            piezaSeleccionada = nullptr;
+            std::cout << "Pieza deseleccionada." << std::endl;
         }
         else {
-            piezasOscuridad++;
-            if (tablero.getpowerpoint(p->getPosicionTablero())) powerPointsOscuridad++;
-        }
-    }
+            // Validar movimiento
+            if (piezaSeleccionada->poderMover(celdaClickeada, listaPiezas, false)) {
 
-    if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
-        estadoActual = Estado::Victoria;
-        ganadorPartida = 1;
-        guardarPartidaEnHistorial("IMPERIUM");
-    }
-    else if (piezasLuz == 0 || powerPointsOscuridad >= 5) {
-        estadoActual = Estado::Victoria;
-        ganadorPartida = 2;
-        guardarPartidaEnHistorial("TYRANIDOS");
+                // Buscar si hay un enemigo en el destino
+                Pieza* enemigo = nullptr;
+                for (auto p : listaPiezas) {
+                    if (p->posicionTablero == celdaClickeada) {
+                        enemigo = p;
+                        break;
+                    }
+                }
+
+                if (enemigo != nullptr && enemigo->bando != piezaSeleccionada->bando) {
+                    // Si es enemigo, iniciamos combate
+                    iniciarCombate(piezaSeleccionada, enemigo);
+                }
+                else {
+                    // Si la casilla está vacía, movemos
+                    piezaSeleccionada->posicionTablero = celdaClickeada;
+                    piezaSeleccionada->sincronizarPosicionTablero(); // Actualiza los píxeles visuales
+
+                    std::cout << "Movimiento realizado con exito." << std::endl;
+
+                    sonidoMover.play();
+
+                    piezaSeleccionada->seleccionado = false;
+                    piezaSeleccionada = nullptr;
+
+                    //Verificamos si no se cumplen las condicciones de victoria pacífica por control de 5 power points:
+                    VerificarVictoria();
+
+                    //Sólo se procede con el juego si el último movimiento no supuso una victoria:
+                    if (estadoActual != Estado::Victoria) {
+                        intentarAccionJugador(jugadorActual);
+                    }
+                }
+            }
+            else {
+                std::cout << "Movimiento denegado: Camino bloqueado o fuera de rango." << std::endl;
+                sonidoError.play();
+            }
+        }
     }
 }
 
-void Motor::renderizar() {
-    if (estadoActual == Estado::Tablero) {
-        tablero.dibujar(window);
-        for (Pieza* p : listaPiezas) {
-            p->dibujar(window, Estado::Tablero);
+
+//GESTIÓN DEL TECLADO ARENA
+void Motor::actualizar(double dt) {
+    // 1. Filtro de estado obligatorio
+    // Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimiento de los FPS:
+    // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
+    if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
+
+    // Identificamos quién pertenece a qué bando para asignar controles WASD o flechas:
+
+    // 2. Identificación de bandos
+    Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
+    Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
+
+    // LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
+    // Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorno{función}
+    // No especificamos el tipo de retorno porque en C++ no es imprescindible.
+
+    auto procesarInput = [&](Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo, sf::Keyboard::Key izqda, sf::Keyboard::Key dcha, sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto) {
+
+        // Inicializamos el vector dirección a 0 in el primer frame:
+        sf::Vector2f dir(0, 0);
+
+        // Modificación del vector director según las teclas pulsadas:
+        if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(abajo)) dir.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(izqda)) dir.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(dcha))  dir.x += 1.f;
+
+        // Guardamos la última dirección en la que intentó moverse, a efectos de apuntar con proyectiles:
+        p->setultimadireccion(dir);
+
+        // Si se pulsa la tecla de ataque y el cooldown permite disparar:
+        if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
+
+            // Obtenemos hacia dónde está mirando la pieza:
+            sf::Vector2f dirAtaque = p->getultimadireccion();
+
+            // Calculamos la magnitud del vector para hacerlo unitario, evitando problemas con las diagonales:
+            float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+
+            // Normalizamos el vector, y si no se ha movido utilizamos la dirección por defecto:
+            dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : dirPorDefecto;
+
+            // Instanciamos el punto de spawn del hitbox ataque desplazado 35 píxeles del origen de la pieza en dirección del vector dirección ataque:
+            sf::Vector2f puntoSpawnAtaque = (p->getPosicionAbsoluta()) + (dirAtaque * 35.f);
+
+            // Evaluamos si la pieza es rango o melee, y generamos ataque a distancia o melee con distintos stats:
+            if (p->stats.esRango) {
+                // Generamos un proyectil velocidad 500, tiempo de vida 60s, radio 15:
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 60, 15);
+            }
+            else {
+                // Generamos un ataque melee velocidad 0, tiempo de vida 0.2s, radio 35
+                Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 0.2, 35);
+            }
+
+            // Reiniciamos el cooldown interno de la pieza (Lógica):
+            p->reiniciarRelojHitbox();
+        }
+
+        // Movemos físicamente la pieza en la arena aplicando colisiones:
+        p->procesarMovimientoArena(dir, dt, this->arena);
+        };
+
+    // Aplicamos la función reutilizable lambda para el caso de jugador Luz y jugador Oscuridad:
+
+    // LUZ: WASD, disparo con ESPACIO, inicialmente mira hacia la dcha:
+    procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0));
+
+    // Lanzar Hechizo Luz (Tecla Q)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        if (pLuz->getHechizoDisponible()) {
+            pLuz->usarHechizo(Hitboxes, pOsc);
+            pLuz->setHechizoDisponible(false);
+            std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
     }
-    else if (estadoActual == Estado::Arena) {
-        window.draw(sf::RectangleShape(sf::Vector2f(800.f, 600.f)));
-        piezaAtacante->dibujar(window, Estado::Arena);
-        piezaDefensor->dibujar(window, Estado::Arena);
 
-        for (const auto& hb : Hitboxes) {
-            if (hb.getEstadoHitbox()) window.draw(hb.getFormaHitbox());
+    // OSCURIDAD: Flechitas, disparo con ENTER, inicialmente mira a la izq
+    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f));
+
+    // Lanzar Hechizo Oscuridad (Tecla M)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+        if (pOsc->getHechizoDisponible()) {
+            pOsc->usarHechizo(Hitboxes, pLuz);
+            pOsc->setHechizoDisponible(false);
+            std::cout << pOsc->stats.nombre << " hizo uso de su hechizo!" << std::endl;
         }
+    }
+
+    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+    // Delegamos al Líder de la Oscuridad que actualice sus piezas auxiliares pasándole la arena y el rival
+    if (pOsc != nullptr) {
+        pOsc->actualizarMinions(dt, this->arena, pLuz);
+    }
+    // Intentamos transformar los combatientes a ClaseFenix mediante dynamic_cast.
+    // Si la transformación es exitosa, les ordenamos actualizar sus efectos continuos.
+    ClaseFenix* fenixAtacante = dynamic_cast<ClaseFenix*>(piezaAtacante);
+    if (fenixAtacante != nullptr) {
+        fenixAtacante->actualizarLogicaHechizo(dt);
+    }
+
+    ClaseFenix* fenixDefensor = dynamic_cast<ClaseFenix*>(piezaDefensor);
+    if (fenixDefensor != nullptr) {
+        fenixDefensor->actualizarLogicaHechizo(dt);
+    }
+
+    //////////// 4. BUCLE DE ACTUALIZACION Y COLISIONES DE HITBOXES (LIMPIO) /////////
+    for (size_t i = 0; i < Hitboxes.size(); ++i) {
+
+        Hitboxes[i].ActualizarHitbox(dt);
+        if (!Hitboxes[i].getEstadoHitbox()) continue;
+
+        sf::Vector2f posH = Hitboxes[i].getPosicionHitbox();
+        float radioH = Hitboxes[i].getFormaHitbox().getRadius();
+
+        // Colisión con el escenario
+        if (!arena.esPosicionValida(posH, radioH, false)) {
+            if (Hitboxes[i].getEsErratico()) {
+                Hitboxes[i].rebotar();
+                posH = Hitboxes[i].getPosicionHitbox();
+            }
+            else if (Hitboxes[i].esGranada) {
+                if (Hitboxes[i].getTiempoVuelo() > 0.0f) { Hitboxes[i].Detonar(); }
+            }
+            else {
+                Hitboxes[i].setEstadoHitbox(false);
+                continue;
+            }
+        }
+
+        // --- 4.1: COLISIÓN TRADICIONAL CONTRA LOS HÉROES (SOLO PROYECTILES/GRANADAS) ---
+        Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
+        for (Pieza* obj : objetivos) {
+            if (!obj) continue;
+
+            bool esAtacanteArena = (obj == piezaAtacante);
+            bool yaFueDanado = esAtacanteArena ? Hitboxes[i].getYaDanoAtacante() : Hitboxes[i].getYaDanoDefensor();
+
+            // Filtro de fuego amigo
+            if (Hitboxes[i].getAtacante()->getBando() == obj->getBando()) {
+                continue;
+            }
+
+            sf::Vector2f posE = obj->getPosicionAbsoluta();
+            float distSq = std::pow(posH.x - posE.x, 2) + std::pow(posH.y - posE.y, 2);
+            float limiteSq = std::pow(radioH + 20.f, 2);
+
+            if (distSq < limiteSq) {
+                // Si es un proyectil/melee normal del Knight o Golem contra un héroe
+                if (Hitboxes[i].getEsDanoContinuo()) {
+                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano() * dt; }
+                }
+                else if (Hitboxes[i].esGranada) {
+                    if (Hitboxes[i].getTiempoVuelo() > 0.0f) {
+                        Hitboxes[i].Detonar();
+                        posH = Hitboxes[i].getPosicionHitbox();
+                        radioH = Hitboxes[i].getFormaHitbox().getRadius();
+                    }
+                    if (!yaFueDanado && Hitboxes[i].getDano() > 0.0f && !obj->getInvulnerable()) {
+                        obj->stats.vida -= Hitboxes[i].getDano();
+                        if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
+                        else Hitboxes[i].setYaDanoDefensor(true);
+                    }
+                }
+                else if (!yaFueDanado) {
+                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano(); }
+                    if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
+                    else Hitboxes[i].setYaDanoDefensor(true);
+
+                    if (Hitboxes[i].getCausaInmovilizacion()) { obj->aplicarInmovilizacion(Hitboxes[i].getDuracionCC()); }
+
+                    sf::Vector2f vel = Hitboxes[i].getVelocidadHitbox();
+                    if (vel.x != 0.f || vel.y != 0.f) { Hitboxes[i].setEstadoHitbox(false); }
+                }
+            }
+        }
+
+        // Si el proyectil actual fue destruido al impactar con un héroe, no evaluamos los minions
+        if (!Hitboxes[i].getEstadoHitbox()) continue;
+
+        // --- 4.2: DETECCIÓN DE HITBOXES CONTRA MINIONS ENEMIGOS ---
+        // Identificamos al líder que pertenece al bando contrario del dueño del proyectil
+        Pieza* liderConMinions = (Hitboxes[i].getAtacante()->getBando() == Bando::LUZ) ? pOsc : pLuz;
+
+        if (liderConMinions != nullptr) {
+            std::vector<Pieza*>& listaMinions = liderConMinions->getMinionsInvocados();
+
+            auto mit = listaMinions.begin();
+            while (mit != listaMinions.end()) {
+                Pieza* minion = *mit;
+
+                sf::Vector2f posMinion = minion->getPosicionAbsoluta();
+                float radioMinion = 15.f; // Ajustado a la escala reducida (0.6) de tus esbirros
+
+                float distSq = std::pow(posH.x - posMinion.x, 2) + std::pow(posH.y - posMinion.y, 2);
+                float limiteSq = std::pow(radioH + radioMinion, 2);
+
+                if (distSq < limiteSq) {
+                    // Impacto contra el esbirro
+                    minion->stats.vida -= Hitboxes[i].getDano();
+
+                    // Si no es daño continuo o granada, la bala normal se consume
+                    if (!Hitboxes[i].getEsDanoContinuo() && !Hitboxes[i].esGranada) {
+                        Hitboxes[i].setEstadoHitbox(false);
+                    }
+
+                    // Si el minion se queda sin vida, lo eliminamos y limpiamos su iterador
+                    if (minion->stats.vida <= 0.f) {
+                        delete minion;
+                        mit = listaMinions.erase(mit);
+                        std::cout << "Un minion Termagant ha sido pulverizado por un proyectil!" << std::endl;
+                    }
+                    else {
+                        ++mit;
+                    }
+
+                    // Si el proyectil fue destruido tras impactar al esbirro, salimos del bucle de minions
+                    if (!Hitboxes[i].getEstadoHitbox()) break;
+                }
+                else {
+                    ++mit;
+                }
+            }
+        }
+    }
+
+
+    // 5. Limpieza de contenedores clásica por índice inverso
+    for (int i = static_cast<int>(Hitboxes.size()) - 1; i >= 0; --i) {
+        if (!Hitboxes[i].getEstadoHitbox()) {
+            Hitboxes.erase(Hitboxes.begin() + i);
+        }
+    }
+
+    // 6. Comprobación de bajas
+    if (piezaAtacante->stats.vida <= 0.f || piezaDefensor->stats.vida <= 0.f) {
+        Pieza* perdedor = (piezaAtacante->stats.vida <= 0.f) ? piezaAtacante : piezaDefensor;
+        Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
+
+        // --- NUEVO: SUMAR PUNTOS AL BANDO DEL GANADOR ---
+        int puntosObtenidos = calcularPuntosPieza(perdedor->stats.nombre);
+        if (ganador->getBando() == Bando::LUZ) {
+            puntosLuz += puntosObtenidos;
+        }
+        else {
+            puntosOscuridad += puntosObtenidos;
+        }
+
+        // --- SOLUCIÓN: LIMPIEZA ABSOLUTA DE MINIONS ANTES DE BORRAR AL LÍDER ---
+        // Hacemos la limpieza mientras las piezas sigan vivas en memoria.
+        if (pOsc != nullptr) {
+            pOsc->limpiarMinions();
+        }
+        if (pLuz != nullptr) {
+            pLuz->limpiarMinions(); // Por si el de la luz también tuviera minions en el futuro
+        }
+
+        sf::Vector2i destinoFinal = piezaDefensor->getPosicionTablero();
+        auto deteccionperdedor = std::find(listaPiezas.begin(), listaPiezas.end(), perdedor);
+
+        // Ahora sí, borramos la pieza de la memoria de forma segura
+        if (deteccionperdedor != listaPiezas.end()) {
+            delete* deteccionperdedor;
+            listaPiezas.erase(deteccionperdedor);
+        }
+
+        ganador->mover(destinoFinal);
+
+        piezaAtacante = nullptr;
+        piezaDefensor = nullptr;
+        piezaSeleccionada = nullptr;
+
+        Hitboxes.clear();
+        estadoActual = Estado::Tablero;
+
+        VerificarVictoria();
+
+        if (estadoActual != Estado::Victoria) {
+            intentarAccionJugador(jugadorActual);
+        }
+
+        return; // Salimos del método inmediatamente para que no intente ejecutar nada más de la arena en este frame
     }
 }
-
 void Motor::dibujarHUD() {
-    hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+    // Usamos el estadoActual de la CLASE, no uno pasado por fuera
+    if (this->estadoActual == Estado::Tablero) {
+        hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+    }
 }
-
-void Motor::gestionarEntrada(const sf::Event& evento, const sf::View& vistaTablero) {
-    if (estadoActual == Estado::Tablero && evento.type == sf::Event::MouseButtonPressed) {
-        if (evento.mouseButton.button == sf::Mouse::Left) {
+void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
+    if (estadoActual == Estado::Tablero) {
+        if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
             manejarClick(sf::Mouse::getPosition(window), vistaTablero);
         }
     }
-}
 
-// 🚨 CORRECCIÓN 3: Reintegramos el Input de forma limpia sin Lambdas extrañas
+}
 void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
     sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
     sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt)
@@ -269,9 +693,7 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
     if (sf::Keyboard::isKeyPressed(izqda))  dir.x -= 1.f;
     if (sf::Keyboard::isKeyPressed(dcha))   dir.x += 1.f;
 
-    if (dir.x != 0.f || dir.y != 0.f) {
-        p->setultimadireccion(dir);
-    }
+    p->setultimadireccion(dir);
 
     if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
         sf::Vector2f dirAtaque = p->getultimadireccion();
@@ -292,86 +714,15 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
 
     p->procesarMovimientoArena(dir, dt, this->arena);
 }
-
-void Motor::actualizar(double dt) {
-    if (estadoActual != Estado::Arena) return;
-
-    Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
-    Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
-
-    // Llamamos a la función limpia de los controles para el combate
-    procesarInput(pLuz, sf::Keyboard::W, sf::Keyboard::S, sf::Keyboard::A, sf::Keyboard::D, sf::Keyboard::Space, sf::Vector2f(1, 0), static_cast<float>(dt));
-    procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f), static_cast<float>(dt));
-
-    // Hechizos
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && pLuz->getHechizoDisponible()) {
-        pLuz->usarHechizo(Hitboxes, pOsc);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::M) && pOsc->getHechizoDisponible()) {
-        pOsc->usarHechizo(Hitboxes, pLuz);
-    }
-
-    pLuz->actualizarMinions(static_cast<float>(dt), arena, pOsc);
-    pOsc->actualizarMinions(static_cast<float>(dt), arena, pLuz);
-
-    // Colisiones de hitboxes
-    for (auto& hb : Hitboxes) {
-        if (!hb.getEstadoHitbox()) continue;
-        hb.ActualizarHitbox(dt);
-
-        Pieza* enemigo = (hb.getAtacante()->getBando() == Bando::LUZ) ? pOsc : pLuz;
-        sf::Vector2f posE = enemigo->getPosicionAbsoluta();
-        sf::Vector2f posH = hb.getPosicionHitbox();
-
-        float dist = std::hypot(posE.x - posH.x, posE.y - posH.y);
-        if (dist < limitecolision) {
-            if (!enemigo->getInvulnerable() && !hb.getYaDanoDefensor()) {
-                enemigo->stats.vida -= hb.getDano();
-                hb.Detonar();
-            }
-        }
-    }
-
-    // Resolucion de combate y fin de partida
-    if (piezaAtacante->stats.vida <= 0.f || piezaDefensor->stats.vida <= 0.f) {
-        Pieza* perdedor = (piezaAtacante->stats.vida <= 0.f) ? piezaAtacante : piezaDefensor;
-        Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
-
-        // Calcular puntos del historial
-        int puntosAsignados = 0;
-        if (dynamic_cast<ClaseLider*>(perdedor))          puntosAsignados = 2000;
-        else if (dynamic_cast<ClaseFenix*>(perdedor))     puntosAsignados = 750;
-        else if (dynamic_cast<ClaseDjinn*>(perdedor))     puntosAsignados = 750;
-        else if (dynamic_cast<ClaseGolem*>(perdedor))     puntosAsignados = 300;
-        else if (dynamic_cast<ClaseUnicornio*>(perdedor)) puntosAsignados = 300;
-        else if (dynamic_cast<ClaseArcher*>(perdedor))    puntosAsignados = 150;
-        else if (dynamic_cast<ClaseKnight*>(perdedor))    puntosAsignados = 100;
-        else puntosAsignados = 300;
-
-        if (ganador->getBando() == Bando::LUZ) puntuacionImperium += puntosAsignados;
-        else puntuacionTyranidos += puntosAsignados;
-
-        // Limpieza fundamental antes de devolverlos al tablero
-        perdedor->limpiarMinions();
-        ganador->limpiarMinions();
-
-        ganador->stats.vida = ganador->stats.vidaMaxima;
-        ganador->setHechizoDisponible(true);
-
-        sf::Vector2i destinoFinal = perdedor->getPosicionTablero();
-
-        listaPiezas.erase(std::remove(listaPiezas.begin(), listaPiezas.end(), perdedor), listaPiezas.end());
-        delete perdedor;
-
-        ganador->posicionTablero = destinoFinal;
-        ganador->sincronizarPosicionTablero();
-        ganador->setSeleccionado(false);
-
-        piezaSeleccionada = nullptr;
-        piezaAtacante = nullptr;
-        piezaDefensor = nullptr;
-
-        estadoActual = Estado::Tablero;
-        intentarAccionJugador(jugadorActual);
-    }
+//Calulamos los puntos de la pieza
+int Motor::calcularPuntosPieza(const std::string& nombre) {
+    if (nombre == "CAPTAIN" || nombre == "HIVE_TYRANT") return 2000;
+    if (nombre == "LIBRARIAN" || nombre == "HARPY") return 750;
+    if (nombre == "CULEXUS" || nombre == "GENESTEALER") return 750;
+    if (nombre == "ASSAULT_MARINE" || nombre == "GARGOLA") return 300;
+    if (nombre == "DREADNOUGHT" || nombre == "CARNIFEX") return 300;
+    if (nombre == "PRIMARIS" || nombre == "TOXICRENO") return 300;
+    if (nombre == "VINDICARE" || nombre == "LICTOR") return 150;
+    if (nombre == "INTERCESSOR" || nombre == "TERMAGANT") return 100;
+    return 0; // Por seguridad
 }
