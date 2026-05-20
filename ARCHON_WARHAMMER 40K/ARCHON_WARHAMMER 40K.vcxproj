@@ -137,6 +137,7 @@
     <ClCompile Include="src\ClaseDjinn.cpp" />
     <ClCompile Include="src\ClaseFenix.cpp" />
     <ClCompile Include="src\ClaseGolem.cpp" />
+    <ClCompile Include="src\ClaseHelicoptero.cpp" />
     <ClCompile Include="src\ClaseKnight.cpp" />
     <ClCompile Include="src\ClaseLider.cpp" />
     <ClCompile Include="src\ClaseUnicornio.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\ClaseDjinn.h" />
     <ClInclude Include="src\ClaseFenix.h" />
     <ClInclude Include="src\ClaseGolem.h" />
+    <ClInclude Include="src\ClaseHelicoptero.h" />
     <ClInclude Include="src\ClaseKnight.h" />
     <ClInclude Include="src\ClaseLider.h" />
     <ClInclude Include="src\ClaseUnicornio.h" />

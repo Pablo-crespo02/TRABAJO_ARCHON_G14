@@ -1,5 +1,6 @@
 #include "ClaseLider.h"
 #include "ClaseKnight.h"
+#include "ClaseHelicoptero.h"
 #include <cmath> 
 #include <iostream>
 
@@ -217,67 +218,100 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 void ClaseLider::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     if (!enemigo) return;
 
-    if (this->stats.nombre == "CAPTAIN") return;
-
     this->stats.relojHabilidad.restart();
-
     limpiarMinions();
 
-    // --- CAMBIADO A 2 MONSTRUOS ---
-    int numeroMinions = 2;
-    float offsetsX[2] = { -40.f, 40.f };
+    // =========================================================================
+    // CASO 1: EL LÍDER ES EL CAPITÁN (IMPERIUM) -> INVOCA UN HELICÓPTERO
+    // =========================================================================
+    if (this->stats.nombre == "CAPTAIN") {
+        // Spawnea un poco desplazado hacia arriba para simular que entra volando
+        sf::Vector2f puntoSpawnHeli = this->posicionAbsoluta + sf::Vector2f(0.f, -50.f);
 
-    for (int i = 0; i < numeroMinions; i++) {
-        sf::Vector2f puntoSpawn = this->posicionAbsoluta + sf::Vector2f(offsetsX[i], -30.f);
+        ClaseHelicoptero* heli = new ClaseHelicoptero(this->bando, puntoSpawnHeli);
+        minionsInvocados.push_back(heli);
 
-        ClaseKnight* minion = new ClaseKnight(this->bando, sf::Vector2i(0, 0), "TERMAGANT");
+        std::cout << "¡El Capitan ha solicitado apoyo aereo! Helicoptero desplegado." << std::endl;
+    }
+    // =========================================================================
+    // CASO 2: EL OTRO LÍDER (TIRÁNIDO) -> INVOCA 2 TERMAGANTS
+    // =========================================================================
+    else {
+        int numeroMinions = 2;
+        float offsetsX[2] = { -40.f, 40.f };
 
-        minion->setPosicionAbsoluta(puntoSpawn);
-        minion->setEscalaMinion(0.6f);
+        for (int i = 0; i < numeroMinions; i++) {
+            sf::Vector2f puntoSpawn = this->posicionAbsoluta + sf::Vector2f(offsetsX[i], -30.f);
 
-        minion->stats.vida = 15.0f;
-        minion->stats.vidaMaxima = 15.0f;
-        minion->stats.ataque = 3.0f;
-        minion->stats.velAtaque = 1.0f;
+            ClaseKnight* minion = new ClaseKnight(this->bando, sf::Vector2i(0, 0), "TERMAGANT");
 
-        // --- ASIGNACIÓN DE COMPORTAMIENTO ---
-        // Usamos la estadística de defensa de forma temporal para marcar su rol sin tocar el .h
-        if (i == 0) {
-            minion->stats.rol = 1; // Rol: Cazador (Persecución directa)
+            minion->setPosicionAbsoluta(puntoSpawn);
+            minion->setEscalaMinion(0.6f);
+
+            minion->stats.vida = 15.0f;
+            minion->stats.vidaMaxima = 15.0f;
+            minion->stats.ataque = 3.0f;
+            minion->stats.velAtaque = 1.0f;
+
+            if (i == 0) {
+                minion->stats.rol = 1; // Cazador
+            }
+            else {
+                minion->stats.rol = 2; // Estratega
+            }
+
+            minionsInvocados.push_back(minion);
         }
-        else {
-            minion->stats.rol = 2; // Rol: Estratega (Predicción / Intercepción)
-        }
-
-        minionsInvocados.push_back(minion);
+        std::cout << "El lider enemigo ha invocado una horda de Termagants." << std::endl;
     }
 }
 
-void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {
+void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::vector<Hitbox>& hitboxes) {
     if (!enemigo) return;
 
     auto it = minionsInvocados.begin();
     while (it != minionsInvocados.end()) {
         Pieza* minion = *it;
 
+        // ---------------------------------------------------------------------
+        // COMPORTAMIENTO SI EL MINION ES EL HELICÓPTERO (CAPITÁN)
+        // ---------------------------------------------------------------------
+        ClaseHelicoptero* heliMinion = dynamic_cast<ClaseHelicoptero*>(minion);
+        if (heliMinion != nullptr) {
+            // Delegamos toda su IA de vuelo y disparo automático a su propia clase
+            heliMinion->actualizarIA(dt, arena, enemigo, hitboxes);
+
+            // Control de muerte del helicóptero
+            if (heliMinion->stats.vida <= 0.f) {
+                delete heliMinion;
+                it = minionsInvocados.erase(it);
+                std::cout << "El Helicoptero aliado ha sido derribado." << std::endl;
+            }
+            else {
+                ++it;
+            }
+            continue; // Saltamos al siguiente minion, ignorando la lógica terrestre
+        }
+
+        // ---------------------------------------------------------------------
+        // COMPORTAMIENTO SI EL MINION ES TERRESTRE (TERMAGANTS)
+        // ---------------------------------------------------------------------
         sf::Vector2f posicionJugador = enemigo->getPosicionAbsoluta();
         sf::Vector2f puntoObjetivo = posicionJugador;
 
-        // Calculamos la distancia REAL en línea recta hacia el cuerpo del jugador
         sf::Vector2f dirRealJugador = posicionJugador - minion->getPosicionAbsoluta();
         float distanciaRealJugador = std::hypot(dirRealJugador.x, dirRealJugador.y);
 
-        // Rango de ataque asignado
         float rangoAtaque = 45.f;
 
-        // 1. IA COMPORTAMENTAL (Solo calcula el punto si está fuera de rango)
+        // 1. IA Comportamental
         if (minion->stats.rol == 2. && distanciaRealJugador > 120.f) {
             float factorAnticipacion = 100.f;
             sf::Vector2f dirEnemigo = enemigo->getUltimaDireccion();
             puntoObjetivo = posicionJugador + (dirEnemigo * factorAnticipacion);
         }
 
-        // 2. MOVIMIENTO CONDICIONADO (¡CON SENSADO DE OBSTÁCULOS NATIVO!)
+        // 2. Movimiento y Radar Anticolisión
         if (distanciaRealJugador > rangoAtaque) {
             sf::Vector2f dirHaciaObjetivo = puntoObjetivo - minion->getPosicionAbsoluta();
             float distanciaAlObjetivo = std::hypot(dirHaciaObjetivo.x, dirHaciaObjetivo.y);
@@ -285,40 +319,26 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {
             if (distanciaAlObjetivo > 0.f) {
                 sf::Vector2f dirFinal = dirHaciaObjetivo / distanciaAlObjetivo;
 
-                // ---------------------------------------------------------
-                // --- RADAR ANTICOLISIÓN: ESQUIVE DE PIEDRAS/MUROS ---
-                // ---------------------------------------------------------
-                float distanciaRadar = 70.f; // Distancia para empezar a predecir el choque
+                float distanciaRadar = 70.f;
                 sf::Vector2f posicionAdelantada = minion->getPosicionAbsoluta() + (dirFinal * distanciaRadar);
                 float radioMinion = 28.f;
 
-                // Le preguntamos a tu arena si la posición a la que va a llegar es sólida
                 if (!arena.esPosicionValida(posicionAdelantada, radioMinion, false)) {
-                    // ¡Alerta! Hay un obstáculo delante. Vamos a calcular una dirección de desvío lateral.
-                    // Probamos a desviarnos de forma perpendicular (90 grados) para rodear el objeto.
-                    // Vector perpendicular a la derecha: (-dirFinal.y, dirFinal.x)
                     sf::Vector2f desvioLateral(-dirFinal.y, dirFinal.x);
-
-                    // Probamos si el desvío a la derecha está libre
                     sf::Vector2f pruebaDerecha = minion->getPosicionAbsoluta() + (desvioLateral * distanciaRadar);
 
                     if (arena.esPosicionValida(pruebaDerecha, radioMinion, false)) {
-                        // Si la derecha está libre, combinamos el avance con el desvío para rodear la piedra
                         dirFinal = (dirFinal * 0.2f) + (desvioLateral * 0.8f);
                     }
                     else {
-                        // Si la derecha está bloqueada, intentamos esquivar por la izquierda
                         sf::Vector2f desvioIzquierda(dirFinal.y, -dirFinal.x);
                         dirFinal = (dirFinal * 0.2f) + (desvioIzquierda * 0.8f);
                     }
 
-                    // Volvemos a normalizar el vector resultante para mantener la velocidad constante
                     float largoDir = std::hypot(dirFinal.x, dirFinal.y);
                     if (largoDir > 0.f) dirFinal /= largoDir;
                 }
-                // ---------------------------------------------------------
 
-                // Aplicamos el movimiento (con el vector corregido si había piedra)
                 minion->procesarMovimientoArena(dirFinal, dt, arena);
 
                 ClaseKnight* knightMinion = dynamic_cast<ClaseKnight*>(minion);
@@ -328,8 +348,8 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {
             }
         }
 
-        // 3. ATAQUE POR COOLDOWN
-        bool haAtacadoEnEsteFrame = false; // Variable auxiliar para avisar a la barra
+        // 3. Ataque Melee por Cooldown
+        bool haAtacadoEnEsteFrame = false;
 
         if (distanciaRealJugador < rangoAtaque) {
             if (minion->stats.relojHitbox.getElapsedTime().asSeconds() >= minion->stats.velAtaque) {
@@ -337,17 +357,12 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {
                     enemigo->stats.vida -= minion->stats.ataque;
                     std::cout << "Un Termagant ha mordido al enemigo haciendo " << minion->stats.ataque << " de dano!" << std::endl;
                 }
-
-                // 1. Reiniciamos el reloj físico del minion para la lógica
                 minion->stats.relojHitbox.restart();
-
-                // Marcamos que ha atacado para indicárselo a la barra un poco más abajo
                 haAtacadoEnEsteFrame = true;
             }
         }
 
-        // --- ACTUALIZACIÓN DE BARRAS DESDE LA FUNCIÓN PÚBLICA DE PIEZA ---
-        // Le pasamos todos los datos necesarios. Si 'haAtacadoEnEsteFrame' es true, reiniciará el reloj visual internamente.
+        // Barra de ataque visual
         minion->gestionarBarraAtaqueMinion(
             minion->stats.vida,
             minion->stats.vidaMaxima,
@@ -356,8 +371,7 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo) {
             haAtacadoEnEsteFrame
         );
 
-
-        // 4. CONTROL DE MUERTE
+        // 4. Control de muerte Terrestre
         if (minion->stats.vida <= 0.f) {
             delete minion;
             it = minionsInvocados.erase(it);

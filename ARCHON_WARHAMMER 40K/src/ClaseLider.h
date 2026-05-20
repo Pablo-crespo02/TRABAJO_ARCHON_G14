@@ -21,7 +21,7 @@ private:
     int frameActual;
     float temporizadorAnimacion;
     int anchoFrame;
-    int altoFrame;
+    int altoFrame;  
 
 public:
 
@@ -41,7 +41,10 @@ public:
     //FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
     void animar(float dt, sf::Vector2f direccion);
-    void actualizarMinions(float dt, Arena& arena, Pieza* enemigo)override;
+
+    //Añadimos std::vector<Hitbox>& hitboxes para que el helicóptero dispare 
+    void actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::vector<Hitbox>& hitboxes);
+
     std::vector<Pieza*>& getMinionsInvocados() override { return minionsInvocados; }
-    void limpiarMinions()override;
+    void limpiarMinions() override;
 };
