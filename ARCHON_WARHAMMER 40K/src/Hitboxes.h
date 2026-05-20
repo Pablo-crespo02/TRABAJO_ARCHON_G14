@@ -23,7 +23,7 @@ private:
 
     // Mecánica: Basilisco
     bool causaInmovilizacion;
-    float duracionCC; // Cambiado a float para consistencia con SFML
+    float duracionCC;
 
     // Mecánica: Granada
     float radioExplosion;
@@ -39,13 +39,12 @@ public:
     // Atributo público
     bool esGranada;
 
-    // Constructor (Todos los valores por defecto al final, tipos unificados a float/double según corresponda)
+    // Constructor 
     Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
         Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
         bool esDoT = false, bool erratico = false, bool inmoviliza = false, double duracionControl = 0.0,
         bool esGranadaParam = false, double radioExp = 0.0);
 
-    // Asegúrate de que en el .cpp uses exactamente 'double dt' si aquí lo dejas como double
     void ActualizarHitbox(double dt);
     void rebotar();
     void Detonar();
@@ -60,6 +59,9 @@ public:
     bool getYaDanoAtacante() const { return yaDanoAtacante; }
     bool getYaDanoDefensor() const { return yaDanoDefensor; }
 
+    // AQUÍ ESTÁ EL GETTER QUE PEDÍA EL MOTOR PARA LA GRANADA
+    float getTiempoVuelo() const { return temporizadorVuelo; }
+
     // Fénix
     bool getYaHizoDano() const { return haHechoDano; }
     bool getEsDanoContinuo() const { return esDanoContinuo; }
@@ -70,13 +72,4 @@ public:
     // Basilisco
     bool getCausaInmovilizacion() const { return causaInmovilizacion; }
     double getDuracionCC() const { return duracionCC; }
-
-    // Granada
-    float getTiempoVuelo() const { return temporizadorVuelo; }
-
-    // SETTERS
-    void setEstadoHitbox(bool estadoHitbox) { activo = estadoHitbox; }
-    void setYaHizoDano(bool valor) { haHechoDano = valor; }
-    void setYaDanoAtacante(bool valor) { yaDanoAtacante = valor; }
-    void setYaDanoDefensor(bool valor) { yaDanoDefensor = valor; }
 };

@@ -29,25 +29,18 @@ PantallaInicio::PantallaInicio() {
     textoTitulo.setPosition(100.f, 250.f);
 
     // 4. Configuración de las Opciones
-    std::string nombres[] = {
-        "INICIAR PARTIDA",
-        "REANUDAR PARTIDA",
-        "INSTRUCCIONES",
-        "CREDITOS",
-        "SALIR DEL JUEGO",
-        "CARGAR PARTIDA"
-    };
-
     indiceSeleccionado = 0; // Empezamos en Iniciar Partida
 
+    // En el constructor PantallaInicio::PantallaInicio() busca el bucle 'for' que configura las opciones:
     for (int i = 0; i < NUM_OPCIONES; i++) {
-        sf::Text texto;
-        texto.setFont(fuente);
-        texto.setString(nombres[i]);
-        texto.setCharacterSize(40);
-        // Posicionamiento: X=100, Y=400 con 60px de separación
-        texto.setPosition(100.f, 400.f + (i * 60.f));
-        opciones.push_back(texto);
+        sf::Text t;
+        t.setFont(fuente);
+        t.setString(nombres[i]);
+        t.setCharacterSize(40); // Si ves que queda muy junto, puedes bajarlo a 35 o 38
+
+        // Ajuste de altura dinámica para que entren las 7 opciones cómodamente
+        t.setPosition(100.f, 350.f + (i * 55.f));
+        opciones.push_back(t);
     }
 }
 

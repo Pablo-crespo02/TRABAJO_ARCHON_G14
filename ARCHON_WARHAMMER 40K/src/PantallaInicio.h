@@ -13,11 +13,11 @@ private:
     std::vector<sf::Text> opciones;
     std::vector<std::string> nombres = {
         "INICIAR PARTIDA", "REANUDAR PARTIDA", "INSTRUCCIONES",
-        "CREDITOS","SALIR DEL JUEGO","CARGAR PARTIDA",
+        "CREDITOS","SALIR DEL JUEGO","CARGAR PARTIDA","VER HISTORIAL",
     };
 
     int indiceSeleccionado;
-    const int NUM_OPCIONES = 6;
+    const int NUM_OPCIONES = 7;
     bool partidaActiva = false;
 public:
     PantallaInicio();
