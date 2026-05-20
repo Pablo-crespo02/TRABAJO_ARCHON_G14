@@ -281,7 +281,6 @@ void Coordinador::reiniciarPartida() {
     std::cout << "DEBUG: Datos del motor limpiados y unidades desplegadas." << std::endl;
 }
 
-
 void Coordinador::guardarEnRanura(int indice) {
     // 1. Si la ranura ya tenía una partida vieja, limpiamos su memoria para no saturar la RAM
     for (Pieza* p : ranuras[indice].piezas) {
@@ -301,6 +300,10 @@ void Coordinador::guardarEnRanura(int indice) {
     ranuras[indice].ciclo = motor.getCicloActual();
     ranuras[indice].jugador = motor.getJugadorActual();
 
+    //  Guardamos partidas actuales
+    ranuras[indice].puntosLuz = motor.getPuntosLuz();
+    ranuras[indice].puntosOscuridad = motor.getPuntosOscuridad();
+    // 5. Sloth ocupado
     ranuras[indice].ocupada = true;
     std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
 }
@@ -324,7 +327,11 @@ void Coordinador::cargarDesdeRanura(int indice) {
         motor.setCicloActual(ranuras[indice].ciclo);
         motor.setJugadorActual(ranuras[indice].jugador);
 
-        // 4. Cambiamos los estados para reanudar el juego
+        //4: Restauramos partidas guardadas
+        motor.setPuntosLuz(ranuras[indice].puntosLuz);
+        motor.setPuntosOscuridad(ranuras[indice].puntosOscuridad);
+     
+        // 5. Cambiamos los estados para reanudar el juego
         estadoActual = Estado::Tablero;
         motor.setEstado(Estado::Tablero);
         std::cout << "Partida cargada desde la ranura " << indice + 1 << "!" << std::endl;

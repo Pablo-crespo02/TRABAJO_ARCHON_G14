@@ -1,4 +1,5 @@
 #include "InterfazHUD.h"
+#include "Color.h"
 #include <string>
 
 InterfazHUD::InterfazHUD(sf::RenderWindow& win, sf::Font& font) {
@@ -16,7 +17,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     float inicioUI = ancho * 0.66f;
     float anchoHUD = ancho - inicioUI;
 
-    // --- 1. CABECERA (RONDA, CICLO, TURNO) ---
+    // 1.CABECERA (RONDA, CICLO, TURNO) ---
     sf::Text textoTop;
     textoTop.setFont(*fuente);
     textoTop.setOutlineThickness(2);
@@ -29,99 +30,66 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     textoTop.setPosition(ancho * 0.10f, 35.f);
     window.draw(textoTop);
 
-    textoTop.setString("CICLO: " + std::to_string(ciclo) + " / 12");
-    textoTop.setPosition(ancho * 0.10f, 80.f);
+    textoTop.setString("CICLO: " + std::to_string(ciclo));
+    textoTop.setPosition(ancho * 0.30f, 35.f);
     window.draw(textoTop);
 
-    // Turno Actual
-    std::string nombreTurno = (jugadorActual == 1) ? "TURNO: IMPERIUM (LUZ)" : "TURNO: TIRANIDOS (OSCURIDAD)";
-    sf::Color colorTurno = (jugadorActual == 1) ? sf::Color(255, 255, 150) : sf::Color(180, 100, 255);
-    textoTop.setCharacterSize(40);
-    textoTop.setFillColor(colorTurno);
-    textoTop.setString(nombreTurno);
-    textoTop.setPosition((inicioUI / 2.f) - 150.f, 35.f);
+    // Turno del jugador
+    if (jugadorActual == 1) {
+        textoTop.setFillColor(Colores::ColorFichaLuz);
+        textoTop.setString("TURNO: IMPERIUM");
+    }
+    else {
+        textoTop.setFillColor(Colores::ColorFichaOscuridad);
+        textoTop.setString("TURNO: XENOS");
+    }
+    textoTop.setPosition(ancho * 0.50f, 35.f);
     window.draw(textoTop);
 
-    // --- PANEL LATERAL ---
-    sf::RectangleShape panel({ anchoHUD, alto });
-    panel.setPosition(inicioUI, 0);
-    panel.setFillColor(sf::Color(18, 18, 22));
-    window.draw(panel);
-
-    float margenX = inicioUI + 25.f;
-    float yActual = 60.f;
-
-    sf::Text textoPanel;
-    textoPanel.setFont(*fuente);
-    textoPanel.setCharacterSize(35);
-    textoPanel.setFillColor(sf::Color(120, 120, 130));
-    textoPanel.setString("UNIDAD");
-    textoPanel.setPosition(margenX, yActual);
-    window.draw(textoPanel);
-
-    yActual += 70.f;
-
-    // Marcos de imagen
-    float anchoMarco = (anchoHUD - 70.f) / 2.f;
-    sf::RectangleShape marco({ anchoMarco, 320.f });
-    marco.setOutlineThickness(3);
-    marco.setOutlineColor(sf::Color(80, 80, 90));
-    marco.setFillColor(sf::Color(25, 25, 30));
-
-    marco.setPosition(margenX, yActual);
-    window.draw(marco);
-    marco.setPosition(margenX + anchoMarco + 20.f, yActual);
-    window.draw(marco);
-
-    yActual += 360.f;
-
-    // --- DATOS DE LA PIEZA ---
+    //  2. PANEL DE INFORMACIÓN DE PIEZA (DERECHA) ---
     if (seleccionada != nullptr) {
-        // --- TÍTULO DE LA UNIDAD (Estilo THUNDERHAWK) ---
-        sf::Text textoNombre;
-        textoNombre.setFont(*fuente);
-        textoNombre.setCharacterSize(55); // Aumentado para que destaque como en la foto
-        textoNombre.setFillColor(sf::Color::White);
-        textoNombre.setString(seleccionada->stats.nombre);
+        float margenX = inicioUI + 30.f;
+        float yActual = 150.f;
 
-        // Posicionamiento tras los marcos de imagen
-        // yActual debería estar aproximadamente en 450.f - 480.f aquí
-        textoNombre.setPosition(margenX, yActual);
-        window.draw(textoNombre);
+        // Nombre de la Unidad
+        sf::Text txtNombre;
+        txtNombre.setFont(*fuente);
+        txtNombre.setString(seleccionada->stats.nombre);
+        txtNombre.setCharacterSize(40);
+        txtNombre.setFillColor(seleccionada->getBando() == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
+        txtNombre.setOutlineThickness(2);
+        txtNombre.setOutlineColor(sf::Color::Black);
+        txtNombre.setPosition(margenX, yActual);
+        window.draw(txtNombre);
+        yActual += 60.f;
 
-        // Dejamos un margen generoso después del nombre
-        yActual += 90.f;
+        // Atributos Base
+        dibujarDato(window, "VIDA:", std::to_string((int)seleccionada->stats.vida) + " / " + std::to_string((int)seleccionada->stats.vidaMaxima), margenX, yActual, sf::Color::Green);
+        dibujarDato(window, "ATAQUE:", std::to_string((int)seleccionada->stats.ataque), margenX, yActual, sf::Color::Red);
+        dibujarDato(window, "DEFENSA:", std::to_string((int)seleccionada->stats.defensa), margenX, yActual, sf::Color::Blue);
 
-        // LISTA DE DATOS 
-
-        // Vida y Ataque
-        dibujarDato(window, "VIDA:", std::to_string((int)seleccionada->stats.vida), margenX, yActual, sf::Color(100, 255, 100));
-        dibujarDato(window, "ATAQUE:", std::to_string((int)seleccionada->stats.ataque), margenX, yActual, sf::Color(255, 120, 120));
-
-        // Rango Mov
-        dibujarDato(window, "RANGO MOV:", std::to_string(seleccionada->rangoMovimiento) + " CASILLAS", margenX, yActual, sf::Color::White);
-
-        // Movimiento (Lógica de colores)
-        std::string txtMov = "TERRESTRE";
-        sf::Color colMov = sf::Color(200, 150, 100);
-        if (seleccionada->tipoMov == TipoMovimiento::Volador) {
-            txtMov = "VOLADOR";
-            colMov = sf::Color(100, 200, 255);
-        }
-        else if (seleccionada->tipoMov == TipoMovimiento::Teletransporte) {
-            txtMov = "TELETRANSPORTE";
-            colMov = sf::Color(255, 100, 255);
-        }
-        dibujarDato(window, "MOVIMIENTO:", txtMov, margenX, yActual, colMov);
-
-        // Combate
+        // Tipo de Combate (Rango o Melee)
         sf::Color colCom = seleccionada->stats.esRango ? sf::Color(255, 215, 0) : sf::Color(255, 80, 80);
         dibujarDato(window, "COMBATE:", seleccionada->stats.esRango ? "DISTANCIA" : "MELEE", margenX, yActual, colCom);
+
+        // --- VALOR EN PUNTOS DE LA PIEZA SELECCIONADA ---
+        int ptsValor = 0;
+        std::string n = seleccionada->stats.nombre;
+        if (n == "CAPTAIN" || n == "HIVE_TYRANT") ptsValor = 2000;
+        else if (n == "LIBRARIAN" || n == "HARPY") ptsValor = 750;
+        else if (n == "CULEXUS" || n == "GENESTEALER") ptsValor = 750;
+        else if (n == "ASSAULT_MARINE" || n == "GARGOLA") ptsValor = 300;
+        else if (n == "DREADNOUGHT" || n == "CARNIFEX") ptsValor = 300;
+        else if (n == "PRIMARIS" || n == "TOXICRENO") ptsValor = 300;
+        else if (n == "VINDICARE" || n == "LICTOR") ptsValor = 150;
+        else if (n == "INTERCESSOR" || n == "TERMAGANT") ptsValor = 100;
+
+        dibujarDato(window, "VALOR PTS:", std::to_string(ptsValor), margenX, yActual, sf::Color(150, 255, 150));
 
         // Velocidad de Ataque
         dibujarDato(window, "VEL. ATQ:", std::to_string((int)seleccionada->stats.velAtaque), margenX, yActual, sf::Color::White);
 
-        // Patrón (Con el color amarillo pálido de tu código)
+        // Patrón de movimiento
         std::string pTxt = "";
         switch (seleccionada->patronMovimiento) {
         case PatronMovimiento::Ambos:     pTxt = "DIAGONAL Y ORTOGONAL (*)"; break;
@@ -131,6 +99,22 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         }
         dibujarDato(window, "PATRON:", pTxt, margenX, yActual, sf::Color(255, 255, 150));
     }
+
+    // 3.MARCADOR DE PUNTOS EN EL TABLERO (ABAJO A LA IZQUIERDA) 
+    sf::Text textoPuntosHUD;
+    textoPuntosHUD.setFont(*fuente);
+    textoPuntosHUD.setCharacterSize(28);
+    textoPuntosHUD.setFillColor(sf::Color::White);
+    textoPuntosHUD.setOutlineColor(sf::Color::Black);
+    textoPuntosHUD.setOutlineThickness(2.f);
+
+    // Utilizamos los atributos internos de la clase que seteamos previamente
+    std::string strPuntos = "PUNTOS IMPERIUM: " + std::to_string(this->puntosLuz) + "\n" +
+        "PUNTOS XENOS:    " + std::to_string(this->puntosOscuridad);
+    textoPuntosHUD.setString(strPuntos);
+
+    textoPuntosHUD.setPosition(40.f, alto - 90.f);
+    window.draw(textoPuntosHUD);
 }
 
 void InterfazHUD::dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal) {

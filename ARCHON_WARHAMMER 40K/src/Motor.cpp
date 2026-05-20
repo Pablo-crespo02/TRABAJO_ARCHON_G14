@@ -669,10 +669,9 @@ void Motor::actualizar(double dt) {
     }
 }
 void Motor::dibujarHUD() {
-    // Usamos el estadoActual de la CLASE, no uno pasado por fuera
-    if (this->estadoActual == Estado::Tablero) {
-        hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
-    }
+    hud.setPuntuaciones(puntosLuz, puntosOscuridad);
+
+    hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
 }
 void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
     if (estadoActual == Estado::Tablero) {
