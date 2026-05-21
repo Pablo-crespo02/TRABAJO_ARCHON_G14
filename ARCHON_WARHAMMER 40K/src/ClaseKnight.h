@@ -4,7 +4,7 @@
 #include "Color.h"
 #include <string>
 #include <SFML/Graphics.hpp>
-
+//ESPADITA
 class ClaseKnight : public PiezaTerrestre {
 private:
     //SPRITES Y TEXTURAS 

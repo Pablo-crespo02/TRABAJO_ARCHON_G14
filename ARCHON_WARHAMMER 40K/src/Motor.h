@@ -42,12 +42,16 @@ private:
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
     //sonido
-    sf::SoundBuffer bufferError;
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
 
     //sonido error
+    sf::SoundBuffer bufferError;
     sf::Sound sonidoError;
+
+    // Sonido de la espada clase kinght luz
+    sf::SoundBuffer bufferMotosierra;
+    sf::Sound sonidoMotosierra;
 
     void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,

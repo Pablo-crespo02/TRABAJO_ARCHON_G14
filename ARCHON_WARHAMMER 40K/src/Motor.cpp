@@ -32,7 +32,6 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoMover.setBuffer(bufferMover);
         sonidoMover.setVolume(70.f); 
     }
-    
     //CARGA DEL SONIDO DE ERROR
     if (!bufferError.loadFromFile("sonidos/error.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
@@ -40,6 +39,14 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     else {
         sonidoError.setBuffer(bufferError);
         sonidoError.setVolume(50.f); 
+    }
+    // CARGA DEL SONIDO MOTOSIERRA
+    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.ogg")) {
+        std::cout << "Aviso: No se pudo cargar el sonido motosierra.mp3" << std::endl;
+    }
+    else {
+        sonidoMotosierra.setBuffer(bufferMotosierra);
+        sonidoMotosierra.setVolume(60.f); // Ajusta a tu gusto
     }
 
     // 2. Generar el mundo inicial
@@ -707,6 +714,13 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
     p->setultimadireccion(dir);
 
     if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
+        //SONIDOS DE COMBATE EN ARENA
+        std::cout << "ATACANDO CON LA PIEZA: [" << p->stats.nombre << "]" << std::endl;
+
+        // --- SONIDOS DE COMBATE CUERPO A CUERPO ---
+        if (p->stats.nombre == "INTERCESSOR") {
+            sonidoMotosierra.play();
+        }
         sf::Vector2f dirAtaque = p->getultimadireccion();
         float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
         dirAtaque = (magnitud != 0.f) ? (dirAtaque / magnitud) : dirPorDefecto;

@@ -1,4 +1,5 @@
 #include "Coordinador.h"
+#include "Generador.h"
 
 Coordinador::Coordinador():motor(window, fuente)
 {
@@ -35,6 +36,9 @@ Coordinador::Coordinador():motor(window, fuente)
     vistaTablero.setSize(700.f, 700.f);
     vistaTablero.setCenter(350.f, 350.f);
     vistaTablero.setViewport(sf::FloatRect(0.10f, 0.20f, 0.60f, 0.80f));
+
+    //cargar las partidas guardadas
+    cargarDatosDeFichero();
 }
 
 void Coordinador::ejecutar() {
@@ -312,6 +316,8 @@ void Coordinador::guardarEnRanura(int indice) {
     // 5. Sloth ocupado
     ranuras[indice].ocupada = true;
     std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
+
+    guardarDatosEnFichero();
 }
 
 void Coordinador::cargarDesdeRanura(int indice) {
@@ -345,4 +351,95 @@ void Coordinador::cargarDesdeRanura(int indice) {
     else {
         std::cout << "La ranura " << indice + 1 << " esta vacia." << std::endl;
     }
+}
+
+// FUNCION QUE LEE EL ARCHIVO
+void Coordinador::cargarDatosDeFichero() {
+    std::ifstream archivo("partidas_guardadas.txt");
+
+    // Si el archivo no existe (primera vez que juegas), no pasa nada
+    if (!archivo.is_open()) {
+        std::cout << "Aviso: NO HAY ARCHIVO GUARDADO PREVIO. Se creara uno nuevo al jugar." << std::endl;
+        return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        archivo >> ranuras[i].ocupada;
+        if (ranuras[i].ocupada) {
+            //variables globales de la partida
+            archivo >> ranuras[i].ronda
+                >> ranuras[i].ciclo
+                >> ranuras[i].jugador
+                >> ranuras[i].puntosLuz
+                >> ranuras[i].puntosOscuridad
+                >> ranuras[i].tiempoJugado;
+
+            int numPiezas;
+            archivo >> numPiezas;
+
+            // Limpiamos la ranura por si acaso había basura en memoria
+            for (Pieza* p : ranuras[i].piezas) delete p;
+            ranuras[i].piezas.clear();
+
+            // Reconstruimos pieza a pieza
+            for (int j = 0; j < numPiezas; j++) {
+                int bandoInt, x, y;
+                std::string nombre;
+                float vida;
+                archivo >> bandoInt >> x >> y >> nombre >> vida;
+
+                Bando b = static_cast<Bando>(bandoInt);
+                sf::Vector2i pos(x, y);
+
+                // se usa el motor temporalmente para crear la pieza correcta
+                motor.limpiarDatos();
+                Generador::AnadirUnidad(motor, b, nombre, pos);
+
+                if (!motor.getListaPiezas().empty()) {
+                    Pieza* p = motor.getListaPiezas().back();
+                    p->stats.vida = vida; // Le ponemos la salud que tenía al guardar
+                    ranuras[i].piezas.push_back(p->clonar()); // La clonamos a la ranura segura
+                }
+            }
+            motor.limpiarDatos(); // Dejamos el motor limpio
+        }
+    }
+    archivo.close();
+    std::cout << "Datos cargados desde partidas_guardadas.txt" << std::endl;
+}
+
+//Esta función lo que hace es coger todo lo que haya en la memoria de las 3 ranuras y lo escribe en partidasa_guardadas.txt
+void Coordinador::guardarDatosEnFichero() {
+    std::ofstream archivo("partidas_guardadas.txt");
+    if (!archivo.is_open()) {
+        std::cout << "Error: No se pudo crear el archivo de guardado." << std::endl;
+        return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        archivo << ranuras[i].ocupada << " ";
+        if (ranuras[i].ocupada) {
+            // Guardar el estado global
+            archivo << ranuras[i].ronda << " "
+                << ranuras[i].ciclo << " "
+                << ranuras[i].jugador << " "
+                << ranuras[i].puntosLuz << " "
+                << ranuras[i].puntosOscuridad << " "
+                << ranuras[i].tiempoJugado << " ";
+
+            // Guardar cuántas piezas hay vivas
+            archivo << ranuras[i].piezas.size() << " ";
+
+            // Guardamos los datos de cada pieza viva
+            for (Pieza* p : ranuras[i].piezas) {
+                archivo << static_cast<int>(p->getBando()) << " "
+                    << p->getPosicionTablero().x << " "
+                    << p->getPosicionTablero().y << " "
+                    << p->stats.nombre << " "
+                    << p->stats.vida << " ";
+            }
+        }
+        archivo << "\n";
+    }
+    archivo.close();
 }
