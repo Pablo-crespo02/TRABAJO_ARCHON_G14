@@ -33,10 +33,30 @@ void Tablero::actualizarColores(int numCiclo) {
     }
 }
 void Tablero::dibujar(sf::RenderWindow& window) {
-    // Recorremos la matriz 9x9 y mandamos a cada Casilla a dibujarse
+
+    // Dibujamos el marco
+    // 
+    // El tablero mide 590x590. Hacemos el borde de 610x610 (10px extra por lado)
+    sf::RectangleShape fondoBorde(sf::Vector2f(580.f, 580.f));
+
+    // Lo movemos 10 píxeles hacia atrás en X e Y para que quede centrado detrás de las casillas
+    fondoBorde.setPosition(-20.f, -20.f);
+
+    // Le damos un color gris oscuro para que resalte sin molestar
+    fondoBorde.setFillColor(sf::Color(45, 45, 45));
+
+    // Un pequeño borde un poco más claro para darle relieve
+    fondoBorde.setOutlineThickness(2.f);
+    fondoBorde.setOutlineColor(sf::Color(80, 80, 80));
+
+    // Lo dibujamos primero para que quede al fondo
+    window.draw(fondoBorde);
+
+
+    // 2. DIBUJAMOS LAS CASILLAS
+
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
-            // 'tablero' es el nombre de tu matriz interna (Casilla tablero[9][9])
             tablero[i][j].Dibujar(window);
         }
     }

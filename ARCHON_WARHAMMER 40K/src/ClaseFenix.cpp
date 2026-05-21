@@ -3,7 +3,7 @@
 #include <iostream>
 
 const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 120.0f;
+const float PIEZA_ALTURA_ARENA = 150.0f;
 
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
@@ -18,6 +18,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.esRango = true;
 
     this->rangoMovimiento = 4;
+    this->hechizoDisponible = true;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Volador;
 
@@ -217,7 +218,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 // ACTIVACIÓN DEL HECHIZO
 // =========================================================================
 void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-
+    // 1. Lógica del LIBRARIAN: No depende del enemigo
     if (this->stats.nombre == "LIBRARIAN") {
         sf::Vector2f dirFija(0, 0);
         hitboxes.emplace_back(
@@ -226,21 +227,25 @@ void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
             0,
             sf::Color(255, 69, 0, 150),
             this,
-            10.0f,
-            5.0f,
-            150.0f,
-            true
+            10.0f, // Daño
+            5.0f,  // Tiempo de vida
+            150.0f,// Radio
+            true   // ¿Es área?
         );
+
+        // ¡IMPORTANTE! Reiniciamos el reloj para que el cooldown actúe
+        this->stats.relojHabilidad.restart();
         std::cout << "El Librarian desata una Supernova!" << std::endl;
     }
+    // 2. Lógica de la HARPY: Sí depende del enemigo
     else if (this->stats.nombre == "HARPY") {
-        // Guardamos la referencia del rival y activamos el reloj de 10 segundos
+        if (!enemigo) return; // Solo devolvemos si la Harpy necesita al enemigo y no hay
+
         this->enemigoEnlazado = enemigo;
         this->stats.relojHabilidad.restart();
-        std::cout << "El Harpy activa Enlace de Sangre por 10 segundos contra su objetivo!" << std::endl;
+        std::cout << "El Harpy activa Enlace de Sangre!" << std::endl;
     }
 }
-
 // =========================================================================
 // ACTUALIZACIÓN DE VIDA CONTINUA
 // =========================================================================

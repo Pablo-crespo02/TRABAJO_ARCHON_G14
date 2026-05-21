@@ -261,7 +261,7 @@ void ClaseArcher::gestionarInvisibilidad(double dt) {
 
         // Transparencia casi total para el sprite de la arena
         sf::Color colorAct = spriteArena.getColor();
-        colorAct.a = 10;
+        colorAct.a = 10; //SE PODRIA PONER A 0 PARA INVISIVILIDAD TOTAL
         spriteArena.setColor(colorAct);
 
         // Si el tiempo se agota, restauramos todo a la normalidad

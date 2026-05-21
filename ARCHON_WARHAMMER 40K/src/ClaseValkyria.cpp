@@ -2,7 +2,7 @@
 #include <cmath> 
 #include <iostream>
 
-const float PIEZA_ALTURA_TABLERO = 90.0f;
+const float PIEZA_ALTURA_TABLERO = 80.0f;
 const float PIEZA_ALTURA_ARENA = 120.0f;
 
 ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
@@ -194,7 +194,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "FALTA") {
+        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "FALTA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

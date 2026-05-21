@@ -26,8 +26,8 @@ ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
     //CARGA DE SPRITES (Chibi)
     if (tipo == "CAPTAIN" || tipo == "HIVE_TYRANT") {
 
-        std::string rutaTablero = (tipo == "CAPTAIN") ? "imagenes/BASE-PROTOTIPO-XXX.png" : "imagenes/BASE-HIVE_TYRANT-TYRANIDS.png";
-        std::string rutaArena = (tipo == "CAPTAIN") ? "imagenes/Chibi-PROTOTIPO-XXX.png" : "imagenes/Chibi-HIVE_TYRANT-TYRANIDS-1.0.png";
+        std::string rutaTablero = (tipo == "CAPTAIN") ? "imagenes/BASE-CAPTAIN-Humanidad.png" : "imagenes/BASE-HIVE_TYRANT-TYRANIDS.png";
+        std::string rutaArena = (tipo == "CAPTAIN") ? "imagenes/Chibi-CAPTAIN-Humanidad-1.0.png" : "imagenes/Chibi-HIVE_TYRANT-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -172,7 +172,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -202,7 +202,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
@@ -238,7 +238,7 @@ void ClaseLider::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         ClaseHelicoptero* heli = new ClaseHelicoptero(this->bando, puntoSpawnHeli);
         minionsInvocados.push_back(heli);
 
-        std::cout << "¡El Capitan ha solicitado apoyo aereo! Helicoptero desplegado." << std::endl;
+        std::cout << "El Capitan ha solicitado apoyo aereo! Helicoptero desplegado." << std::endl;
     }
     // =========================================================================
     // CASO 2: EL OTRO LÍDER (TIRÁNIDO) -> INVOCA 2 TERMAGANTS

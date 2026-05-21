@@ -43,9 +43,9 @@ Coordinador::Coordinador():motor(window, fuente)
     // 5. CONFIGURACIÓN FINAL
     estadoActual = Estado::MenuPrincipal;
     vistaUI = window.getDefaultView();
-    vistaTablero.setSize(700.f, 700.f);
-    vistaTablero.setCenter(350.f, 350.f);
-    vistaTablero.setViewport(sf::FloatRect(0.10f, 0.20f, 0.60f, 0.80f));
+    vistaTablero.setSize(620.f, 620.f);
+    vistaTablero.setCenter(270.f, 270.f);
+    vistaTablero.setViewport(sf::FloatRect(0.04f, 0.10f, 0.60f, 0.80f));
 
     //cargar las partidas guardadas
     cargarDatosDeFichero();
