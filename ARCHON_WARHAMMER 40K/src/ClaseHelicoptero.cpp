@@ -66,47 +66,59 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
     sf::Vector2f posHeli = this->posicionAbsoluta;
     sf::Vector2f posEnemigo = enemigo->getPosicionAbsoluta();
 
-    // 1. MOVIMIENTO: Calcular vector hacia el enemigo
+    // 1. CÁLCULO DE DISTANCIA
     sf::Vector2f dir = posEnemigo - posHeli;
     float distancia = std::hypot(dir.x, dir.y);
-
     if (distancia != 0.f) dir /= distancia; // Normalizar vector
 
-    // Mantener una distancia prudencial de combate (ej: 180 píxeles)
-    sf::Vector2f dirMovimiento = dir;
-    if (distancia < 180.f) {
-        dirMovimiento = -dir; // Se aleja un poco para ametrallar desde el aire si el enemigo se acerca
+    float rangoIdeal = 180.f; // Distancia de ataque
+    float tolerancia = 8.f;   // Margen de 8px para evitar que oscile
+
+    sf::Vector2f dirMovimiento(0.f, 0.f);
+    bool moviendose = false;
+
+    // Lógica con Deadzone: Solo nos movemos si estamos fuera del rango de tolerancia
+    if (distancia > (rangoIdeal + tolerancia)) {
+        dirMovimiento = dir;        // Muy lejos: Avanzar
+        moviendose = true;
     }
-
-    float velocidadVuelo = 130.f;
-    sf::Vector2f desplazamiento = dirMovimiento * velocidadVuelo * dt;
-    sf::Vector2f nuevaPos = posHeli + desplazamiento;
-
-    // =========================================================================
-    // ¡CORRECCIÓN VOLADORA!: Ignoramos obstáculos internos de la arena
-    // Pasamos 'true' para indicarle a la arena que somos una unidad aérea.
-    // =========================================================================
-    if (arena.esPosicionValida(nuevaPos, 25.f, true)) {
-        this->posicionAbsoluta = nuevaPos;
-        this->animar(dt, dirMovimiento);
+    else if (distancia < (rangoIdeal - tolerancia)) {
+        dirMovimiento = -dir;       // Muy cerca: Retroceder
+        moviendose = true;
     }
     else {
-        // Si llega a tocar los bordes exteriores del mapa (límites de la pantalla), 
-        // se frena pero sigue reproduciendo la animación de flotar/quieto.
+        // DENTRO DE LA ZONA MUERTA: 
+        // El helicóptero se queda quieto, solo debe mirar al enemigo.
+        dirMovimiento = sf::Vector2f(0.f, 0.f);
+        moviendose = false;
+    }
+
+    // 2. MOVIMIENTO Y COLISIONES
+    if (moviendose) {
+        float velocidadVuelo = 130.f;
+        sf::Vector2f desplazamiento = dirMovimiento * velocidadVuelo * dt;
+        sf::Vector2f nuevaPos = posHeli + desplazamiento;
+
+        // Comprobación de límites (true = unidad aérea)
+        if (arena.esPosicionValida(nuevaPos, 25.f, true)) {
+            this->posicionAbsoluta = nuevaPos;
+            this->animar(dt, dirMovimiento);
+        }
+    }
+    else {
+        // Si no se mueve, llamamos a animar con vector 0 para que flote quieto
         this->animar(dt, sf::Vector2f(0.f, 0.f));
     }
 
-    // =========================================================================
-    // 2. DISPARO AUTOMÁTICO POR COOLDOWN
-    // =========================================================================
+    // 3. DISPARO AUTOMÁTICO POR COOLDOWN
     if (relojDisparoAuto.getElapsedTime().asSeconds() >= this->stats.velAtaque) {
+        // Disparamos siempre hacia la posición del enemigo
         sf::Vector2f dirBala = posEnemigo - this->posicionAbsoluta;
         float magBala = std::hypot(dirBala.x, dirBala.y);
         if (magBala != 0.f) dirBala /= magBala;
 
         sf::Vector2f spawnBala = this->posicionAbsoluta + (dirBala * 30.f);
 
-        // Instanciamos el proyectil en el contenedor global de Hitboxes
         hitboxes.emplace_back(
             spawnBala,
             dirBala,
@@ -121,7 +133,6 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
         relojDisparoAuto.restart();
     }
 }
-
 void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
     int fila = 0;
     int colInicial = 0;
@@ -140,8 +151,8 @@ void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
     else if (direccion.x != 0.f) {
         // SECUENCIA DE VUELO LATERAL (Fila 0, Columnas de la 1 a la 4)
         fila = 0;
-        colInicial = 1;
-        colFinal = 2;
+        colInicial = 2;
+        colFinal = 3;
     }
     else if (direccion.y > 0.f) {
         // FOTOGRAMA DE DESCENSO / ABAJO (Fila 1, Columna 3)
@@ -159,7 +170,7 @@ void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
         // FOTOGRAMA ESTÁTICO / QUIETO (Fila 0, Columna 0)
         fila = 0;
         colInicial = 0;
-        colFinal = 0;
+        colFinal = 1;
     }
 
     // 1. GESTIÓN DE CAMBIO DE FRAME / FILA
