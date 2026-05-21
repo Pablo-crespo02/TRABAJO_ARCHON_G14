@@ -12,13 +12,23 @@ Coordinador::Coordinador():motor(window, fuente)
     // 1. INIIALIZAMOS LOS MENÚS NO INTERACTIVOS:
     pantallainfo.inicializarTextos();  
 
-    // 2. CARGAMOS EL SONIDO
+    // 2. CARGAMOS EL SONIDO DEL CLICK EN EL MENU
     if (!bufferClick.loadFromFile("sonidos/click.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido click.wav" << std::endl;
     }
     else {
         sonidoClick.setBuffer(bufferClick);
         sonidoClick.setVolume(50.f);
+    }
+
+    //2.1 MUSICA MENU
+    if (!musicaMenu.openFromFile("sonidos/musica_menu.mp3")) {
+        std::cout << "Aviso: No se encontro musica_menu.mp3" << std::endl;
+    }
+    else {
+        musicaMenu.setLoop(true);   // la canción se repita en bucle
+        musicaMenu.setVolume(60.f);
+        musicaMenu.play();
     }
 
     // 3. CREAMOS LA VENTANA
@@ -261,6 +271,26 @@ void Coordinador::dibujar() {
 }
 
 void Coordinador::actualizar(float dt) {
+
+    //CONTROL DE LA MÚSICA DE MENÚS
+    bool estamosEnUnMenu = (estadoActual == Estado::MenuPrincipal ||
+        estadoActual == Estado::Pausa ||
+        estadoActual == Estado::Instrucciones ||
+        estadoActual == Estado::Creditos ||
+        estadoActual == Estado::SeleccionCarga);
+
+    if (estamosEnUnMenu) {
+        // Si estamos en un menú y la música NO está sonando, la encendemos
+        if (musicaMenu.getStatus() != sf::SoundSource::Playing) {
+            musicaMenu.play();
+        }
+    }
+    else {
+        // Si estamos jugando (Tablero/Arena/Victoria) y la música sigue sonando, la pausamos
+        if (musicaMenu.getStatus() == sf::SoundSource::Playing) {
+            musicaMenu.pause();
+        }
+    }
     //  EL TEMPORIZADOR GLOBAL 
     if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
         motor.setTiempoJugado(motor.getTiempoJugado() + dt);

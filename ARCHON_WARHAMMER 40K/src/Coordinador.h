@@ -46,6 +46,8 @@ private:
     sf::SoundBuffer bufferClick;
     sf::Sound sonidoClick;
 
+    sf::Music musicaMenu;
+
     
     // --- COMPONENTES ---
     Motor motor; // El motor se inicializa 
