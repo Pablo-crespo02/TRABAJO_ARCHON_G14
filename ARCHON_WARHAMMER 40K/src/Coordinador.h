@@ -9,6 +9,7 @@
 #include "MenuPausa.h"
 #include "PantallaCarga.h"
 #include "Motor.h" 
+#include <fstream> //para fichero de guardar partida
 
 struct DatosGuardados {
     bool ocupada = false;
@@ -37,9 +38,15 @@ private:
     bool partidaEnCurso = false;
     DatosGuardados ranuras[3];
 
+    // FICHERO
+    void guardarDatosEnFichero();
+    void cargarDatosDeFichero();
+
     // --- AUDIO ---
     sf::SoundBuffer bufferClick;
     sf::Sound sonidoClick;
+
+    sf::Music musicaMenu;
 
     
     // --- COMPONENTES ---
