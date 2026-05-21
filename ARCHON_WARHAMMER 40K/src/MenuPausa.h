@@ -22,4 +22,7 @@ public:
     void moverArriba();
     void moverAbajo();
     int getIndiceSeleccionado() const { return indiceSeleccionado; }
+
+    //Método utilizado para que el menú de guardado y el de pausa compartan fondo:
+    void dibujarFondo(sf::RenderWindow& window);
 };

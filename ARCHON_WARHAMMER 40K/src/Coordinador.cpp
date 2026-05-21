@@ -168,7 +168,7 @@ void Coordinador::gestionarEventos() {
                     case 4: // GUARDAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = true;
                         pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
-                        estadoActual = Estado::SeleccionCarga;
+                        estadoActual = Estado::SeleccionGuardar;
                         break;
 
                     case 5: // SALIR AL ESCRITORIO
@@ -178,8 +178,8 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
-        //MENU DE CARGA
-        else if (estadoActual == Estado::SeleccionCarga) {
+        //MENUS DE CARGA Y GUARDADO:
+        else if (estadoActual == Estado::SeleccionCarga || estadoActual == Estado::SeleccionGuardar) {
             if (evento.type == sf::Event::KeyPressed) {
                 if (evento.key.code == sf::Keyboard::Up)
                 {
@@ -195,11 +195,10 @@ void Coordinador::gestionarEventos() {
                 if (evento.key.code == sf::Keyboard::Enter) {
                     int ranura = pantallaCarga->getIndiceSeleccionado();
                     if (ranura == 3) { // Opción "VOLVER"
-                        
-                        estadoActual = modoGuardar ? Estado::Pausa : Estado::MenuPrincipal;
-                    }
+                        estadoActual = (estadoActual == Estado::SeleccionGuardar) ? Estado::Pausa : Estado::MenuPrincipal;
+                        }
                     else {
-                        if (modoGuardar) {
+                        if (estadoActual == Estado::SeleccionGuardar) {
                             this->guardarEnRanura(ranura);
                             pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
                             estadoActual = Estado::Pausa;
@@ -247,21 +246,35 @@ void Coordinador::dibujar() {
     if (estadoActual == Estado::Pausa) {
         menuPausa->dibujar(window);
     }
+
+    //PANTALLA VICTORIA:
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaVictoria(window);
     }
+
     // 5. PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaInstrucciones(window);
     }
-    //6. menu cargar ranuras
+    //6. MENÚ DE CARGA:
     else if (estadoActual == Estado::SeleccionCarga) {
         pantallaInicio.dibujar(window); // Dibujamos el fondo del marine y el tiranido
+        window.setView(vistaUI);
         pantallaCarga->dibujar(window); // Dibujamos las ranuras encima
     }
-    // 7. PANTALLA CRÉDITOS
+
+    // 7. MENÚ DE GUARDADO:
+    else if (estadoActual == Estado::SeleccionGuardar) {
+
+        //Se respeta el renderizado del mapa y el fondo anterior, sólo se puede acceder a esta pantalla desde el menú de pausa del juego:
+        menuPausa->dibujarFondo(window);
+
+        window.setView(vistaUI);
+        pantallaCarga->dibujar(window);
+    }
+    // 8. PANTALLA CRÉDITOS
     else if (estadoActual == Estado::Creditos) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaCreditos(window);
@@ -277,6 +290,7 @@ void Coordinador::actualizar(float dt) {
         estadoActual == Estado::Pausa ||
         estadoActual == Estado::Instrucciones ||
         estadoActual == Estado::Creditos ||
+        estadoActual == Estado::SeleccionGuardar ||
         estadoActual == Estado::SeleccionCarga);
 
     if (estamosEnUnMenu) {
@@ -309,7 +323,7 @@ void Coordinador::actualizar(float dt) {
         // Pasamos las puntuaciones y el tiempo
         pantallainfo.configurarPantallaVictoria(ganador, motor.getPuntosLuz(), motor.getPuntosOscuridad(), motor.getTiempoJugado(), window);
     }
-    // CORRECCIÓN: Ahora el motor SOLO se actualiza si NO estamos en pausa
+    // SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);
     }

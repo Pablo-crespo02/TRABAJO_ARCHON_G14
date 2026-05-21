@@ -71,3 +71,9 @@ void MenuPausa::moverArriba() {
 void MenuPausa::moverAbajo() {
     indiceSeleccionado = (indiceSeleccionado + 1) % NUM_OPCIONES;
 }
+
+void MenuPausa::dibujarFondo(sf::RenderWindow& window) {
+    window.setView(window.getDefaultView());
+    window.draw(spriteFondo);
+    window.draw(fondoOscuro);
+}
