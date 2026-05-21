@@ -34,31 +34,38 @@ ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
         if (!texturaTablero.loadFromFile(rutaTablero)) {
             std::cout << "Error: No se encontro " << rutaTablero << std::endl;
         }
-        spriteTablero.setTexture(texturaTablero);
-        spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
 
-        float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-        spriteTablero.setScale(escalaTablero, escalaTablero);
+        else {
+            spriteTablero.setTexture(texturaTablero);
+            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
+
+            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
+            spriteTablero.setScale(escalaTablero, escalaTablero);
+        }
+       
 
         if (!texturaArena.loadFromFile(rutaArena)) {
             std::cout << "Error: No se encontro " << rutaArena << std::endl;
         }
-        spriteArena.setTexture(texturaArena);
 
-        anchoFrame = texturaArena.getSize().x / columnas;
-        altoFrame = texturaArena.getSize().y / filas;
-
-        spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-        spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-        float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-        if (this->bando == Bando::OSCURIDAD) {
-            spriteArena.setScale(-escalaArena, escalaArena);
-        }
         else {
-            spriteArena.setScale(escalaArena, escalaArena);
-        }
+            spriteArena.setTexture(texturaArena);
 
+            anchoFrame = texturaArena.getSize().x / columnas;
+            altoFrame = texturaArena.getSize().y / filas;
+
+            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
+            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
+
+            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+            if (this->bando == Bando::OSCURIDAD) {
+                spriteArena.setScale(-escalaArena, escalaArena);
+            }
+            else {
+                spriteArena.setScale(escalaArena, escalaArena);
+            }
+        }
+      
         frameActual = 0;
         temporizadorAnimacion = 0.0f;
     }

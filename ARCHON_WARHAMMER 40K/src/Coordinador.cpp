@@ -280,7 +280,7 @@ void Coordinador::actualizar(float dt) {
         estadoActual == Estado::SeleccionCarga);
 
     if (estamosEnUnMenu) {
-        // Si estamos en un menú y la música NO está sonando, la encendemos
+        // Si venimos de jugar y la música está pausada, la reanudamos:
         if (musicaMenu.getStatus() != sf::SoundSource::Playing) {
             musicaMenu.play();
         }
@@ -394,35 +394,46 @@ void Coordinador::cargarDatosDeFichero() {
     }
 
     for (int i = 0; i < 3; i++) {
-        archivo >> ranuras[i].ocupada;
+        if (!(archivo >> ranuras[i].ocupada))break;
+       
         if (ranuras[i].ocupada) {
+
             //variables globales de la partida
-            archivo >> ranuras[i].ronda
+            if (!(archivo >> ranuras[i].ronda
                 >> ranuras[i].ciclo
                 >> ranuras[i].jugador
                 >> ranuras[i].puntosLuz
                 >> ranuras[i].puntosOscuridad
-                >> ranuras[i].tiempoJugado;
+                >> ranuras[i].tiempoJugado)) {
+                std::cout << "Error leyendo cabecera de la ranura" << i + 1 << std::endl;
+                break;
+           }
 
             int numPiezas;
-            archivo >> numPiezas;
+            if (!(archivo >> numPiezas))break;;
 
             // Limpiamos la ranura por si acaso había basura en memoria
             for (Pieza* p : ranuras[i].piezas) delete p;
             ranuras[i].piezas.clear();
+
+            //Limpiamos el motor:
+            motor.limpiarDatos();
 
             // Reconstruimos pieza a pieza
             for (int j = 0; j < numPiezas; j++) {
                 int bandoInt, x, y;
                 std::string nombre;
                 float vida;
-                archivo >> bandoInt >> x >> y >> nombre >> vida;
+
+                if (!(archivo >> bandoInt >> x >> y >> nombre >> vida)) {
+                    std::cout << "Error de formato en la pieza " << j << "de la ranura " << i + 1 << " CARGA ABORTADA" << std::endl;
+                    break;
+                };
 
                 Bando b = static_cast<Bando>(bandoInt);
                 sf::Vector2i pos(x, y);
 
                 // se usa el motor temporalmente para crear la pieza correcta
-                motor.limpiarDatos();
                 Generador::AnadirUnidad(motor, b, nombre, pos);
 
                 if (!motor.getListaPiezas().empty()) {
