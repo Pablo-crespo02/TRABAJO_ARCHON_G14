@@ -16,7 +16,7 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     this->stats.defensa = 20.0f;
     this->stats.velAtaque = 1.2f;
     // --- Lógica de tipos ---
-    this->stats.esRango = false;    // El Golem es melee
+    this->stats.esRango = true;    // La valkiria es rango
 
     this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
@@ -25,7 +25,7 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
 
         std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
+        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TIRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -92,8 +92,8 @@ void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
     if (estaAtacando) {
         //FOTOGRAMA DE ATAQUE 
         fila = 1;
-        colInicial = 2;
-        colFinal = 2;
+        colInicial = 0;
+        colFinal = 1;
     }
     else if (direccion.x != 0) {
         //FOTOGRAMA DE CAMINAR LATERAL 
@@ -164,7 +164,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "FALTA") {
+        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -194,7 +194,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "FALTA") {
+        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
