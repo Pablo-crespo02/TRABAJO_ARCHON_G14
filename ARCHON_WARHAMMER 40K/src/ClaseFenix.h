@@ -9,31 +9,20 @@
 
 class ClaseFenix : public PiezaVoladora {
 private:
-    // SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+  
     // VARIABLES DEL ENLACE DE SANGRE (HARPY)
     Pieza* enemigoEnlazado;
 
     // VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
-
+    
 public:
     ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo);
 
     // Función de clonación
     Pieza* clonar() const override {
-        ClaseFenix* clon = new ClaseFenix(*this);
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
-        clon->enemigoEnlazado = nullptr; // El clon inicia sin enlaces activos
+        ClaseFenix* clon = new ClaseFenix(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
 

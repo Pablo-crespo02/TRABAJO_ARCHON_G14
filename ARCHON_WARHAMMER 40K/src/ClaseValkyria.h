@@ -7,28 +7,18 @@
 
 class ClaseValkyria : public PiezaVoladora {
 private:
-    //SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+   
     //VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
+    
 
 public:
 
     ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
-        ClaseValkyria* clon = new ClaseValkyria(*this);
-        // Reconectamos sus propios sprites a sus propias texturas
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
+        ClaseValkyria* clon = new ClaseValkyria(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
 

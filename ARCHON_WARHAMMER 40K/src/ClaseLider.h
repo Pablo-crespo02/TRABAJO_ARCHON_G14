@@ -10,28 +10,17 @@ class ClaseLider : public PiezaTeletransporte {
 private:
 
     std::vector<Pieza*> minionsInvocados;
-    //SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+   
     //VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;  
-
+    
 public:
 
     ClaseLider(Bando b, sf::Vector2i pos, std::string tipo);
     ~ClaseLider();
     Pieza* clonar() const override {
-        ClaseLider* clon = new ClaseLider(*this);
-        // Reconectamos sus propios sprites a sus propias texturas
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
+        ClaseLider* clon = new ClaseLider(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
 

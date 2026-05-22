@@ -1,11 +1,13 @@
 #pragma once
+#include <SFML/Graphics.hpp>
+#include <string>
+#include <vector>
+#include "Pieza.h"
 #include "PiezaVoladora.h"
 #include "Arena.h"
 #include "Hitboxes.h"
 #include "Color.h"
-#include <SFML/Graphics.hpp>
-#include <string>
-#include <vector>
+
 
 class ClaseHelicoptero : public PiezaVoladora {
 private:
@@ -25,10 +27,9 @@ private:
 public:
     // Constructor adaptado (bando, posición inicial en la arena, y estadísticas base)
     ClaseHelicoptero(Bando b, sf::Vector2f posArena);
-
     // Método obligatorio de clonación (lo dejamos limpio por si acaso)
     Pieza* clonar() const override {
-        ClaseHelicoptero* clon = new ClaseHelicoptero(*this);
+        ClaseHelicoptero* clon = new ClaseHelicoptero(this->bando, this->posicionAbsoluta);
         clon->spriteArena.setTexture(clon->texturaArena);
         return clon;
     }
