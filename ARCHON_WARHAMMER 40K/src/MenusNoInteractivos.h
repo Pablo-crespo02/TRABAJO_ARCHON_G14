@@ -8,24 +8,26 @@ class MenuNoInteractivo
 private:
 
     //PANTALLA DE VICTORIA:
-
     sf::Texture texturaFondo;
     sf::Sprite spriteFondo;
     sf::Font fuente;
     sf::Text textoVictoria;
+    sf::Text textoJugadorGanador;
     sf::Text textoContinuar;
     sf::Text textoTiempo;
+    sf::Text textoPuntuaciones;
 
+    //OTRAS PANTALLAS ESTÁTICAS:
     sf::Text textoCreditos;
     sf::Text textoInstrucciones;
-    sf::Text textoPuntuaciones;
+
 public:
     MenuNoInteractivo() {};
     void inicializarTextos();
-    void configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, float tiempoJugado, sf::RenderWindow& window);
+
+    //Pantallas Estáticas
+    void configurarPantallaVictoria(int ganador, int ptosLuz, int ptosOscuridad, float tiempoJugado, std::string nombreGanador, sf::RenderWindow& window);
     void dibujarPantallaVictoria(sf::RenderWindow& window);
     void dibujarPantallaCreditos(sf::RenderWindow& window);
     void dibujarPantallaInstrucciones(sf::RenderWindow& window);
-  
 };
-

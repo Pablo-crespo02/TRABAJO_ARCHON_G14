@@ -8,6 +8,7 @@
 #include "MenusNoInteractivos.h"
 #include "MenuPausa.h"
 #include "PantallaCarga.h"
+#include "MenuNombre.h"
 #include "Motor.h" 
 #include <fstream> //para fichero de guardar partida
 
@@ -34,6 +35,7 @@ private:
     int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
     int indiceSeleccionado = 0;
     const int MAX_OPCIONES = 6;
+    std::string nombreGanador = "";
     bool modoGuardar = false;
     bool partidaEnCurso = false;
     DatosGuardados ranuras[3];
@@ -55,6 +57,7 @@ private:
     MenuNoInteractivo pantallainfo;
     Estado estadoActual;
     MenuPausa* menuPausa;
+    MenuNombre* menuNombre;
     Estado estadoAnterior;
     PantallaCarga* pantallaCarga;
 
