@@ -38,6 +38,7 @@ Coordinador::Coordinador():motor(window, fuente)
     // 4. INICIALIZAMOS LAS PANTALLAS
     pantallaCarga = new PantallaCarga(fuente, window.getSize());
     menuPausa = new MenuPausa(fuente, window.getSize());
+    menuNombre = new MenuNombre(fuente, window.getSize());
     
 
     // 5. CONFIGURACIÓN FINAL
@@ -211,6 +212,24 @@ void Coordinador::gestionarEventos() {
                 }
             }
         } 
+        //Menu Nombre
+        if (estadoActual == Estado::Nombre) {
+            if (evento.type == sf::Event::TextEntered) {
+                if (evento.text.unicode == '\b') {
+                    menuNombre->borrarLetra();
+                }
+                else {
+                    menuNombre->procesarTexto(evento.text.unicode);
+                }
+            }
+            else if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
+                if (!menuNombre->getNombre().empty()) {
+                    estadoActual = Estado::Victoria;
+                    pantallainfo.configurarPantallaVictoria(motor.getGanador(), motor.getPuntosLuz(), motor.getPuntosOscuridad(), motor.getTiempoJugado(), menuNombre->getNombre(), window);
+                }
+            }
+        }
+        //Pantalla de victoria
         else if (estadoActual == Estado::Victoria) {
             if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
                 estadoActual = Estado::MenuPrincipal;
@@ -245,6 +264,10 @@ void Coordinador::dibujar() {
     // SI ES PAUSA, dibujamos el menú de pausa al final del todo (encima de todo)
     if (estadoActual == Estado::Pausa) {
         menuPausa->dibujar(window);
+    }
+    //MENUNOMBRE
+    else if (estadoActual == Estado::Nombre) {
+        menuNombre->dibujar(window);
     }
 
     //PANTALLA VICTORIA:
@@ -317,11 +340,12 @@ void Coordinador::actualizar(float dt) {
     else if (motor.getEstado() == Estado::Arena && estadoActual == Estado::Tablero) {
         estadoActual = Estado::Arena;
     }
-    else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria) {
-        estadoActual = Estado::Victoria;
-        int ganador = motor.getGanador();
-        // Pasamos las puntuaciones y el tiempo
-        pantallainfo.configurarPantallaVictoria(ganador, motor.getPuntosLuz(), motor.getPuntosOscuridad(), motor.getTiempoJugado(), window);
+    else if (motor.getEstado() == Estado::Victoria && estadoActual != Estado::Victoria && estadoActual != Estado::Nombre) {
+        estadoActual = Estado::Nombre;
+        menuNombre->configurarGanador(motor.getGanador());
+    }
+    else if (estadoActual == Estado::Nombre) {
+        menuNombre->dibujar(window);
     }
     // SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
@@ -396,7 +420,6 @@ void Coordinador::cargarDesdeRanura(int indice) {
         std::cout << "La ranura " << indice + 1 << " esta vacia." << std::endl;
     }
 }
-
 // FUNCION QUE LEE EL ARCHIVO
 void Coordinador::cargarDatosDeFichero() {
     std::ifstream archivo("partidas_guardadas.txt");
@@ -462,7 +485,6 @@ void Coordinador::cargarDatosDeFichero() {
     archivo.close();
     std::cout << "Datos cargados desde partidas_guardadas.txt" << std::endl;
 }
-
 //Esta función lo que hace es coger todo lo que haya en la memoria de las 3 ranuras y lo escribe en partidasa_guardadas.txt
 void Coordinador::guardarDatosEnFichero() {
     std::ofstream archivo("partidas_guardadas.txt");
