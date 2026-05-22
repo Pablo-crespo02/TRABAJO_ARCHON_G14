@@ -225,7 +225,7 @@ void MenuNoInteractivo::dibujarPantallaCreditos(sf::RenderWindow& window) {
 void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
     window.setView(window.getDefaultView());
 
-    //Cargamos el fondo de la pantalla de inicio
+    //CARGA DEL FONDO
     if (!texturaFondo.loadFromFile("imagenes/Ranking.png")) {
         std::cout << "Error cargando fondo en Ranking" << std::endl;
     }
@@ -233,23 +233,22 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
     spriteFondo.setScale((float)window.getSize().x / texturaFondo.getSize().x, (float)window.getSize().y / texturaFondo.getSize().y);
     window.draw(spriteFondo);
 
-    //Configuraramos el título del Ranking
+    //TÍTULO PRINCIPAL
     textoRankingTitulo.setFont(fuente);
     textoRankingTitulo.setCharacterSize(70);
     textoRankingTitulo.setFillColor(sf::Color::Yellow);
     textoRankingTitulo.setOutlineColor(sf::Color::Black);
     textoRankingTitulo.setOutlineThickness(3.f);
-    textoRankingTitulo.setString("SALON DE LA FAMA - TOP JUGADORES");
+    textoRankingTitulo.setString("SALON DE LA FAMA - TOP 7 JUGADORES");
 
     sf::FloatRect rectT = textoRankingTitulo.getLocalBounds();
     textoRankingTitulo.setOrigin(rectT.left + rectT.width / 2.0f, rectT.top + rectT.height / 2.0f);
     textoRankingTitulo.setPosition(window.getSize().x / 2.0f, 80.f);
     window.draw(textoRankingTitulo);
 
-    //Lee el ranking.txt
+    //LEER EL ARCHIVO
     std::vector<RegistroPartida> listaPartidas;
     std::ifstream archivoLectura("ranking.txt");
-
     if (archivoLectura.is_open()) {
         RegistroPartida reg;
         while (archivoLectura >> reg.nombre >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
@@ -258,72 +257,97 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
         archivoLectura.close();
     }
 
-    //Hace un "ranking". Ordenamos de menor tiempo a mayor tiempo
+    //ORDENAR POR TIEMPO (De menor a mayor)
     std::sort(listaPartidas.begin(), listaPartidas.end(), [](const RegistroPartida& a, const RegistroPartida& b) {
         return a.tiempo < b.tiempo;
         });
+    //CONSTRUCCIÓN DE LA TABLA (FONDO NEGRO Y CUADRÍCULA BLANCA)
+    // Dimensiones maestras de la tabla
+    float anchoTabla = 1450.f;
+    float altoFila = 60.f;
+    int numFilas = 8; 
+    float altoTabla = altoFila * numFilas;
 
-    //Renderizamos las filas (Mostramos como máximo el Top 7 para que no se sature la pantalla)
+    float xInicio = (window.getSize().x - anchoTabla) / 2.f;
+    float yInicio = 170.f;
+
+    sf::RectangleShape fondoTabla(sf::Vector2f(anchoTabla, altoTabla));
+    fondoTabla.setPosition(xInicio, yInicio);
+    fondoTabla.setFillColor(sf::Color(0, 0, 0, 220));
+    window.draw(fondoTabla);
+    float colAnchos[6] = { 150.f, 350.f, 300.f, 250.f, 250.f, 150.f };
+    float xColumnas[7]; 
+    xColumnas[0] = xInicio;
+    for (int i = 0; i < 6; i++) {
+        xColumnas[i + 1] = xColumnas[i] + colAnchos[i];
+    }
+    for (int i = 0; i <= numFilas; i++) {
+        sf::RectangleShape lineaH(sf::Vector2f(anchoTabla, 3.f)); 
+        lineaH.setFillColor(sf::Color::White);
+        lineaH.setPosition(xInicio, yInicio + (i * altoFila));
+        window.draw(lineaH);
+    }
+    for (int i = 0; i <= 6; i++) {
+        sf::RectangleShape lineaV(sf::Vector2f(3.f, altoTabla)); 
+        lineaV.setFillColor(sf::Color::White);
+        lineaV.setPosition(xColumnas[i], yInicio);
+        window.draw(lineaV);
+    }
+
+    //RELLENAR LOS TEXTOS CENTRADOS EN CADA CELDA
     textoRankingLineas.setFont(fuente);
-    textoRankingLineas.setCharacterSize(40);
+    textoRankingLineas.setCharacterSize(35);
     textoRankingLineas.setOutlineColor(sf::Color::Black);
     textoRankingLineas.setOutlineThickness(2.f);
+    //Función auxiliarpara centrar textos matemáticamente en una celda
+    auto dibujarCelda = [&](std::string texto, int colIndex, int rowIndex, sf::Color color) {
+        textoRankingLineas.setString(texto);
+        textoRankingLineas.setFillColor(color);
 
-    float yFila = 200.f;
-    int maxMuestras = std::min(static_cast<int>(listaPartidas.size()), 7); 
+        sf::FloatRect bounds = textoRankingLineas.getLocalBounds();
+        float xCentroCelda = xColumnas[colIndex] + (colAnchos[colIndex] / 2.f);
+        float yCentroCelda = yInicio + (rowIndex * altoFila) + (altoFila / 2.f);
 
-    if (maxMuestras == 0) {
-        textoRankingLineas.setString("NO HAY PARTIDAS REGISTRADAS TODAVIA.");
-        sf::FloatRect r = textoRankingLineas.getLocalBounds();
-        textoRankingLineas.setOrigin(r.left + r.width / 2.f, 0);
-        textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila + 100.f);
+        textoRankingLineas.setOrigin(bounds.left + bounds.width / 2.f, bounds.top + bounds.height / 2.f);
+        textoRankingLineas.setPosition(xCentroCelda, yCentroCelda - 5.f); // -5.f compensa el margen de la fuente
         window.draw(textoRankingLineas);
+        };
+
+    //Rellenamos la Fila 0 (Cabeceras en Rojo según tu gusto, aquí Rojo)
+    dibujarCelda("POS", 0, 0, sf::Color::Red);
+    dibujarCelda("JUGADOR", 1, 0, sf::Color::Red);
+    dibujarCelda("BANDO", 2, 0, sf::Color::Red);
+    dibujarCelda("IMP_PTS", 3, 0, sf::Color::Red);
+    dibujarCelda("XEN_PTS", 4, 0, sf::Color::Red);
+    dibujarCelda("TIEMPO", 5, 0, sf::Color::Red);
+
+    //Rellenamos de la Fila 1  a la 7 con los datos
+    int maxMuestras = std::min(static_cast<int>(listaPartidas.size()), 7);
+    for (int i = 0; i < maxMuestras; i++) {
+        RegistroPartida p = listaPartidas[i];
+        int filaAct = i + 1; // Fila actual en la tabla
+
+        //Color según el bando ganador
+        sf::Color colorTexto = (p.bando == "IMPERIUM") ? sf::Color::Cyan : sf::Color::Magenta;
+
+        //Formatear el string del tiempo
+        int min = static_cast<int>(p.tiempo) / 60;
+        int seg = static_cast<int>(p.tiempo) % 60;
+        std::string strSeg = (seg < 10 ? "0" : "") + std::to_string(seg);
+        std::string strTiempo = std::to_string(min) + ":" + strSeg;
+
+        //Dibujamos cada dato exactamente en su columna y fila correspondiente
+        dibujarCelda("#" + std::to_string(filaAct), 0, filaAct, colorTexto);
+        dibujarCelda(p.nombre, 1, filaAct, colorTexto);
+        dibujarCelda(p.bando, 2, filaAct, colorTexto);
+        dibujarCelda(std::to_string(p.puntosLuz), 3, filaAct, colorTexto);
+        dibujarCelda(std::to_string(p.puntosOscuridad), 4, filaAct, colorTexto);
+        dibujarCelda(strTiempo, 5, filaAct, colorTexto);
     }
-    else {
-        // Cabecera de la tabla de posiciones
-        textoRankingLineas.setFillColor(sf::Color::Red);
-        textoRankingLineas.setString("POS     JUGADOR            BANDO            IMP_PTS        XEN_PTS        TIEMPO");
-        sf::FloatRect rCab = textoRankingLineas.getLocalBounds();
-        textoRankingLineas.setOrigin(rCab.left + rCab.width / 2.f, 0);
-        textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila);
-        window.draw(textoRankingLineas);
-        yFila += 60.f;
 
-        // Pintamos cada registro ordenado
-        for (int i = 0; i < maxMuestras; i++) {
-            RegistroPartida p = listaPartidas[i];
-
-            // Color dependiendo del bando que ganó
-            if (p.bando == "IMPERIUM") {
-                textoRankingLineas.setFillColor(sf::Color::Cyan); // Azul Humanidad
-            }
-            else {
-                textoRankingLineas.setFillColor(sf::Color::Magenta); // Violeta Xenos
-            }
-
-            // Formatear tiempo
-            int min = static_cast<int>(p.tiempo) / 60;
-            int seg = static_cast<int>(p.tiempo) % 60;
-            std::string strSeg = (seg < 10 ? "0" : "") + std::to_string(seg);
-            std::string strTiempo = std::to_string(min) + ":" + strSeg;
-
-            // Construir línea
-            char buffer[200];
-            snprintf(buffer, sizeof(buffer), "#%-3d %-16s %-14s %-12d %-12d %s",
-                (i + 1), p.nombre.c_str(), p.bando.c_str(), p.puntosLuz, p.puntosOscuridad, strTiempo.c_str());
-
-            textoRankingLineas.setString(buffer);
-
-            sf::FloatRect rectFila = textoRankingLineas.getLocalBounds();
-            textoRankingLineas.setOrigin(rectFila.left + rectFila.width / 2.f, 0);
-            textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila);
-
-            window.draw(textoRankingLineas);
-            yFila += 50.f; // Espacio entre filas
-        }
-    }
+    //TEXTO PARA CONTINUAR
     textoContinuar.setCharacterSize(40);
-    textoRankingLineas.setOutlineColor(sf::Color::Black);
+    textoContinuar.setOutlineColor(sf::Color::Black);
     textoContinuar.setFillColor(sf::Color::Yellow);
     textoContinuar.setString("PULSA ESC PARA VOLVER AL MENU PRINCIPAL");
     sf::FloatRect rectC = textoContinuar.getLocalBounds();
