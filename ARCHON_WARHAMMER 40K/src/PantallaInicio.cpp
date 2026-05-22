@@ -33,6 +33,7 @@ PantallaInicio::PantallaInicio() {
         "INICIAR PARTIDA",
         "REANUDAR PARTIDA",
         "INSTRUCCIONES",
+        "VER RANKING",
         "CREDITOS",
         "SALIR DEL JUEGO",
         "CARGAR PARTIDA"

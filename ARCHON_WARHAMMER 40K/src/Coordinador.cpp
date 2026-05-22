@@ -77,7 +77,7 @@ void Coordinador::gestionarEventos() {
             else if (estadoActual == Estado::Pausa) {
                 estadoActual = estadoAnterior;
             }
-            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos || estadoActual == Estado::SeleccionCarga) {
+            else if (estadoActual == Estado::Instrucciones || estadoActual == Estado::Creditos || estadoActual == Estado::SeleccionCarga || estadoActual == Estado::Ranking) {
                 estadoActual = estadoAnterior; }
             }
         
@@ -98,8 +98,7 @@ void Coordinador::gestionarEventos() {
                     pantallaInicio.moverAbajo();
                     sonidoClick.play();
                 }
-
-                if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
+                if (evento.key.code == sf::Keyboard::Enter||evento.key.code == sf::Keyboard::Return) {
                     int seleccion = pantallaInicio.getIndiceSeleccionado();
                     switch (seleccion) {
                     case 0: // INICIAR PARTIDA
@@ -116,22 +115,29 @@ void Coordinador::gestionarEventos() {
                         }
                         break;
 
-                    case 2: {
-                        estadoAnterior = Estado::MenuPrincipal;
+                    case 2: //INSTRUCCIONES
+                    {
+                          estadoAnterior = Estado::MenuPrincipal;
                           estadoActual = Estado::Instrucciones; 
                           break;
                     }
-                    case 3: {
+                    case 3://RANKING
+                    {
+                        estadoAnterior = Estado::MenuPrincipal;
+                        estadoActual = Estado::Ranking;
+                        break;
+                    }
+                    case 4: //CREDITOS 
+                    {
                         estadoAnterior = Estado::MenuPrincipal;
                         estadoActual = Estado::Creditos; 
                         break;
                     }
-
-                    case 4: // SALIR DEL JUEGO
+                    case 5: // SALIR DEL JUEGO
                         window.close();
                         break;
 
-                    case 5: // CARGAR PARTIDA (Lleva al menú de ranuras)
+                    case 6: // CARGAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = false;
                         pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
                         estadoActual = Estado::SeleccionCarga;
@@ -140,7 +146,6 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
-
         //MENÚ DE PAUSA
         else if (estadoActual == Estado::Pausa) {
             if (evento.type == sf::Event::KeyPressed) {
@@ -224,6 +229,20 @@ void Coordinador::gestionarEventos() {
             }
             else if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
                 if (!menuNombre->getNombre().empty()) {
+                    // ESCRITURA EN FICHERO DE REGISTRO DE PARTIDAS
+                    std::ofstream archivoEscritura("ranking.txt", std::ios::app); 
+                    if (archivoEscritura.is_open()) {
+                        std::string bandoGanador = (motor.getGanador() == 1) ? "IMPERIUM" : "XENOS";
+                        // Guardamos las variables separadas por espacios de forma estructurada
+                        archivoEscritura << menuNombre->getNombre() << " "
+                            << bandoGanador << " "
+                            << motor.getPuntosLuz() << " "
+                            << motor.getPuntosOscuridad() << " "
+                            << motor.getTiempoJugado() << "\n";
+
+                        archivoEscritura.close();
+                        std::cout << "Partida registrada en el archivo de historial con exito." << std::endl;
+                    }
                     estadoActual = Estado::Victoria;
                     pantallainfo.configurarPantallaVictoria(motor.getGanador(), motor.getPuntosLuz(), motor.getPuntosOscuridad(), motor.getTiempoJugado(), menuNombre->getNombre(), window);
                 }
@@ -260,34 +279,34 @@ void Coordinador::dibujar() {
         window.setView(vistaTablero);
         motor.renderizar();
     }
-
     // SI ES PAUSA, dibujamos el menú de pausa al final del todo (encima de todo)
     if (estadoActual == Estado::Pausa) {
         menuPausa->dibujar(window);
     }
-    //MENUNOMBRE
+    //MENU NOMBRE
     else if (estadoActual == Estado::Nombre) {
         menuNombre->dibujar(window);
     }
-
     //PANTALLA VICTORIA:
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaVictoria(window);
     }
-
-    // 5. PANTALLA INSTRUCCIONES
+    else if (estadoActual == Estado::Ranking) {
+        window.setView(vistaUI);
+        pantallainfo.dibujarPantallaRanking(window);
+    }
+    //PANTALLA INSTRUCCIONES
     else if (estadoActual == Estado::Instrucciones) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaInstrucciones(window);
     }
-    //6. MENÚ DE CARGA:
+    //MENÚ DE CARGA:
     else if (estadoActual == Estado::SeleccionCarga) {
         pantallaInicio.dibujar(window); // Dibujamos el fondo del marine y el tiranido
         window.setView(vistaUI);
         pantallaCarga->dibujar(window); // Dibujamos las ranuras encima
     }
-
     // 7. MENÚ DE GUARDADO:
     else if (estadoActual == Estado::SeleccionGuardar) {
 
@@ -302,7 +321,6 @@ void Coordinador::dibujar() {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaCreditos(window);
     }
-
     window.display();
 }
 
@@ -347,6 +365,7 @@ void Coordinador::actualizar(float dt) {
     else if (estadoActual == Estado::Nombre) {
         menuNombre->dibujar(window);
     }
+
     // SOLO se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);

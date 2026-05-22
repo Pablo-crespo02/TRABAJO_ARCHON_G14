@@ -3,5 +3,5 @@ enum class Estado {
 	MenuPrincipal, Tablero, Arena, Victoria, Instrucciones, Creditos, Pausa,
 	SeleccionCarga,//Para cargar las tres partidas en tres ranuras distintas
 	SeleccionGuardar, //Para guardar partida en una ranura de guardado
-	Nombre
+	Nombre, Ranking// Para el fichero
 };

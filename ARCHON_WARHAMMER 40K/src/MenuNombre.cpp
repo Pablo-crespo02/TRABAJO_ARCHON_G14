@@ -6,7 +6,7 @@ MenuNombre::MenuNombre(sf::Font& font, sf::Vector2u tamano) {
     this->nombreActual = "";
 
     // Reutilizamos el fondo de las pantallas estáticas (o el que prefieras)
-    if (!texturaFondo.loadFromFile("imagenes/pantalla_inicio.png")) {
+    if (!texturaFondo.loadFromFile("imagenes/Pantalla_nombre.png")) {
         std::cout << "Error cargando imagen en MenuNombre" << std::endl;
     }
     spriteFondo.setTexture(texturaFondo);
@@ -31,10 +31,10 @@ void MenuNombre::configurarGanador(int ganador) {
     limpiarNombre(); // Vaciamos el nombre por si venimos de otra partida
 
     if (ganador == 1) {
-        textoInputTitulo.setString("FELICIDAS PATRIARCA INMORTALICE SU VICTORIA:");
+        textoInputTitulo.setString("FELICIDADES PRIMARCA INMORTALICE SU VICTORIA:");
     }
     else {
-        textoInputTitulo.setString("FELICIDAS LIDER DE LA COLMENA INMORTALICE SU VICTORIA:");
+        textoInputTitulo.setString("FELICIDADES LIDER DE LA COLMENA INMORTALICE SU VICTORIA:");
     }
 }
 

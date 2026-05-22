@@ -49,7 +49,7 @@ void MenuNoInteractivo::inicializarTextos() {
     textoPuntuaciones.setFont(fuente);
 
     // Configuramos el texto de continuar estándar
-    textoContinuar.setString("PULSA ESC PARA VOLVER AL MENU");
+    textoContinuar.setString("PULSA ENTER PARA VOLVER AL MENU");
     textoContinuar.setCharacterSize(30);
     textoContinuar.setFillColor(sf::Color::White);
     textoContinuar.setOutlineColor(sf::Color::Black);
@@ -220,4 +220,114 @@ void MenuNoInteractivo::dibujarPantallaCreditos(sf::RenderWindow& window) {
 
     window.draw(spriteFondo);
     window.draw(textoCreditos);
+}
+
+void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
+    window.setView(window.getDefaultView());
+
+    //Cargamos el fondo de la pantalla de inicio
+    if (!texturaFondo.loadFromFile("imagenes/Ranking.png")) {
+        std::cout << "Error cargando fondo en Ranking" << std::endl;
+    }
+    spriteFondo.setTexture(texturaFondo, true);
+    spriteFondo.setScale((float)window.getSize().x / texturaFondo.getSize().x, (float)window.getSize().y / texturaFondo.getSize().y);
+    window.draw(spriteFondo);
+
+    //Configuraramos el título del Ranking
+    textoRankingTitulo.setFont(fuente);
+    textoRankingTitulo.setCharacterSize(70);
+    textoRankingTitulo.setFillColor(sf::Color::Yellow);
+    textoRankingTitulo.setOutlineColor(sf::Color::Black);
+    textoRankingTitulo.setOutlineThickness(3.f);
+    textoRankingTitulo.setString("SALON DE LA FAMA - TOP JUGADORES");
+
+    sf::FloatRect rectT = textoRankingTitulo.getLocalBounds();
+    textoRankingTitulo.setOrigin(rectT.left + rectT.width / 2.0f, rectT.top + rectT.height / 2.0f);
+    textoRankingTitulo.setPosition(window.getSize().x / 2.0f, 80.f);
+    window.draw(textoRankingTitulo);
+
+    //Lee el ranking.txt
+    std::vector<RegistroPartida> listaPartidas;
+    std::ifstream archivoLectura("ranking.txt");
+
+    if (archivoLectura.is_open()) {
+        RegistroPartida reg;
+        while (archivoLectura >> reg.nombre >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
+            listaPartidas.push_back(reg);
+        }
+        archivoLectura.close();
+    }
+
+    //Hace un "ranking". Ordenamos de menor tiempo a mayor tiempo
+    std::sort(listaPartidas.begin(), listaPartidas.end(), [](const RegistroPartida& a, const RegistroPartida& b) {
+        return a.tiempo < b.tiempo;
+        });
+
+    //Renderizamos las filas (Mostramos como máximo el Top 7 para que no se sature la pantalla)
+    textoRankingLineas.setFont(fuente);
+    textoRankingLineas.setCharacterSize(40);
+    textoRankingLineas.setOutlineColor(sf::Color::Black);
+    textoRankingLineas.setOutlineThickness(2.f);
+
+    float yFila = 200.f;
+    int maxMuestras = std::min(static_cast<int>(listaPartidas.size()), 7); 
+
+    if (maxMuestras == 0) {
+        textoRankingLineas.setString("NO HAY PARTIDAS REGISTRADAS TODAVIA.");
+        sf::FloatRect r = textoRankingLineas.getLocalBounds();
+        textoRankingLineas.setOrigin(r.left + r.width / 2.f, 0);
+        textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila + 100.f);
+        window.draw(textoRankingLineas);
+    }
+    else {
+        // Cabecera de la tabla de posiciones
+        textoRankingLineas.setFillColor(sf::Color::Red);
+        textoRankingLineas.setString("POS     JUGADOR            BANDO            IMP_PTS        XEN_PTS        TIEMPO");
+        sf::FloatRect rCab = textoRankingLineas.getLocalBounds();
+        textoRankingLineas.setOrigin(rCab.left + rCab.width / 2.f, 0);
+        textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila);
+        window.draw(textoRankingLineas);
+        yFila += 60.f;
+
+        // Pintamos cada registro ordenado
+        for (int i = 0; i < maxMuestras; i++) {
+            RegistroPartida p = listaPartidas[i];
+
+            // Color dependiendo del bando que ganó
+            if (p.bando == "IMPERIUM") {
+                textoRankingLineas.setFillColor(sf::Color::Cyan); // Azul Humanidad
+            }
+            else {
+                textoRankingLineas.setFillColor(sf::Color::Magenta); // Violeta Xenos
+            }
+
+            // Formatear tiempo
+            int min = static_cast<int>(p.tiempo) / 60;
+            int seg = static_cast<int>(p.tiempo) % 60;
+            std::string strSeg = (seg < 10 ? "0" : "") + std::to_string(seg);
+            std::string strTiempo = std::to_string(min) + ":" + strSeg;
+
+            // Construir línea
+            char buffer[200];
+            snprintf(buffer, sizeof(buffer), "#%-3d %-16s %-14s %-12d %-12d %s",
+                (i + 1), p.nombre.c_str(), p.bando.c_str(), p.puntosLuz, p.puntosOscuridad, strTiempo.c_str());
+
+            textoRankingLineas.setString(buffer);
+
+            sf::FloatRect rectFila = textoRankingLineas.getLocalBounds();
+            textoRankingLineas.setOrigin(rectFila.left + rectFila.width / 2.f, 0);
+            textoRankingLineas.setPosition(window.getSize().x / 2.f, yFila);
+
+            window.draw(textoRankingLineas);
+            yFila += 50.f; // Espacio entre filas
+        }
+    }
+    textoContinuar.setCharacterSize(40);
+    textoRankingLineas.setOutlineColor(sf::Color::Black);
+    textoContinuar.setFillColor(sf::Color::Yellow);
+    textoContinuar.setString("PULSA ESC PARA VOLVER AL MENU PRINCIPAL");
+    sf::FloatRect rectC = textoContinuar.getLocalBounds();
+    textoContinuar.setOrigin(rectC.left + rectC.width / 2.0f, rectC.top + rectC.height / 2.0f);
+    textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y - 60.f);
+    window.draw(textoContinuar);
 }
