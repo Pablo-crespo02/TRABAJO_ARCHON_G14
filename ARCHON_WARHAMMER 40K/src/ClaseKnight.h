@@ -7,28 +7,23 @@
 //ESPADITA
 class ClaseKnight : public PiezaTerrestre {
 private:
-    //SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+    
     //VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
-
+    
 public:
+
+    bool estaSaltando = false;
+    float tiempoSalto = 0.0f;
+    float duracionTotalSalto = 0.8f;
+    sf::Vector2f posInicioSalto;
+    sf::Vector2f posDestinoSalto;
 
     ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
-        ClaseKnight* clon = new ClaseKnight(*this);
-        // Reconectamos sus propios sprites a sus propias texturas
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
+        ClaseKnight* clon = new ClaseKnight(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
     //FUNCIONES DE MOVIMIENTO
@@ -47,4 +42,5 @@ public:
         sf::Vector2f escalaActual = spriteArena.getScale();
         spriteArena.setScale(escalaActual.x * porcentaje, escalaActual.y * porcentaje);
     }
+    void actualizarSalto(float dt); //Funcion que gestiona el salto del hechizo del termgant
 };

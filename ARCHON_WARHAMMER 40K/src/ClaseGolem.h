@@ -7,28 +7,17 @@
 
 class ClaseGolem : public PiezaTerrestre {
 private:
-    //SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+   
     //VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
 
 public:
    
     ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
-        ClaseGolem* clon = new ClaseGolem(*this);
-        // Reconectamos sus propios sprites a sus propias texturas
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
+        ClaseGolem* clon = new ClaseGolem(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
 

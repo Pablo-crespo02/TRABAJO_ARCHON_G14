@@ -2,9 +2,6 @@
 #include <iostream>
 #include <cmath> 
 
-const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 120.0f;
-
 ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)
 {
@@ -21,50 +18,22 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     this->rangoMovimiento = 3;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
+
+    // CONFIGURACIÓN DE TAMAÑOS SPRITES:
+    this->piezaAlturaTablero = 90;
+    this->piezaAlturaArena = 120;
+
     //CARGA DE SPRITES (Chibi)
-    if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
-        std::string rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIS-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
-        std::string rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIS-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+    cargarConfigurarSprites(tipo);
 
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
+    // 4. REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO
+    if (animador) {
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 1, 1, 0.20f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
         }
-        else {
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-        
-
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-        else {
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-      
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
-    }
 }
 
 //ENLACE DE FÍSICAS Y ANIMACIÓN
@@ -79,71 +48,30 @@ void ClaseUnicornio::procesarMovimientoArena(sf::Vector2f direccion, float dt, A
 }
 
 void ClaseUnicornio::animar(float dt, sf::Vector2f direccion) {
-    int fila = 0;
-    int colInicial = 0;
-    int colFinal = 0;
-
+    if (!animador) return;
+   
     // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 1;
-        colFinal = 1;
+        animador->jugar("ATAQUE");
     }
     else if (direccion.x != 0) {
-        //FOTOGRAMA DE CAMINAR LATERAL 
-        fila = 0;
-        colInicial = 1;
-        colFinal = 4;
+        animador->jugar("CAMINAR_LATERAL");
     }
     else if (direccion.y > 0) {
-        //FOTOGRAMA DE ABAJO 
-        fila = 1;
-        colInicial = 3;
-        colFinal = 3;
+        animador->jugar("ABAJO");
     }
     else if (direccion.y < 0) {
-        // FOTOGRAMA DE ARRIBA 
-        fila = 1;
-        colInicial = 4;
-        colFinal = 4;
+        animador->jugar("ARRIBA");
     }
     else {
-        //FOTOGRAMA QUIETO
-        fila = 0;
-        colInicial = 0;
-        colFinal = 0;
+        animador->jugar("QUIETO");
     }
 
-    int posY_Textura = fila * altoFrame;
-    int posY_Actual = spriteArena.getTextureRect().top;
-
-    if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
-        frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        temporizadorAnimacion = 0.0f;
-    }
-
-    if (colInicial != colFinal) {
-        temporizadorAnimacion += dt;
-        float velocidadAnimacion = 0.15f;
-
-        if (temporizadorAnimacion >= velocidadAnimacion) {
-            temporizadorAnimacion = 0.0f;
-            frameActual++;
-
-            if (frameActual > colFinal) {
-                frameActual = colInicial;
-            }
-
-            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        }
-    }
 
     //ARREGLO DEL EFECTO ESPEJO
-    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+    float escalaArena = piezaAlturaArena / altoFrame;
     if (direccion.x < 0) {
         spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
     }

@@ -1,9 +1,6 @@
 #include "ClaseArcher.h"
 #include <iostream>
 
-const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 120.0f;
-
 ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)
 {
@@ -28,130 +25,55 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     this->multiplicadorVelocidad = 1.0f;
     // Forzamos al sprite a que tenga opacidad máxima de salida
 
+    //Tamaño de los sprites:
+    this->piezaAlturaArena = 120;
+    this->piezaAlturaTablero = 90;
 
+    //CARGA DE SPRITES:
+    cargarConfigurarSprites(tipo);
 
-    //CARGA DE SPRITES (Chibi)
-    if (tipo == "VINDICARE" || tipo == "LICTOR") {
-
-        std::string rutaTablero = (tipo == "VINDICARE") ? "imagenes/BASE-VINDICARE-Humanidad.png" : "imagenes/BASE-LICTOR-TYRANIDS.png";
-        std::string rutaArena = (tipo == "VINDICARE") ? "imagenes/Chibi-VINDICARE-Humanidad-1.0.png" : "imagenes/Chibi-LICTOR-TYRANIDS-1.0.png";
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
-        }
-        else {
-
-            //Medida de seguridad. Sólo se ejecuta si la imagen existe, evitando una divisón entre 0 y un bucle infinito que nos destruía el juego entero:
-
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-       
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-
-        else {
-
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
+    //REGISTRO DE CLIP DE ANIMACIONES EN EL DICCIONARIO:
+    if (animador) {
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true); //fila, colInicial, colFinal, bool bucle
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.15f, true);
+        animador->agreganAnimacion("PREPARANDO_SIGILO", 1, 2, 2, 0.20f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
 }
 
 
 void ClaseArcher::animar(float dt, sf::Vector2f direccion) {
-    int fila = 0;
-    int colInicial = 0;
-    int colFinal = 0;
+    if (!animador) return;
 
     // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (preparandoInvisibilidad) {
-        fila = 1;       // Fila 1 de la hoja de sprites
-        colInicial = 2; // Columna 2 de la hoja de sprites
-        colFinal = 2;   // Al ser igual que la inicial, la animación se congela en este frame
+        animador->jugar("PREPARANDO_SIGILO");
     }
     else if (estaAtacando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 0;
-        colFinal = 1;
+        animador->jugar("ATAQUE");
     }
     else if (direccion.x != 0) {
-        //FOTOGRAMA DE CAMINAR LATERAL 
-        fila = 0;
-        colInicial = 1;
-        colFinal = 4;
+        animador->jugar("CAMINAR_LATERAL");
     }
     else if (direccion.y > 0) {
-        //FOTOGRAMA DE ABAJO 
-        fila = 1;
-        colInicial = 3;
-        colFinal = 3;
+        animador->jugar("ABAJO");
     }
     else if (direccion.y < 0) {
-        // FOTOGRAMA DE ARRIBA 
-        fila = 1;
-        colInicial = 4;
-        colFinal = 4;
+        animador->jugar("ARRIBA");
     }
     else {
-        //FOTOGRAMA QUIETO
-        fila = 0;
-        colInicial = 0;
-        colFinal = 0;
+        animador->jugar("QUIETO");
     }
 
-    int posY_Textura = fila * altoFrame;
-    int posY_Actual = spriteArena.getTextureRect().top;
-
-    if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
-        frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        temporizadorAnimacion = 0.0f;
-    }
-
-    if (colInicial != colFinal) {
-        temporizadorAnimacion += dt;
-        float velocidadAnimacion = 0.15f;
-
-        if (temporizadorAnimacion >= velocidadAnimacion) {
-            temporizadorAnimacion = 0.0f;
-            frameActual++;
-
-            if (frameActual > colFinal) {
-                frameActual = colInicial;
-            }
-
-            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        }
-    }
+    //Avance del tiempo de animación:
+    actualizarAnimacion(dt);
 
     //ARREGLO DEL EFECTO ESPEJO
-    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+    float escalaArena = piezaAlturaArena / altoFrame;
     if (direccion.x < 0) {
         spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
     }
@@ -199,6 +121,8 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
+
+
         if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
@@ -233,8 +157,6 @@ void ClaseArcher::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         std::cout << "Bendición de velocidad activada!" << std::endl;
     }
 }
-
-
 
 
 void ClaseArcher::gestionarInvisibilidad(double dt) {

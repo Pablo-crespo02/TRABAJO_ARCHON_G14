@@ -25,7 +25,6 @@ ClaseHelicoptero::ClaseHelicoptero(Bando b, sf::Vector2f posArena)
     if (!texturaArena.loadFromFile("imagenes/Chibi-HELICOPTER-Humanidad-1.0.png")) {
         std::cout << "Error: No se encontro el sprite del helicopetero" << std::endl;
     }
-
     spriteArena.setTexture(texturaArena);
 
     int columnas = 5;

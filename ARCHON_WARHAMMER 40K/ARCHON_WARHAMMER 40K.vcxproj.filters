@@ -103,7 +103,10 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="src\MenuNombre.cpp">
-      <Filter>Archivos de origen</Filter>
+		<Filter>Archivos de origen</Filter>
+	</ClCompile>
+    <ClCompile Include="src\Animaciones.cpp">
+     <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -194,11 +197,14 @@
     <ClInclude Include="src\ClaseValkyria.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\ClaseHelicoptero.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MenuNombre.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
+	  <CLInclude Include="src\ClaseHelicoptero.h">
+		  <Filter>Archivos de encabezado</Filter>
+	  </CLInclude>
+	  <CLInclude Include="src\MenuNombre.h">
+		  <Filter>Archivos de encabezado</Filter>
+	  </CLInclude>
+	  <CLInclude Include="src\Animaciones.h">
+		  <Filter>Archivos de encabezado</Filter>
+	  </CLInclude>
   </ItemGroup>
 </Project>

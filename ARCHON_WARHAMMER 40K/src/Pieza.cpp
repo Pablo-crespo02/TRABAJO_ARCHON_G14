@@ -96,3 +96,95 @@ void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
     temporizadorInvulnerabilidad = duracion;
 }
+
+//SPRITES Y ANIMACIONES:
+
+void Pieza::cargarConfigurarSprites(const std::string& tipo) {
+    std::string rutaTablero = "";
+    std::string rutaArena = "";
+
+    if (tipo == "VINDICARE" || tipo == "LICTOR") {
+        rutaTablero = (tipo == "VINDICARE") ? "imagenes/BASE-VINDICARE-Humanidad.png" : "imagenes/BASE-LICTOR-TYRANIDS.png";
+        rutaArena = (tipo == "VINDICARE") ? "imagenes/Chibi-VINDICARE-Humanidad-1.0.png" : "imagenes/Chibi-LICTOR-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "CULEXUS" || tipo == "GENESTEALER") {
+        rutaTablero = (tipo == "CULEXUS") ? "imagenes/BASE-CULEXUS-Humanidad.png" : "imagenes/BASE-GENESTEALER-TYRANIDS.png";
+        rutaArena = (tipo == "CULEXUS") ? "imagenes/Chibi-CULEXUS-Humanidad-1.0.png" : "imagenes/Chibi-GENESTEALER-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "DREADNOUGHT" || tipo == "CARNIFEX") {
+        rutaTablero = (tipo == "DREADNOUGHT") ? "imagenes/BASE-DREADNOUGHT-Humanidad.png" : "imagenes/BASE-CARNIFEX-TYRANIDS.png";
+        rutaArena = (tipo == "DREADNOUGHT") ? "imagenes/Chibi-DREADNOUGHT-Humanidad-1.0.png" : "imagenes/Chibi-CARNIFEX-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "LIBRARIAN" || tipo == "HARPY") {
+        rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-HARPY-TYRANIDS.png";
+        rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-HARPY-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "INTERCESSOR" || tipo == "TERMAGANT") {
+        rutaTablero = (tipo == "INTERCESSOR") ? "imagenes/BASE-INTERCESSOR-Humanidad.png" : "imagenes/BASE-TERMAGANT-TYRANIDS.png";
+        rutaArena = (tipo == "INTERCESSOR") ? "imagenes/Chibi-INTERCESSOR-Humanidad.png" : "imagenes/Chibi-TERMAGANT-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "CAPTAIN" || tipo == "HIVE_TYRANT") {
+        rutaTablero = (tipo == "CAPTAIN") ? "imagenes/BASE-CAPTAIN-Humanidad.png" : "imagenes/BASE-HIVE_TYRANT-TYRANIDS.png";
+        rutaArena = (tipo == "CAPTAIN") ? "imagenes/Chibi-CAPTAIN-Humanidad-1.0.png" : "imagenes/Chibi-HIVE_TYRANT-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
+        rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIAN-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
+        rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIAN-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+    }
+    else if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
+        rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
+        rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
+    }
+
+    //Todas las hojas de sprites comparten número de filas y columnas:
+    int columnas = 5;
+    int filas = 2;
+
+    //Gestión de la carga de la textura y el sprite del TABLERO:
+    if (!texturaTablero.loadFromFile(rutaTablero)) {
+        std::cout << "ERROR: TEXTURA NO ENCONTRADA TABLERO: " << rutaTablero << std::endl;
+    }
+    else {
+        spriteTablero.setTexture(texturaTablero);
+        spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
+
+        float escalaTablero = piezaAlturaTablero / texturaTablero.getSize().y;
+        spriteTablero.setScale(escalaTablero, escalaTablero);
+    }
+
+    //Gestión de la carga de la textura y el sprite de la ARENA:
+    if (!texturaArena.loadFromFile(rutaArena)) {
+        std::cout << "ERROR: TEXTURA NO ENCONTRADA ARENA: " << rutaArena << std::endl;
+    }
+    else {
+        spriteArena.setTexture(texturaArena);
+
+        // Medida del frame individual
+        anchoFrame = texturaArena.getSize().x / columnas;
+        altoFrame = texturaArena.getSize().y / filas;
+
+        spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
+        spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
+
+        double escalaArena = piezaAlturaArena / altoFrame;
+
+        // Volteado lateral de escala automática según el bando
+        if (this->bando == Bando::OSCURIDAD) {
+            spriteArena.setScale(-escalaArena, escalaArena);
+        }
+        else {
+            spriteArena.setScale(escalaArena, escalaArena);
+        }
+
+        //Constructor para instanciar punteros inteligentes.
+        //Vincula "AnimadorSprites" con el sprite de la arena, su alto y su ancho.
+        //Los punteros inteligentes se eliminan automáticamente de la RAM cuando la pieza el eliminada, evitando fugas de memoria.
+        animador = std::make_unique<AnimadorSprites>(spriteArena, anchoFrame, altoFrame);
+        
+        animador->   jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
+    }
+
+}
+void Pieza::actualizarAnimacion(double dt) {
+    if (animador) animador->actualizar(dt);
+}
