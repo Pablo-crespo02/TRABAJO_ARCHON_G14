@@ -8,19 +8,10 @@
 class ClaseArcher : public PiezaTerrestre {
 private:
 
-    // SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
     // VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
-
+    
     // --- VARIABLES DE INVISIBILIDAD (LICTOR - OSCURIDAD) ---
     bool esInvisible;
     bool preparandoInvisibilidad; // Nuevo: rastrea si está en el medio segundo de carga
@@ -35,12 +26,7 @@ public:
     ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
-        ClaseArcher* clon = new ClaseArcher(*this);
-
-        // Reconectamos los sprites a las texturas que hereda de Pieza / PiezaTerrestre
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
-
+        ClaseArcher* clon = new ClaseArcher(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;

@@ -5,6 +5,7 @@
 #include "BarrasArena.h"
 #include "EstadoJuego.h"
 #include "Hitboxes.h"
+#include "Animaciones.h"
 
 class Coordinador;
 // Enums básicos para todo el juego
@@ -49,6 +50,7 @@ protected:
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
     sf::CircleShape formaVisual;
+
     bool hechizoDisponible;//Hechizo sólo una vez por combate
     //Hechizo del basilisco, va en pieza y no en ClaseUnicornio porque la inmovilización puede afectar a cualquier pieza no a sí misma:
     bool inmovilizado = false;
@@ -61,6 +63,24 @@ protected:
     friend class Motor;
     friend class Generador;
     friend class InterfazHUD;
+
+    //Atributos para texturas, sprites, animación:
+    sf::Texture texturaTablero;
+    sf::Texture texturaArena;
+    sf::Sprite spriteTablero;
+    sf::Sprite spriteArena;
+
+    //Smart pointer, exclusivo de C++. Garantiza que la memoria del animador se destruya de la RAM en el momento que la pieza muera en combate y se elimine.
+    std::unique_ptr<AnimadorSprites> animador; 
+
+    double piezaAlturaTablero = 60;
+    double piezaAlturaArena = 40; //NO SON UNIVERSALES, HAY PIEZAS MÁS GRANDES Y MÁS PEQUEÑAS
+
+    int anchoFrame = 0;
+    int altoFrame = 0;
+
+
+
 public:
     Stats stats;
     PatronMovimiento patronMovimiento;
@@ -131,6 +151,7 @@ public:
     void setPosicionAbsoluta(sf::Vector2f nuevaPos) {
         posicionAbsoluta = nuevaPos;
         formaVisual.setPosition(posicionAbsoluta); // Actualizamos la forma visual al instante
+    
     }
 
     //Setter para establecer tiempos de recarga diferentes para cada pieza:
@@ -171,4 +192,10 @@ public:
         // Llamamos a la función nativa de tu clase BarrasArena
         this->barrasArena.actualizar(vidaActual, vidaMax, velAtaque, posicion);
     }
+
+    //CONFIGURCIÓN CENTRALIZADA DE LOS SPRITES:
+
+    void cargarConfigurarSprites(const std::string& tipo);
+
+    void actualizarAnimacion(double dt);
 };

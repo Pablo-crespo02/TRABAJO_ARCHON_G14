@@ -21,52 +21,21 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
+
+    //TAMAÑO DE LOS SPRITES:
+    this->piezaAlturaTablero = 80.0f;
+    this->piezaAlturaArena = 120.0f;
+
     //CARGA DE SPRITES (Chibi)
-    if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
+    cargarConfigurarSprites(tipo);
 
-        std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
-        }
-
-        else {
-
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-       
-
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-
-        else {
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-        
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
+    // 4. REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO
+    if (animador) {
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
 }
 
@@ -82,68 +51,30 @@ void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Ar
 }
 
 void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
-    int fila = 0;
-    int colInicial = 0;
-    int colFinal = 0;
+    if (!animador) return;
 
-    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
+    // Leemos el reloj interno para comprobar el estado de ataque
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
+    // 1. EVALUACIÓN DE ESTADOS (Máquina de estados visual)
     if (estaAtacando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 2;
-        colFinal = 2;
+        animador->jugar("ATAQUE");
     }
     else if (direccion.x != 0) {
-        //FOTOGRAMA DE CAMINAR LATERAL 
-        fila = 0;
-        colInicial = 1;
-        colFinal = 4;
+        animador->jugar("CAMINAR_LATERAL");
     }
     else if (direccion.y > 0) {
-        //FOTOGRAMA DE ABAJO 
-        fila = 1;
-        colInicial = 3;
-        colFinal = 3;
+        animador->jugar("ABAJO");
     }
     else if (direccion.y < 0) {
-        // FOTOGRAMA DE ARRIBA 
-        fila = 1;
-        colInicial = 4;
-        colFinal = 4;
+        animador->jugar("ARRIBA");
     }
     else {
-        //FOTOGRAMA QUIETO
-        fila = 0;
-        colInicial = 0;
-        colFinal = 0;
+        animador->jugar("QUIETO");
     }
 
-    int posY_Textura = fila * altoFrame;
-    int posY_Actual = spriteArena.getTextureRect().top;
-
-    if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
-        frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        temporizadorAnimacion = 0.0f;
-    }
-
-    if (colInicial != colFinal) {
-        temporizadorAnimacion += dt;
-        float velocidadAnimacion = 0.15f;
-
-        if (temporizadorAnimacion >= velocidadAnimacion) {
-            temporizadorAnimacion = 0.0f;
-            frameActual++;
-
-            if (frameActual > colFinal) {
-                frameActual = colInicial;
-            }
-
-            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        }
-    }
+    // 2. AVANCE DEL TIEMPO DE ANIMACIÓN CENTRALIZADA
+    actualizarAnimacion(dt);
 
     //ARREGLO DEL EFECTO ESPEJO
     float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;

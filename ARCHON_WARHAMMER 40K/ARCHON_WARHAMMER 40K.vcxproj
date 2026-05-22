@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Animaciones.cpp" />
     <ClCompile Include="src\Arena.cpp" />
     <ClCompile Include="src\BarrasArena.cpp" />
     <ClCompile Include="src\Casilla.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="src\Tablero.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Animaciones.h" />
     <ClInclude Include="src\Arena.h" />
     <ClInclude Include="src\BarrasArena.h" />
     <ClInclude Include="src\Casilla.h" />

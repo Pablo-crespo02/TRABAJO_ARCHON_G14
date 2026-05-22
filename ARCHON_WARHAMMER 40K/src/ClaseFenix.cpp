@@ -2,9 +2,6 @@
 #include <cmath> 
 #include <iostream>
 
-const float PIEZA_ALTURA_TABLERO = 90.0f;
-const float PIEZA_ALTURA_ARENA = 150.0f;
-
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
@@ -25,49 +22,20 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     // Inicializamos el puntero por seguridad
     this->enemigoEnlazado = nullptr;
 
+    //Tamaño de los sprites:
+    this->piezaAlturaArena = 150;
+    this->piezaAlturaTablero = 90;
+
     // CARGA DE SPRITES
-    if (tipo == "LIBRARIAN" || tipo == "HARPY") {
-        std::string rutaTablero = (tipo == "LIBRARIAN") ? "imagenes/BASE-LIBRARIAN-Humanidad.png" : "imagenes/BASE-HARPY-TYRANIDS.png";
-        std::string rutaArena = (tipo == "LIBRARIAN") ? "imagenes/Chibi-LIBRARIAN-Humanidad-1.0.png" : "imagenes/Chibi-HARPY-TYRANIDS-1.0.png";
+    cargarConfigurarSprites(tipo);
 
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
-        }
-        else {
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-        
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-        else {
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-    
-
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
+    //REGISTRO DE ANIMACIONES EN EL DICCIONARIO
+    if (animador) {
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 1, 1, 0.20f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
 }
 
@@ -79,52 +47,30 @@ void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
 }
 
 void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
-    int fila = 0;
-    int colInicial = 0;
-    int colFinal = 0;
+    if (!animador) return;
 
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
 
     if (estaAtacando) {
-        fila = 1; colInicial = 1; colFinal = 1;
+        animador->jugar("ATAQUE");
     }
     else if (direccion.x != 0) {
-        fila = 0; colInicial = 1; colFinal = 4;
+        animador->jugar("CAMINAR_LATERAL");
     }
     else if (direccion.y > 0) {
-        fila = 1; colInicial = 3; colFinal = 3;
+        animador->jugar("ABAJO");
     }
     else if (direccion.y < 0) {
-        fila = 1; colInicial = 4; colFinal = 4;
+        animador->jugar("ARRIBA");
     }
     else {
-        fila = 0; colInicial = 0; colFinal = 0;
+        animador->jugar("QUIETO");
     }
 
-    int posY_Textura = fila * altoFrame;
-    int posY_Actual = spriteArena.getTextureRect().top;
+    actualizarAnimacion(dt);
 
-    if (posY_Actual != posY_Textura || frameActual < colInicial || frameActual > colFinal) {
-        frameActual = colInicial;
-        spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        temporizadorAnimacion = 0.0f;
-    }
-
-    if (colInicial != colFinal) {
-        temporizadorAnimacion += dt;
-        float velocidadAnimacion = 0.15f;
-
-        if (temporizadorAnimacion >= velocidadAnimacion) {
-            temporizadorAnimacion = 0.0f;
-            frameActual++;
-            if (frameActual > colFinal) {
-                frameActual = colInicial;
-            }
-            spriteArena.setTextureRect(sf::IntRect(frameActual * anchoFrame, posY_Textura, anchoFrame, altoFrame));
-        }
-    }
-
-    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
+    //  ARREGLO DEL EFECTO ESPEJO:
+    float escalaArena = piezaAlturaArena / altoFrame;
     if (direccion.x < 0) {
         spriteArena.setScale(-escalaArena, escalaArena);
     }

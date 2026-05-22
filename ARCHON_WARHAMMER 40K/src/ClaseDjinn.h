@@ -7,28 +7,20 @@
 
 class ClaseDjinn : public PiezaTeletransporte {
 private:
-    //SPRITES Y TEXTURAS 
-    sf::Texture texturaTablero;
-    sf::Sprite spriteTablero;
-
-    sf::Texture texturaArena;
-    sf::Sprite spriteArena;
-
+   
     //VARIABLES DE ANIMACIÓN (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    int anchoFrame;
-    int altoFrame;
+   
 
 
 public:
     ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
-        ClaseDjinn* clon = new ClaseDjinn(*this);
-        // Reconectamos sus propios sprites a sus propias texturas
-        clon->spriteTablero.setTexture(clon->texturaTablero);
-        clon->spriteArena.setTexture(clon->texturaArena);
+        ClaseDjinn* clon = new ClaseDjinn(this->bando, this->posicionTablero, this->stats.nombre);
+        clon->stats.vida = this->stats.vida;
+        clon->stats.vidaMaxima = this->stats.vidaMaxima;
         return clon;
     }
 
