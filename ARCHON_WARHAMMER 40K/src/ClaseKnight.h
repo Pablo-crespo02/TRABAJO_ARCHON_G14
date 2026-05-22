@@ -22,6 +22,12 @@ private:
 
 public:
 
+    bool estaSaltando = false;
+    float tiempoSalto = 0.0f;
+    float duracionTotalSalto = 0.8f;
+    sf::Vector2f posInicioSalto;
+    sf::Vector2f posDestinoSalto;
+
     ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo);
 
     Pieza* clonar() const override {
@@ -47,4 +53,5 @@ public:
         sf::Vector2f escalaActual = spriteArena.getScale();
         spriteArena.setScale(escalaActual.x * porcentaje, escalaActual.y * porcentaje);
     }
+    void actualizarSalto(float dt); //Funcion que gestiona el salto del hechizo del termgant
 };

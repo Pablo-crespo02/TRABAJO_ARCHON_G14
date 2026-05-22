@@ -68,12 +68,22 @@ ClaseKnight::ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo)
     }
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
 void ClaseKnight::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
+    // Actualizamos la lógica de tiempo del salto primero
+    actualizarSalto(dt);
+
+    // Si el Termagant está saltando, bloqueamos el movimiento terrestre físico
+    // Esto impide que el movimiento normal interfiera con la trayectoria del salto
+    if (estaSaltando) {
+        // Aún llamamos a animar para que mantenga el sprite de "salto" activo
+        this->animar(dt, direccion);
+        return;
+    }
+
+    // Si NO está saltando, dejamos que la clase padre maneje el movimiento normal
     PiezaTerrestre::procesarMovimientoArena(direccion, dt, arena);
 
-    //Actualizamos la imagen visible con nuestra máquina de estados
+    // Actualizamos la animación normal (caminar/quieto/atacar)
     if (this->stats.nombre == "INTERCESSOR" || this->stats.nombre == "TERMAGANT") {
         animar(dt, direccion);
     }
@@ -92,6 +102,12 @@ void ClaseKnight::animar(float dt, sf::Vector2f direccion) {
         fila = 1;
         colInicial = 0;
         colFinal = 1;
+    }
+    else if (estaSaltando) {
+        //FOTOGRAMA DE ATAQUE 
+        fila = 1;
+        colInicial = 2;
+        colFinal = 2;
     }
     else if (direccion.x != 0) {
         //FOTOGRAMA DE CAMINAR LATERAL 
@@ -210,23 +226,75 @@ void ClaseKnight::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
 
 void ClaseKnight::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    sf::Vector2f dirAtaque = this->getultimadireccion();
-    float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
-    dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : sf::Vector2f(1.f, 0.f);
+    if (!enemigo) return;
 
-    sf::Vector2f puntoSpawn = this->posicionAbsoluta + (dirAtaque * 35.f);
+    // LÓGICA PARA INTERCESSOR (Granada)
+    if (this->stats.nombre == "INTERCESSOR") {
+        sf::Vector2f dirAtaque = this->getultimadireccion();
+        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+        dirAtaque = (magnitud != 0) ? (dirAtaque / magnitud) : sf::Vector2f(1.f, 0.f);
 
-    double rapidez = 400.0;
-    double danoBase = 10.0;
-    double tiempoDeVidaTotal = 2.5;
-    double radioProyectil = 10.0;
-    double radioDeLaExplosion = 120.0;
-    hitboxes.emplace_back(
-        puntoSpawn, dirAtaque, rapidez, sf::Color(100, 100, 100), this,
-        (danoBase * this->multiplicadorArena), tiempoDeVidaTotal, radioProyectil,
-        false, false, false, 0.0,
-        true, radioDeLaExplosion
-    );
+        sf::Vector2f puntoSpawn = this->posicionAbsoluta + (dirAtaque * 35.f);
 
-    std::cout << this->stats.nombre << " ha lanzado una Granada de Fragmentacion!" << std::endl;
+        hitboxes.emplace_back(
+            puntoSpawn, dirAtaque, 400.0, sf::Color(100, 100, 100), this,
+            (10.0 * this->multiplicadorArena), 2.5, 10.0,
+            false, false, false, 0.0, true, 120.0
+        );
+        std::cout << "Intercessor ha lanzado una Granada de Fragmentación!" << std::endl;
+    }
+
+    // LÓGICA PARA TERMAGANT (Salto Acechante)
+    else if (this->stats.nombre == "TERMAGANT") {
+        // Solo iniciamos si no estamos saltando ya
+        if (estaSaltando) return;
+
+        sf::Vector2f posEnemigo = enemigo->getPosicionAbsoluta();
+        sf::Vector2f miPos = this->posicionAbsoluta;
+        sf::Vector2f dir = posEnemigo - miPos;
+        float dist = std::hypot(dir.x, dir.y);
+
+        if (dist > 50.f) {
+            // Normalizar dirección
+            if (dist != 0) dir /= dist;
+
+            // Guardamos los puntos para la trayectoria
+            posInicioSalto = miPos;
+            posDestinoSalto = posEnemigo - (dir * 40.f);
+
+            // Reseteamos el reloj del salto al inicio (0.0f)
+            tiempoSalto = 0.0f;
+            estaSaltando = true;
+
+            std::cout << "Termagant inicia salto acechante!" << std::endl;
+        }
+    }
+}
+void ClaseKnight::actualizarSalto(float dt) {
+    if (!estaSaltando) return;
+
+    tiempoSalto += dt;
+
+    // Calculamos el progreso (de 0.0 a 1.0)
+    float progreso = tiempoSalto / duracionTotalSalto;
+
+    // Si llega al final, aterrizaje forzoso
+    if (progreso >= 1.0f) {
+        this->posicionAbsoluta = posDestinoSalto;
+        estaSaltando = false;
+        tiempoSalto = 0.0f;
+    }
+    else {
+        // Movimiento lineal X/Y (la base del salto)
+        sf::Vector2f nuevaPos = posInicioSalto + (posDestinoSalto - posInicioSalto) * progreso;
+
+        // EL TRUCO: La parábola siempre debe ir de 0 a PI (180 grados)
+        // sin importar cuánto dure el tiempo.
+        // Al usar 'progreso * 3.14159f', garantizamos que el seno haga 
+        // una curva completa de 0 a 180 grados en cualquier duración.
+        float alturaMaxima = 150.0f; // Ajusta esto para que sea más alto o bajo
+        float altura = -alturaMaxima * sin(progreso * 3.14159f);
+
+        this->posicionAbsoluta = nuevaPos + sf::Vector2f(0.0f, altura);
+    }
 }
