@@ -35,7 +35,7 @@ void MenuNoInteractivo::inicializarTextos() {
     textoCreditos.setString(
         "           CREDITOS DE LA OBRA\n\n"
         "Desarrollado de forma integra por:\n"
-        "            [Tu Nombre Aqui]\n\n"
+        "            JAVIER MONRIO\n            GONZALO CASTRO\n            PABLO CRESPO\n            CECILIA BARRIO\n            JAVIER LERIN\n\n"
         "Musica y Efectos: Warhammer 40K Fan Assets\n"
         "Libreria Grafica: SFML 2.6.x\n\n\n"
         "    (Pulsa ESC para volver al Menu Principal)"
