@@ -105,7 +105,6 @@ void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
     // 1. EVALUACIÓN DE ESTADOS (Máquina de estados visual)
     if (estaAtacando) {
         animador->jugar("ATAQUE");
-
     }
     else if (direccion.x != 0) {
         animador->jugar("CAMINAR_LATERAL");

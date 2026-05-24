@@ -188,3 +188,16 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
 void Pieza::actualizarAnimacion(double dt) {
     if (animador) animador->actualizar(dt);
 }
+
+void Pieza::actualizarFlash(float dt) {
+    if (temporizadorFlashDano > 0.f) {
+        temporizadorFlashDano -= dt;
+
+        // Si está sufriendo daño, teñimos el sprite de ROJO (manteniendo su transparencia actual por si es un Lictor invisible)
+        spriteArena.setColor(sf::Color(255, 50, 50, spriteArena.getColor().a));
+    }
+    else {
+        // Si no está sufriendo daño, restauramos su color BLANCO original (que significa "sin filtro")
+        spriteArena.setColor(sf::Color(255, 255, 255, spriteArena.getColor().a));
+    }
+}

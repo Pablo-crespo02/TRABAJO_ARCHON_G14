@@ -37,6 +37,11 @@ private:
     sf::Sprite spriteSuelo;   
     sf::Texture texturaSuelo;
 
+    //VARIABLES SCREEN SHAKE
+    float tiempoTemblor = 0.f;
+    float magnitudTemblor = 0.f;
+
+
     // Contenedores de objetos
     std::vector<SpawnPoint> spawns;
     std::vector<sf::ConvexShape> rocas;
@@ -88,4 +93,8 @@ public:
     }
     void dibujar(sf::RenderWindow& window) const;
     void establecerAmbiente(Ambiente tipo);
+
+    //FUNCIONES SCREEN SHAKE
+    void iniciarTemblor(float duracion, float magnitud);
+    void actualizarTemblor(float dt);
 };
