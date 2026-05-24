@@ -59,7 +59,6 @@ void ClaseKnight::procesarMovimientoArena(sf::Vector2f direccion, float dt, Aren
 }
 
 void ClaseKnight::animar(float dt, sf::Vector2f direccion) {
-    animador->jugar("ATAQUE");;
 
     // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
     bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
@@ -68,10 +67,8 @@ void ClaseKnight::animar(float dt, sf::Vector2f direccion) {
         animador->jugar("ATAQUE");
     }
     else if (estaSaltando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 2;
-        colFinal = 2;
+        // Mientras esté saltando, congelamos la animación en el fotograma de ataque
+        animador->jugar("ATAQUE");
     }
     else if (direccion.x != 0) {
         animador->jugar("CAMINAR_LATERAL");
