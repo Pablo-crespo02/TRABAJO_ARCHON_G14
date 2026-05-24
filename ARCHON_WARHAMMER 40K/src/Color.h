@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Casilla.h"
 
+enum class Ambiente { Luz, Oscuridad, Neutral };
 //Struct con los colores del las casillas
 struct Colores
 {
@@ -16,7 +18,27 @@ struct Colores
 	static const sf::Color ColorFichaOscuridad;
 	static const sf::Color ColorOutlineSeleccion;
 	static const sf::Color ColorProyectil;
+
+	//para organizar el color de la casilla a la hora de ir a la arena
+	static bool esVentajaLuz(ColorActual color) {
+		return (color == ColorActual::Blanco_pico ||
+			color == ColorActual::Blanco ||
+			color == ColorActual::Gris_claro ||
+			color == ColorActual::Gris_medio);
+	}
+	//determina que bando tiene la ventaja 
+	static Ambiente determinarAmbiente(ColorActual color) {
+		if (color == ColorActual::Gris_medio) return Ambiente::Neutral;
+
+		if (color == ColorActual::Blanco_pico ||
+			color == ColorActual::Blanco ||
+			color == ColorActual::Gris_claro)
+			return Ambiente::Luz;
+
+		return Ambiente::Oscuridad; // Gris_oscuro, Negro, Negro_pico
+	}
 };
+
 
 
 inline const sf::Color Colores::ColorBlanco_pico = sf::Color(255, 255, 255);

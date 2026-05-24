@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "Tablero.h"
+#include"Color.h"
 
 // --- CLASE SPAWNPOINT (Definición ligera) ---
 class SpawnPoint {
@@ -41,16 +43,19 @@ class Arena;
 class GeneradorArena {
 public:
     // La función principal que llamaremos desde el Motor
-    static void generarMapa(Arena& arena, sf::Color cLuz, sf::Color cOsc);
+    static void generarMapa(Arena& arena, ColorActual colorCasilla);
 
 private:
     // Pasamos la lógica de muros y spawns aquí
-    static void prepararSpawns(Arena& arena, sf::Color cLuz, sf::Color cOsc);
+    static void prepararSpawns(Arena& arena);
 
     static void generarRejillas(Arena& arena);
     static void generarRocas(Arena& arena);
     static void generarSangre(Arena& arena);
 
     static bool esPosicionValida(sf::Vector2f pos, float radio, const Arena& arena);
+    static bool sonColoresIguales(sf::Color c1, sf::Color c2) {
+        return (c1.r == c2.r && c1.g == c2.g && c1.b == c2.b);
+    }
     static bool esPosicionSangreValida(sf::Vector2f pos, float radio, const Arena& arena);
 };

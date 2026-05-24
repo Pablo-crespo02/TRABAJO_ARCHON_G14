@@ -300,21 +300,25 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 
     }
 
-    // Usamos colores genéricos de SFML para que no te de error de "identificador no declarado"
-    GeneradorArena::generarMapa(arena, sf::Color::White, sf::Color(50, 50, 50));
-    //Calculamos los modificadores de daño y defnsa en función de la casilla en la que se combate:
     sf::Vector2i posTableroCombate = piezaDefensor->getPosicionTablero();
     ColorActual colorArenaCombate = tablero.getcoloractualcasilla(posTableroCombate);
 
-    piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
-    piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
 
-    //CHIVATOS DEBUG:
-    std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
-    std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
+        //Calculamos los modificadores de daño y defensa en función de la casilla en la que se combate:
 
-   estadoActual = Estado::Arena;
+      //  GeneradorArena::generarMapa(arena, colorArenaCombate);
+    GeneradorArena::generarMapa(arena, colorArenaCombate);
+
+        piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
+        piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
+
+        //CHIVATOS DEBUG:
+        std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
+        std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
+
+        estadoActual = Estado::Arena;
 }
+
 
 //MANEJO DE CLICKS EN EL TABLERO:
 

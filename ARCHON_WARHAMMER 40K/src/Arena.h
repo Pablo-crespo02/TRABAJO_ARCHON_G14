@@ -34,6 +34,8 @@ private:
     // Elementos visuales base
     sf::RectangleShape suelo;
     sf::View vistaArena;
+    sf::Sprite spriteSuelo;   
+    sf::Texture texturaSuelo;
 
     // Contenedores de objetos
     std::vector<SpawnPoint> spawns;
@@ -85,4 +87,5 @@ public:
         gotasSangre.clear();
     }
     void dibujar(sf::RenderWindow& window) const;
+    void establecerAmbiente(Ambiente tipo);
 };

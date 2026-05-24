@@ -3,19 +3,20 @@
     #include <ctime>
     #include <cmath>
 
-    void GeneradorArena::generarMapa(Arena& arena, sf::Color colorLuz, sf::Color colorOsc) {
-        // 1. Limpieza total a través de la arena
-        arena.limpiarTodo();
+void GeneradorArena::generarMapa(Arena& arena, ColorActual colorCasilla) {
+    arena.limpiarTodo();
 
-        // 2. Levantamos la infraestructura (Spawns y Muros)
-        prepararSpawns(arena, colorLuz, colorOsc);
+    // La lógica de "qué es ventaja" queda encapsulada en la clase Colores
+    Ambiente tipoAmbiente = Colores::determinarAmbiente(colorCasilla);
+    arena.establecerAmbiente(tipoAmbiente); // Pasamos el enum
 
-        // 3. Inicializamos semilla y generamos elementos procedurales
-        std::srand(static_cast<unsigned>(std::time(nullptr)));
-        generarRejillas(arena);
-        generarRocas(arena);
-        generarSangre(arena);
-    }
+    // Si los colores de bando son fijos o globales, ya no hace falta pasarlos
+    // Si los necesitas por otro motivo, puedes dejarlos, pero para el suelo ya no.
+    prepararSpawns(arena);
+    generarRejillas(arena);
+    generarRocas(arena);
+    generarSangre(arena);
+}
 
     bool GeneradorArena::esPosicionValida(sf::Vector2f pos, float radio, const Arena& arena) {
         // REGLA 1: No pisar los SpawnPoints
@@ -183,10 +184,10 @@
             }
         }
     }
-    void GeneradorArena::prepararSpawns(Arena& arena, sf::Color colorLuz, sf::Color colorOscuridad) {
+    void GeneradorArena::prepararSpawns(Arena& arena) {
         // 1. Inyectamos los SpawnPoints en la Arena
-        arena.addSpawnPoint(SpawnPoint(sf::Vector2f(150.f, 300.f), 30.f, colorLuz));
-        arena.addSpawnPoint(SpawnPoint(sf::Vector2f(650.f, 300.f), 30.f, colorOscuridad));
+        arena.addSpawnPoint(SpawnPoint(sf::Vector2f(150.f, 300.f), 30.f, Colores::ColorFichaLuz));
+        arena.addSpawnPoint(SpawnPoint(sf::Vector2f(650.f, 300.f), 30.f, Colores::ColorFichaOscuridad));
 
         // 2. Colores de los muros
         sf::Color colorRelleno(30, 32, 40);

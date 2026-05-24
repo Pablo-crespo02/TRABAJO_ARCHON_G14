@@ -72,55 +72,6 @@ bool Arena::esPosicionValida(sf::Vector2f pos, float radio, bool esVoladora) con
     // Si no chocó con nada, la posición es apta.
     return true;
 }
-
-void Arena::dibujar(sf::RenderWindow& window) const {
-    // Aplicamos la vista específica de la arena (zoom/posición)
-    window.setView(this->vistaArena);
-
-    // Capa Base: Suelo y Rejillas
-    window.draw(this->suelo);
-    for (const auto& r : this->rejillasSuelo) {
-        window.draw(r.marco);
-        for (const auto& barra : r.barras) window.draw(barra);
-    }
-
-    // Capa de Suelo: Sangre
-    for (const auto& mancha : this->charcosSangre) window.draw(mancha);
-    for (const auto& gota : this->gotasSangre) window.draw(gota);
-
-    // Capa de Sombras de Muros 
-    for (const auto& sombraMuro : this->sombrasMuros) {
-        window.draw(sombraMuro);
-    }
-
-    // Rocas con efecto 3D
-    // Nota: sf::ConvexShape no es costoso de copiar para el dibujo, pero usamos const para seguridad
-    for (size_t i = 0; i < this->rocas.size(); ++i) {
-        window.draw(this->sombras[i]); // Sombra proyectada
-
-        sf::ConvexShape cuerpo = this->rocas[i];
-        cuerpo.setFillColor(sf::Color(80, 80, 85));
-
-        // Extrusión para efecto 3D
-        for (int j = 0; j < 10; ++j) {
-            cuerpo.move(0.f, -1.f);
-            window.draw(cuerpo);
-        }
-
-        // Tapa superior
-        sf::ConvexShape tapa = this->rocas[i];
-        tapa.move(0.f, -10.f);
-        tapa.setFillColor(sf::Color(100, 100, 105));
-        window.draw(tapa);
-    }
-
-    // Capa Final: Muros
-    for (const auto& muro : this->muros) {
-        window.draw(muro);
-    }
-}
-
-
 /*
   Valida si una posición es apta para spawnear un objeto sin colisionar con otros.
   posActual    Coordenada (x, y) donde se intenta generar el objeto.
@@ -170,17 +121,66 @@ bool Arena::esGeneracionValida(sf::Vector2f posActual, float radioActual, TipoOb
     // Si pasó todas las pruebas anteriores, la posición es válida.
     return true;
 }
-// Hay que mejorarla, no se nota suficiente cambio en la arena
-void Arena::establecerAmbiente(sf::Color colorCasilla) {
-    if (colorCasilla == sf::Color::White || (colorCasilla.r > 200 && colorCasilla.g > 200)) {
-        suelo.setFillColor(sf::Color(255, 250, 220));
+
+
+void Arena::dibujar(sf::RenderWindow& window) const {
+    // Aplicamos la vista específica de la arena (zoom/posición)
+    window.setView(this->vistaArena);
+    window.draw(this->spriteSuelo);
+
+    //Rejillas 
+    for (const auto& r : this->rejillasSuelo) {
+        window.draw(r.marco);
+        for (const auto& barra : r.barras) {
+            window.draw(barra);
+        }
     }
-    else if (colorCasilla.r < 50 && colorCasilla.g < 50) {
-        suelo.setFillColor(sf::Color(20, 20, 25));
+    // Capa de Suelo: Sangre
+    for (const auto& mancha : this->charcosSangre) window.draw(mancha);
+    for (const auto& gota : this->gotasSangre) window.draw(gota);
+
+    // Capa de Sombras de Muros 
+    for (const auto& sombraMuro : this->sombrasMuros) {
+        window.draw(sombraMuro);
     }
-    else {
-        sf::Color grisSuave = colorCasilla;
-        grisSuave.a = 255;
-        suelo.setFillColor(grisSuave);
+
+    // Rocas con efecto 3D
+    // Nota: sf::ConvexShape no es costoso de copiar para el dibujo, pero usamos const para seguridad
+    for (size_t i = 0; i < this->rocas.size(); ++i) {
+        window.draw(this->sombras[i]); // Sombra proyectada
+
+        sf::ConvexShape cuerpo = this->rocas[i];
+        cuerpo.setFillColor(sf::Color(80, 80, 85));
+
+        // Extrusión para efecto 3D
+        for (int j = 0; j < 10; ++j) {
+            cuerpo.move(0.f, -1.f);
+            window.draw(cuerpo);
+        }
+
+        // Tapa superior
+        sf::ConvexShape tapa = this->rocas[i];
+        tapa.move(0.f, -10.f);
+        tapa.setFillColor(sf::Color(100, 100, 105));
+        window.draw(tapa);
+    }
+
+    // Capa Final: Muros
+    for (const auto& muro : this->muros) {
+        window.draw(muro);
+    }
+}
+
+void Arena::establecerAmbiente(Ambiente tipo) {
+    std::string ruta;
+    switch (tipo) {
+    case Ambiente::Luz:       ruta = "imagenes/SPRITE_ARENA_LUZ.png"; break;
+    case Ambiente::Oscuridad: ruta = "imagenes/SPRITE_ARENA_OSCURIDAD.png";  break;
+    case Ambiente::Neutral:  ruta = "imagenes/SPRITE_ARENA_NEUTRAL.png"; break;
+    }
+
+    if (texturaSuelo.loadFromFile(ruta)) {
+        spriteSuelo.setTexture(texturaSuelo);
+        spriteSuelo.setScale(ANCHO_MAPA / texturaSuelo.getSize().x, ALTO_MAPA / texturaSuelo.getSize().y);
     }
 }

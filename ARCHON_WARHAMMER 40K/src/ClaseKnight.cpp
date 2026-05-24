@@ -29,6 +29,7 @@ ClaseKnight::ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo)
 
     //REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO:
     if (animador) {
+      //  animador->agreganAnimacion("ESTA_SALTANDO", 1, 2, 2, 0.20f, true);
         animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
         animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
         animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.15f, true);
@@ -67,12 +68,9 @@ void ClaseKnight::animar(float dt, sf::Vector2f direccion) {
     if (estaAtacando) {
         animador->jugar("ATAQUE");
     }
-    else if (estaSaltando) {
-        //FOTOGRAMA DE ATAQUE 
-        fila = 1;
-        colInicial = 2;
-        colFinal = 2;
-    }
+    /*else if (estaSaltando) {
+        animador->jugar("ESTA_SALTANDO");
+    }*/
     else if (direccion.x != 0) {
         animador->jugar("CAMINAR_LATERAL");
     }
