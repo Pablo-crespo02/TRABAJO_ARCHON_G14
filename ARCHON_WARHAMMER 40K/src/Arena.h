@@ -34,6 +34,9 @@ private:
     // Elementos visuales base
     sf::RectangleShape suelo;
     sf::View vistaArena;
+    //VARIABLES SCREEN SHAKE
+    float tiempoTemblor = 0.f;
+    float magnitudTemblor = 0.f;
 
     // Contenedores de objetos
     std::vector<SpawnPoint> spawns;
@@ -85,4 +88,8 @@ public:
         gotasSangre.clear();
     }
     void dibujar(sf::RenderWindow& window) const;
+
+    //FUNCIONES SCREEN SHAKE
+    void iniciarTemblor(float duracion, float magnitud);
+    void actualizarTemblor(float dt);
 };

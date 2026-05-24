@@ -70,6 +70,9 @@ protected:
     sf::Sprite spriteTablero;
     sf::Sprite spriteArena;
 
+    //VARIABLE HIT FLASH
+    float temporizadorFlashDano = 0.f;
+
     //Smart pointer, exclusivo de C++. Garantiza que la memoria del animador se destruya de la RAM en el momento que la pieza muera en combate y se elimine.
     std::unique_ptr<AnimadorSprites> animador; 
 
@@ -198,4 +201,8 @@ public:
     void cargarConfigurarSprites(const std::string& tipo);
 
     void actualizarAnimacion(double dt);
+
+    //FUNCIONES HIT FLASH
+    void activarFlashDano() { temporizadorFlashDano = 0.15f; } // Dura 0.15 segundos
+    void actualizarFlash(float dt);
 };

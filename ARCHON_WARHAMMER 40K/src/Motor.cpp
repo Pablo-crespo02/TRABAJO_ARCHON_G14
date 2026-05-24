@@ -424,6 +424,11 @@ void Motor::actualizar(double dt) {
     Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
     Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
+    //ACTUALIZAR GAME FEEL (TEMBLOR Y FLASH)
+    arena.actualizarTemblor(dt);
+    if (pLuz) pLuz->actualizarFlash(dt);
+    if (pOsc) pOsc->actualizarFlash(dt);
+    
     // LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
     // Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorno{función}
     // No especificamos el tipo de retorno porque en C++ no es imprescindible.
@@ -566,7 +571,12 @@ void Motor::actualizar(double dt) {
             if (distSq < limiteSq) {
                 // Si es un proyectil/melee normal del Knight o Golem contra un héroe
                 if (Hitboxes[i].getEsDanoContinuo()) {
-                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano() * dt; }
+                    if (!obj->getInvulnerable()) 
+                    { obj->stats.vida -= Hitboxes[i].getDano() * dt; 
+                    // GAME FEEL: Temblor leve y parpadeo constante
+                    obj->activarFlashDano();
+                    arena.iniciarTemblor(0.1f, 1.5f);
+                    }
                 }
                 else if (Hitboxes[i].esGranada) {
                     if (Hitboxes[i].getTiempoVuelo() > 0.0f) {
@@ -578,10 +588,20 @@ void Motor::actualizar(double dt) {
                         obj->stats.vida -= Hitboxes[i].getDano();
                         if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                         else Hitboxes[i].setYaDanoDefensor(true);
+
+                        // GAME FEEL:Terremoto por explosión
+                        obj->activarFlashDano();
+                        arena.iniciarTemblor(0.3f, 12.0f);
                     }
                 }
                 else if (!yaFueDanado) {
-                    if (!obj->getInvulnerable()) { obj->stats.vida -= Hitboxes[i].getDano(); }
+                    if (!obj->getInvulnerable()) 
+                    { obj->stats.vida -= Hitboxes[i].getDano(); 
+                    // GAME FEEL: Impacto seco normal
+                    obj->activarFlashDano();
+                    arena.iniciarTemblor(0.15f, 6.0f);
+                    
+                    }
                     if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                     else Hitboxes[i].setYaDanoDefensor(true);
 
@@ -617,6 +637,9 @@ void Motor::actualizar(double dt) {
                     // Impacto contra el esbirro
                     minion->stats.vida -= Hitboxes[i].getDano();
 
+                    // GAME FEEL: Temblor medio para muertes de minions
+                    minion->activarFlashDano();
+                    arena.iniciarTemblor(0.1f, 4.0f);
                     // Si no es daño continuo o granada, la bala normal se consume
                     if (!Hitboxes[i].getEsDanoContinuo() && !Hitboxes[i].esGranada) {
                         Hitboxes[i].setEstadoHitbox(false);

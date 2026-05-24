@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>   
+#include <cstdlib>
 
 Arena::Arena() {
     //Configuración básica del Suelo (Solo valores, no dibuja)
@@ -182,5 +183,28 @@ void Arena::establecerAmbiente(sf::Color colorCasilla) {
         sf::Color grisSuave = colorCasilla;
         grisSuave.a = 255;
         suelo.setFillColor(grisSuave);
+    }
+}
+
+void Arena::iniciarTemblor(float duracion, float magnitud) {
+    this->tiempoTemblor = duracion;
+    this->magnitudTemblor = magnitud;
+}
+
+void Arena::actualizarTemblor(float dt) {
+    if (tiempoTemblor > 0.f) {
+        tiempoTemblor -= dt;
+
+        // Generamos un temblor caótico aleatorio (offset en X e Y)
+        float offsetX = ((std::rand() % 200) / 100.f - 1.f) * magnitudTemblor;
+        float offsetY = ((std::rand() % 200) / 100.f - 1.f) * magnitudTemblor;
+
+        // Desplazamos la cámara desde su centro original
+        vistaArena.setCenter((ANCHO_MAPA / 2.f) + offsetX, (ALTO_MAPA / 2.f) + offsetY);
+
+        // Si el temblor se ha acabado, centramos la cámara a la perfección
+        if (tiempoTemblor <= 0.f) {
+            vistaArena.setCenter(ANCHO_MAPA / 2.f, ALTO_MAPA / 2.f);
+        }
     }
 }
