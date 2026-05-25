@@ -89,7 +89,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -119,7 +119,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "FALTA" || this->stats.nombre == "TOXICRENO") {
+        if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

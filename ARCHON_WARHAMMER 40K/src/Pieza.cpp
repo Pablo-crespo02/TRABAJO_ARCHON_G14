@@ -128,8 +128,8 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         rutaArena = (tipo == "CAPTAIN") ? "imagenes/Chibi-CAPTAIN-Humanidad-1.0.png" : "imagenes/Chibi-HIVE_TYRANT-TYRANIDS-1.0.png";
     }
     else if (tipo == "PRIMARIS" || tipo == "TOXICRENO") {
-        rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIAN-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
-        rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIAN-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
+        rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIS-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
+        rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIS-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
     }
     else if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
         rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";

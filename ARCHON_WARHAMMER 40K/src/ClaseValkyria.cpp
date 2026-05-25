@@ -31,7 +31,7 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
 
 
         std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TIRANIDS-1.0.png";
+        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 

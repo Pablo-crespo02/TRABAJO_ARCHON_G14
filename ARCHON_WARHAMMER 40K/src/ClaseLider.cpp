@@ -27,7 +27,8 @@ ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
     this->piezaAlturaTablero = 80.0f;
     this->piezaAlturaArena = 150.0f;
 
-    //CARGA DE SPRITES (Chibi)
+    //CARGA DE SPRITES (
+    // )
     cargarConfigurarSprites(tipo);
 
     // 4. REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO

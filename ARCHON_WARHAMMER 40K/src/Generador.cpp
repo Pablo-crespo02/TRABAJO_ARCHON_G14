@@ -110,7 +110,6 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     for (int i = 1; i < 8; i++) {
         AnadirUnidad(motor, Bando::LUZ, "INTERCESSOR", sf::Vector2i(1, i));
     }
-    AnadirUnidad(motor, Bando::LUZ, "FENIX", sf::Vector2i(2, 4));
 
     //BANDO OSCURIDAD DESPLIEGUE
     AnadirUnidad(motor, Bando::OSCURIDAD, "GARGOLA", sf::Vector2i(8, 0));
