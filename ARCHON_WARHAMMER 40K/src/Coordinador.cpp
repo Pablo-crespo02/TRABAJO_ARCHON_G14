@@ -1,6 +1,6 @@
 #include "Coordinador.h"
 #include "Generador.h"
-
+#include "Pieza.h"
 Coordinador::Coordinador():motor(window, fuente)
 {
     // CARGA DE LA FUENTE:
@@ -233,11 +233,12 @@ void Coordinador::gestionarEventos() {
                     std::ofstream archivoEscritura("ranking.txt", std::ios::app); 
                     if (archivoEscritura.is_open()) {
                         std::string bandoGanador = (motor.getGanador() == 1) ? "IMPERIUM" : "XENOS";
-                        // Guardamos las variables separadas por espacios de forma estructurada
-                        archivoEscritura << menuNombre->getNombre() << " "
-                            << bandoGanador << " "
-                            << motor.getPuntosLuz() << " "
-                            << motor.getPuntosOscuridad() << " "
+
+                        // Guardamos cada variable en una línea independiente
+                        archivoEscritura << menuNombre->getNombre() << "\n"
+                            << bandoGanador << "\n"
+                            << motor.getPuntosLuz() << "\n"
+                            << motor.getPuntosOscuridad() << "\n"
                             << motor.getTiempoJugado() << "\n";
 
                         archivoEscritura.close();
@@ -250,7 +251,7 @@ void Coordinador::gestionarEventos() {
         }
         //Pantalla de victoria
         else if (estadoActual == Estado::Victoria) {
-            if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
+            if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
                 estadoActual = Estado::MenuPrincipal;
                 motor.reiniciarJuego();
             }
@@ -378,29 +379,33 @@ void Coordinador::reiniciarPartida() {
 }
 
 void Coordinador::guardarEnRanura(int indice) {
-    // 1. Si la ranura ya tenía una partida vieja, limpiamos su memoria para no saturar la RAM
-    for (Pieza* p : ranuras[indice].piezas) {
-        delete p;
-    }
-    ranuras[indice].piezas.clear();
+    // 1. Limpiamos los datos ligeros viejos de la ranura
+    ranuras[indice].piezasLigeras.clear();
 
     // 2. Extraemos las piezas actuales del tablero
     std::vector<Pieza*> piezasActuales = motor.getListaPiezas();
 
-    // 3. CLONACIÓN: Recorremos cada pieza y creamos una copia exacta en la ranura
+    // 3. Convertimos las piezas físicas a nuestro nuevo formato "Ligero"
     for (Pieza* p : piezasActuales) {
-        ranuras[indice].piezas.push_back(p->clonar());
+        DatosPiezaLigera datosP;
+        datosP.bando = static_cast<int>(p->getBando());
+        datosP.posX = p->getPosicionTablero().x;
+        datosP.posY = p->getPosicionTablero().y;
+        datosP.nombre = p->stats.nombre;
+        datosP.vida = p->stats.vida;
+
+        ranuras[indice].piezasLigeras.push_back(datosP);
     }
 
+    // 4. Guardamos el estado global
     ranuras[indice].ronda = motor.getRondaActual();
     ranuras[indice].ciclo = motor.getCicloActual();
     ranuras[indice].jugador = motor.getJugadorActual();
-
-    //  Guardamos en las partidas actuales puntos y tiempo
     ranuras[indice].puntosLuz = motor.getPuntosLuz();
     ranuras[indice].puntosOscuridad = motor.getPuntosOscuridad();
     ranuras[indice].tiempoJugado = motor.getTiempoJugado();
-    // 5. Sloth ocupado
+
+    // 5. Marcamos el Slot como ocupado y guardamos en el txt
     ranuras[indice].ocupada = true;
     std::cout << " Partida guardada con exito en la ranura " << indice + 1 << "!" << std::endl;
 
@@ -409,36 +414,47 @@ void Coordinador::guardarEnRanura(int indice) {
 
 void Coordinador::cargarDesdeRanura(int indice) {
     if (ranuras[indice].ocupada) {
-        // 1. Vaciamos el tablero actual usando tu función
+        // 1. Reseteamos el motor 
         motor.limpiarDatos();
 
-        // 2. CLONACIÓN INVERSA: Copiamos las piezas desde la ranura para enviarlas al motor
-        // (Debemos clonarlas de nuevo, o la ranura se quedaría vacía tras jugar)
-        std::vector<Pieza*> piezasCargadas;
-        for (Pieza* p : ranuras[indice].piezas) {
-            piezasCargadas.push_back(p->clonar());
+        // 2. Vaciamos por completo el vector de piezas por defecto del motor
+        // Liberamos su memoria para evitar fugas (Memory Leaks) y lo dejamos a 0.
+        for (Pieza* p : motor.getListaPiezas()) {
+            delete p;
         }
-
-        // 3. Inyectamos los clones en el Motor
-        motor.setListaPiezas(piezasCargadas);
-
+        std::vector<Pieza*> tableroVacio;
+        motor.setListaPiezas(tableroVacio);
+      
+        // 3. Restauramos las variables globales de la partida guardada
         motor.setRondaActual(ranuras[indice].ronda);
         motor.setCicloActual(ranuras[indice].ciclo);
         motor.setJugadorActual(ranuras[indice].jugador);
-
-        //4: Restauramos puntos y tiempo de las partidas guardadas
         motor.setPuntosLuz(ranuras[indice].puntosLuz);
         motor.setPuntosOscuridad(ranuras[indice].puntosOscuridad);
         motor.setTiempoJugado(ranuras[indice].tiempoJugado);
-        // 5. Cambiamos los estados para reanudar el juego
+
+        // 4. MATERIALIZAMOS LAS PIEZAS
+        for (const DatosPiezaLigera& datosP : ranuras[indice].piezasLigeras) {
+            Bando b = static_cast<Bando>(datosP.bando);
+            sf::Vector2i pos(datosP.posX, datosP.posY);
+
+            Generador::AnadirUnidad(motor, b, datosP.nombre, pos);
+
+            if (!motor.getListaPiezas().empty()) {
+                motor.getListaPiezas().back()->stats.vida = datosP.vida;
+            }
+        }
+
+        // 5. Cambiamos los estados para reanudar la partida
         estadoActual = Estado::Tablero;
         motor.setEstado(Estado::Tablero);
-        std::cout << "Partida cargada desde la ranura " << indice + 1 << "!" << std::endl;
+        std::cout << "Partida cargada desde la ranura " << indice + 1 << " de forma limpia y exitosa." << std::endl;
     }
     else {
         std::cout << "La ranura " << indice + 1 << " esta vacia." << std::endl;
     }
 }
+
 // FUNCION QUE LEE EL ARCHIVO
 void Coordinador::cargarDatosDeFichero() {
     std::ifstream archivo("partidas_guardadas.txt");
@@ -450,60 +466,47 @@ void Coordinador::cargarDatosDeFichero() {
     }
 
     for (int i = 0; i < 3; i++) {
-        if (!(archivo >> ranuras[i].ocupada))break;
-       
+        if (!(archivo >> ranuras[i].ocupada)) break;
+
         if (ranuras[i].ocupada) {
 
-            //variables globales de la partida
+            // Variables globales de la partida
             if (!(archivo >> ranuras[i].ronda
                 >> ranuras[i].ciclo
                 >> ranuras[i].jugador
                 >> ranuras[i].puntosLuz
                 >> ranuras[i].puntosOscuridad
                 >> ranuras[i].tiempoJugado)) {
-                std::cout << "Error leyendo cabecera de la ranura" << i + 1 << std::endl;
+                std::cout << "Error leyendo cabecera de la ranura " << i + 1 << std::endl;
                 break;
-           }
+            }
 
             int numPiezas;
-            if (!(archivo >> numPiezas))break;;
+            if (!(archivo >> numPiezas)) break;
 
-            // Limpiamos la ranura por si acaso había basura en memoria
-            for (Pieza* p : ranuras[i].piezas) delete p;
-            ranuras[i].piezas.clear();
+            // OPTIMIZACIÓN CLAVE: Ya no hay punteros pesados (Pieza*) que borrar aquí.
+            // Simplemente limpiamos nuestro vector de datos ligeros.
+            ranuras[i].piezasLigeras.clear();
 
-            //Limpiamos el motor:
-            motor.limpiarDatos();
-
-            // Reconstruimos pieza a pieza
+            // Reconstruimos en memoria de texto puro (Súper rápido, sin tocar imágenes)
             for (int j = 0; j < numPiezas; j++) {
-                int bandoInt, x, y;
-                std::string nombre;
-                float vida;
+                DatosPiezaLigera datosP;
 
-                if (!(archivo >> bandoInt >> x >> y >> nombre >> vida)) {
-                    std::cout << "Error de formato en la pieza " << j << "de la ranura " << i + 1 << " CARGA ABORTADA" << std::endl;
+                // Leemos exactamente las variables en tu orden original
+                if (!(archivo >> datosP.bando >> datosP.posX >> datosP.posY >> datosP.nombre >> datosP.vida)) {
+                    std::cout << "Error de formato en la pieza " << j << " de la ranura " << i + 1 << " CARGA ABORTADA" << std::endl;
                     break;
-                };
-
-                Bando b = static_cast<Bando>(bandoInt);
-                sf::Vector2i pos(x, y);
-
-                // se usa el motor temporalmente para crear la pieza correcta
-                Generador::AnadirUnidad(motor, b, nombre, pos);
-
-                if (!motor.getListaPiezas().empty()) {
-                    Pieza* p = motor.getListaPiezas().back();
-                    p->stats.vida = vida; // Le ponemos la salud que tenía al guardar
-                    ranuras[i].piezas.push_back(p->clonar()); // La clonamos a la ranura segura
                 }
+
+                // Guardamos los datos puros en nuestra ranura optimizada
+                ranuras[i].piezasLigeras.push_back(datosP);
             }
-            motor.limpiarDatos(); // Dejamos el motor limpio
         }
     }
     archivo.close();
-    std::cout << "Datos cargados desde partidas_guardadas.txt" << std::endl;
+    std::cout << "Estructura de partidas guardadas inicializada al instante desde partidas_guardadas.txt" << std::endl;
 }
+
 //Esta función lo que hace es coger todo lo que haya en la memoria de las 3 ranuras y lo escribe en partidasa_guardadas.txt
 void Coordinador::guardarDatosEnFichero() {
     std::ofstream archivo("partidas_guardadas.txt");
@@ -523,16 +526,16 @@ void Coordinador::guardarDatosEnFichero() {
                 << ranuras[i].puntosOscuridad << " "
                 << ranuras[i].tiempoJugado << " ";
 
-            // Guardar cuántas piezas hay vivas
-            archivo << ranuras[i].piezas.size() << " ";
+            // Guardar cuántas piezas hay vivas (usando el vector ligero)
+            archivo << ranuras[i].piezasLigeras.size() << " ";
 
-            // Guardamos los datos de cada pieza viva
-            for (Pieza* p : ranuras[i].piezas) {
-                archivo << static_cast<int>(p->getBando()) << " "
-                    << p->getPosicionTablero().x << " "
-                    << p->getPosicionTablero().y << " "
-                    << p->stats.nombre << " "
-                    << p->stats.vida << " ";
+            // Guardamos los datos de cada pieza plana
+            for (const DatosPiezaLigera& p : ranuras[i].piezasLigeras) {
+                archivo << p.bando << " "
+                    << p.posX << " "
+                    << p.posY << " "
+                    << p.nombre << " "
+                    << p.vida << " ";
             }
         }
         archivo << "\n";

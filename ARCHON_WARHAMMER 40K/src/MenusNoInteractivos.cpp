@@ -1,4 +1,5 @@
 #include "MenusNoInteractivos.h"
+#include "Color.h"
 #include <iostream>
 
 void MenuNoInteractivo::inicializarTextos() {
@@ -49,9 +50,9 @@ void MenuNoInteractivo::inicializarTextos() {
     textoPuntuaciones.setFont(fuente);
 
     // Configuramos el texto de continuar estándar
-    textoContinuar.setString("PULSA ENTER PARA VOLVER AL MENU");
-    textoContinuar.setCharacterSize(30);
-    textoContinuar.setFillColor(sf::Color::White);
+    textoContinuar.setString("PULSA ESC PARA VOLVER AL MENU");
+    textoContinuar.setCharacterSize(40);
+    textoContinuar.setFillColor(sf::Color::Yellow);
     textoContinuar.setOutlineColor(sf::Color::Black);
     textoContinuar.setOutlineThickness(2.0f);
 }
@@ -76,7 +77,7 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int
 
         spriteFondo.setTexture(texturaFondo, true);  //true garantiza el correcto escalado de la imagen
         textoVictoria.setString("VICTORIA DEL IMPERIUM");
-        textoVictoria.setFillColor(sf::Color::Yellow);
+        textoVictoria.setFillColor(Colores::ColorFichaLuz);
         break;
 
     case 2:
@@ -88,7 +89,7 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int
 
         spriteFondo.setTexture(texturaFondo, true);
         textoVictoria.setString("VICTORIA XENOS");
-        textoVictoria.setFillColor(sf::Color::Red);
+        textoVictoria.setFillColor(Colores::ColorFichaOscuridad);
         break;
 
     default:
@@ -110,11 +111,11 @@ void MenuNoInteractivo::configurarPantallaVictoria(int ganador, int ptosLuz, int
 
     if (ganador == 1) {
         textoVictoria.setString("VICTORIA DEL IMPERIUM");
-        textoVictoria.setFillColor(sf::Color::Yellow);
+        textoVictoria.setFillColor(Colores::ColorFichaLuz);
     }
     else {
         textoVictoria.setString("VICTORIA DE LOS XENOS");
-        textoVictoria.setFillColor(sf::Color::Magenta);
+        textoVictoria.setFillColor(Colores::ColorFichaOscuridad);
     }
 
     sf::FloatRect textRect = textoVictoria.getLocalBounds();
@@ -223,6 +224,7 @@ void MenuNoInteractivo::dibujarPantallaCreditos(sf::RenderWindow& window) {
 }
 
 void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
+
     window.setView(window.getDefaultView());
 
     //CARGA DEL FONDO
@@ -246,13 +248,19 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
     textoRankingTitulo.setPosition(window.getSize().x / 2.0f, 80.f);
     window.draw(textoRankingTitulo);
 
-    //LEER EL ARCHIVO
+    //LEER EL ARCHIVO DE FORMA SEGURA (LÍNEA A LÍNEA)
     std::vector<RegistroPartida> listaPartidas;
     std::ifstream archivoLectura("ranking.txt");
     if (archivoLectura.is_open()) {
         RegistroPartida reg;
-        while (archivoLectura >> reg.nombre >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
-            listaPartidas.push_back(reg);
+        while (std::getline(archivoLectura, reg.nombre)) {
+            if (reg.nombre.empty()) continue; 
+
+            if (archivoLectura >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
+                listaPartidas.push_back(reg);
+            }
+
+            archivoLectura.ignore();
         }
         archivoLectura.close();
     }
@@ -328,7 +336,7 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
         int filaAct = i + 1; // Fila actual en la tabla
 
         //Color según el bando ganador
-        sf::Color colorTexto = (p.bando == "IMPERIUM") ? sf::Color::Cyan : sf::Color::Magenta;
+        sf::Color colorTexto = (p.bando == "IMPERIUM") ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad;
 
         //Formatear el string del tiempo
         int min = static_cast<int>(p.tiempo) / 60;
@@ -349,7 +357,7 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
     textoContinuar.setCharacterSize(40);
     textoContinuar.setOutlineColor(sf::Color::Black);
     textoContinuar.setFillColor(sf::Color::Yellow);
-    textoContinuar.setString("PULSA ESC PARA VOLVER AL MENU PRINCIPAL");
+    textoContinuar.setString("Pulsa ESC para volver al Menu Principal");
     sf::FloatRect rectC = textoContinuar.getLocalBounds();
     textoContinuar.setOrigin(rectC.left + rectC.width / 2.0f, rectC.top + rectC.height / 2.0f);
     textoContinuar.setPosition(window.getSize().x / 2.0f, window.getSize().y - 60.f);
