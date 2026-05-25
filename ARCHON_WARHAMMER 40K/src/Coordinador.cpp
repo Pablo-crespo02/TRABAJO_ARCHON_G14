@@ -233,11 +233,12 @@ void Coordinador::gestionarEventos() {
                     std::ofstream archivoEscritura("ranking.txt", std::ios::app); 
                     if (archivoEscritura.is_open()) {
                         std::string bandoGanador = (motor.getGanador() == 1) ? "IMPERIUM" : "XENOS";
-                        // Guardamos las variables separadas por espacios de forma estructurada
-                        archivoEscritura << menuNombre->getNombre() << " "
-                            << bandoGanador << " "
-                            << motor.getPuntosLuz() << " "
-                            << motor.getPuntosOscuridad() << " "
+
+                        // Guardamos cada variable en una línea independiente
+                        archivoEscritura << menuNombre->getNombre() << "\n"
+                            << bandoGanador << "\n"
+                            << motor.getPuntosLuz() << "\n"
+                            << motor.getPuntosOscuridad() << "\n"
                             << motor.getTiempoJugado() << "\n";
 
                         archivoEscritura.close();

@@ -224,6 +224,7 @@ void MenuNoInteractivo::dibujarPantallaCreditos(sf::RenderWindow& window) {
 }
 
 void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
+
     window.setView(window.getDefaultView());
 
     //CARGA DEL FONDO
@@ -247,13 +248,19 @@ void MenuNoInteractivo::dibujarPantallaRanking(sf::RenderWindow& window) {
     textoRankingTitulo.setPosition(window.getSize().x / 2.0f, 80.f);
     window.draw(textoRankingTitulo);
 
-    //LEER EL ARCHIVO
+    //LEER EL ARCHIVO DE FORMA SEGURA (LÍNEA A LÍNEA)
     std::vector<RegistroPartida> listaPartidas;
     std::ifstream archivoLectura("ranking.txt");
     if (archivoLectura.is_open()) {
         RegistroPartida reg;
-        while (archivoLectura >> reg.nombre >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
-            listaPartidas.push_back(reg);
+        while (std::getline(archivoLectura, reg.nombre)) {
+            if (reg.nombre.empty()) continue; 
+
+            if (archivoLectura >> reg.bando >> reg.puntosLuz >> reg.puntosOscuridad >> reg.tiempo) {
+                listaPartidas.push_back(reg);
+            }
+
+            archivoLectura.ignore();
         }
         archivoLectura.close();
     }
