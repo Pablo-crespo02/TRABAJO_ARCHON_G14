@@ -250,7 +250,7 @@ void Coordinador::gestionarEventos() {
         }
         //Pantalla de victoria
         else if (estadoActual == Estado::Victoria) {
-            if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
+            if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
                 estadoActual = Estado::MenuPrincipal;
                 motor.reiniciarJuego();
             }
