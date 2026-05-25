@@ -39,8 +39,8 @@ void MenuNombre::configurarGanador(int ganador) {
 }
 
 void MenuNombre::procesarTexto(sf::Uint32 unicode) {
-    // Si pulsa un carácter válido (letras, números, espacios) y no supera 12 caracteres
-    if (unicode < 128 && unicode > 31 && nombreActual.size() < 12) {
+    // Si pulsa un carácter válido (letras, números, espacios) y no supera 24 caracteres
+    if (unicode < 128 && unicode > 31 && nombreActual.size() < 24) {
         nombreActual += std::toupper(static_cast<char>(unicode));
     }
 }

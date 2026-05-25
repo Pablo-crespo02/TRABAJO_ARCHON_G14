@@ -139,7 +139,11 @@ void Coordinador::gestionarEventos() {
 
                     case 6: // CARGAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = false;
-                        pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+                        std::vector<bool> estadosOcupacion(8);
+                        for (int i = 0; i < 8; i++) {
+                            estadosOcupacion[i] = ranuras[i].ocupada;
+                        }
+                        pantallaCarga->actualizarTextosRanuras(estadosOcupacion);
                         estadoActual = Estado::SeleccionCarga;
                         break;
                     }
@@ -162,25 +166,34 @@ void Coordinador::gestionarEventos() {
 
                 if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
                     int selPausa = menuPausa->getIndiceSeleccionado();
-                    switch (selPausa) {
+
+                    // ESTRATEGIA NUEVA: Declaramos la variable ANTES del switch
+                    // Así nos libramos del error C2360 para siempre
+                    std::vector<bool> estadosOcupacion(8);
+
+                    switch (selPausa)
+                    {
                     case 0: estadoActual = estadoAnterior; break; // REANUDAR
                     case 1: reiniciarPartida(); estadoActual = Estado::Tablero; break; // REINICIAR
                     case 2: estadoActual = Estado::MenuPrincipal; break; // VOLVER AL MENU
-                    case 3: { 
+                    case 3:
                         estadoAnterior = Estado::Pausa;
-                        estadoActual = Estado::Instrucciones; break; 
-                    } // INSTRUCCIONES
+                        estadoActual = Estado::Instrucciones;
+                        break;
 
                     case 4: // GUARDAR PARTIDA (Lleva al menú de ranuras)
                         modoGuardar = true;
-                        pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+                        for (int i = 0; i < 8; i++) {
+                            estadosOcupacion[i] = ranuras[i].ocupada;
+                        }
+                        pantallaCarga->actualizarTextosRanuras(estadosOcupacion);
                         estadoActual = Estado::SeleccionGuardar;
                         break;
 
                     case 5: // SALIR AL ESCRITORIO
                         window.close();
                         break;
-                    }
+                    } 
                 }
             }
         }
@@ -200,13 +213,17 @@ void Coordinador::gestionarEventos() {
 
                 if (evento.key.code == sf::Keyboard::Enter) {
                     int ranura = pantallaCarga->getIndiceSeleccionado();
-                    if (ranura == 3) { // Opción "VOLVER"
+                    if (ranura == 8) { // Opción "VOLVER" (índice 8)
                         estadoActual = (estadoActual == Estado::SeleccionGuardar) ? Estado::Pausa : Estado::MenuPrincipal;
-                        }
+                    }
                     else {
                         if (estadoActual == Estado::SeleccionGuardar) {
                             this->guardarEnRanura(ranura);
-                            pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
+
+                            // Refrescamos los textos usando el nuevo formato de vector
+                            std::vector<bool> estadosOcupacion(8);
+                            for (int i = 0; i < 8; i++) estadosOcupacion[i] = ranuras[i].ocupada;
+                            pantallaCarga->actualizarTextosRanuras(estadosOcupacion);
                             estadoActual = Estado::Pausa;
                         }
                         else {
@@ -218,7 +235,7 @@ void Coordinador::gestionarEventos() {
             }
         } 
         //Menu Nombre
-        if (estadoActual == Estado::Nombre) {
+        else if (estadoActual == Estado::Nombre) {
             if (evento.type == sf::Event::TextEntered) {
                 if (evento.text.unicode == '\b') {
                     menuNombre->borrarLetra();
@@ -261,7 +278,6 @@ void Coordinador::gestionarEventos() {
         }
     } // Cierra el while
 } // Cierra la función gestionarEventos
-
 void Coordinador::dibujar() {
     window.clear();
 
@@ -449,7 +465,7 @@ void Coordinador::cargarDatosDeFichero() {
         return;
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 8; i++) {
         if (!(archivo >> ranuras[i].ocupada))break;
        
         if (ranuras[i].ocupada) {
@@ -512,7 +528,7 @@ void Coordinador::guardarDatosEnFichero() {
         return;
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 8; i++) {
         archivo << ranuras[i].ocupada << " ";
         if (ranuras[i].ocupada) {
             // Guardar el estado global
