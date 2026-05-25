@@ -11,10 +11,18 @@
 #include "MenuNombre.h"
 #include "Motor.h" 
 #include <fstream> //para fichero de guardar partida
+//Creamos DatosPiezaLigera para "Lazy Loading" y asi optimizar la carga
+struct DatosPiezaLigera {
+    int bando;
+    int posX;
+    int posY;
+    float vida;
+    std::string nombre;
+};
 
 struct DatosGuardados {
     bool ocupada = false;
-    std::vector<Pieza*> piezas;
+    std::vector<DatosPiezaLigera> piezasLigeras;
     int ronda = 1;      
     int ciclo = 1;    
     int jugador = 1;
