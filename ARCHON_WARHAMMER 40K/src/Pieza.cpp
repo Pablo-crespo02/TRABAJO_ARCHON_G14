@@ -201,3 +201,19 @@ void Pieza::actualizarFlash(float dt) {
         spriteArena.setColor(sf::Color(255, 255, 255, spriteArena.getColor().a));
     }
 }
+
+void Pieza::intentarUsarHechizo(std::vector<Hitbox>& Hitboxes, Pieza* enemigo) {
+    // Regla 1: ¿Tengo cargas en la ronda?
+    // Regla 2: ¿He usado mi "cupo" en este combate específico?
+    if (hechizosRestantes > 0 && !usadoEnEstaArena) {
+        usarHechizo(Hitboxes, enemigo);
+
+        hechizosRestantes--; // Restamos 1 carga de la ronda
+        usadoEnEstaArena = true; // Bloqueamos uso adicional en este combate
+
+        std::cout << "Hechizo usado. Quedan " << hechizosRestantes << " cargas para la ronda." << std::endl;
+    }
+    else {
+        std::cout << "No puedes lanzar el hechizo (Sin cargas o ya usado en este combate)." << std::endl;
+    }
+}

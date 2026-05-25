@@ -70,6 +70,10 @@ protected:
     sf::Sprite spriteTablero;
     sf::Sprite spriteArena;
 
+    //Texto arena sin hechizos
+    sf::Text textoAviso;
+    sf::Font fuente;
+
     //VARIABLE HIT FLASH
     float temporizadorFlashDano = 0.f;
 
@@ -82,7 +86,8 @@ protected:
     int anchoFrame = 0;
     int altoFrame = 0;
 
-
+    int hechizosRestantes = 3; //Para limitar los hechizos por ronda
+    bool usadoEnEstaArena = false; //para limitar su uso a 1 vez por arena
 
 public:
     Stats stats;
@@ -168,12 +173,39 @@ public:
             ultimadireccion = nuevadireccion;
         }
     }
-    bool getHechizoDisponible() const { return hechizoDisponible; }
-    void setHechizoDisponible(bool estado) { hechizoDisponible = estado; }
-    // Función virtual. Pasamos el vector de Hitboxes y el enemigo por si el hechizo es de daño o control
-    // OJO: Le ponemos "{}" al final y no "= 0" para que sea opcional. Así las piezas a las 
-    // que aún no les hayas programado hechizo no darán error de compilación.
+
+    int getHechizosRestantes() const {
+        return hechizosRestantes;
+    }
+    void resetearUsoArena() { usadoEnEstaArena = false; }
+
+    bool puedeLanzar() const { return hechizosRestantes > 0 && !usadoEnEstaArena; }
+    //Limite de 3 hechizos por ronda cada pieza
     virtual void usarHechizo(std::vector<Hitbox>& contenedordeAtaques, Pieza* enemigo) {}
+
+    void resetearHechizos() { hechizosRestantes = 3; }
+
+    void intentarUsarHechizo(std::vector<Hitbox>& Hitboxes, Pieza* enemigo);
+       
+    //Aviso que salta cuando te quedas sin hechizops
+    void configurarAviso() {
+        fuente.loadFromFile("fuentes/fuente_pixel.ttf");
+        textoAviso.setFont(fuente);
+        textoAviso.setString("SIN HECHIZOS");
+        textoAviso.setFillColor(sf::Color::Blue);
+        textoAviso.setCharacterSize(14);
+    }
+    
+    void dibujarAviso(sf::RenderWindow& window, sf::Vector2f pos) {
+        if (!puedeLanzar()) {
+            // Colocamos el texto un poco por encima de la posición dada
+            textoAviso.setPosition(pos.x, pos.y - 50);
+            window.draw(textoAviso);
+        }
+    }
+
+    virtual std::string getDescripcionHechizo() const { return "Hechizo basico de unidad"; }
+
     virtual void actualizarMinions(float dt, Arena& arena, Pieza* enemigo,std::vector<Hitbox>& hitboxes) {}
     virtual void limpiarMinions() {}
     virtual std::vector<Pieza*>& getMinionsInvocados() {

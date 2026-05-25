@@ -30,6 +30,10 @@ private:
     std::vector<Hitbox> Hitboxes;
     double limitecolision = 36;
 
+    float tiempoAviso = 0.f;      // Tiempo restante del mensaje en pantalla
+    sf::Vector2f posAviso;        // Dónde dibujar el mensaje
+    bool mostrarAviso = false;    // ¿Debemos dibujar el mensaje?
+
     //--Sistema de puntuación
     int puntosLuz = 0;
     int puntosOscuridad = 0;

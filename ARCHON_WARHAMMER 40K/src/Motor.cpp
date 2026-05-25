@@ -174,7 +174,10 @@ void Motor::intentarAccionJugador(int idJugador) {
             if (cicloActual > 12) {
                 cicloActual = 1;
                 rondaActual++;
-                std::cout << "\n--- NUEVA RONDA: " << rondaActual << " ---\n" << std::endl;
+                std::cout << "\n--- NUEVA RONDA: " << rondaActual << " - HECHIZOS RECARGADOS ---\n" << std::endl;
+                for (auto& pieza : listaPiezas) {
+                    pieza->resetearHechizos();
+                }
             }
 
             tablero.actualizarColores(cicloActual);
@@ -269,13 +272,14 @@ void Motor::VerificarVictoria() {
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
+    //Reiniciamos los hechizos
+    piezaAtacante->resetearUsoArena();
+    piezaDefensor->resetearUsoArena();
+
     // Limpia estados de selección previos
     piezaAtacante->setSeleccionado(false);
     piezaDefensor->setSeleccionado(false);
 
-    //Recarga el hechizo al entrar en la arena
-    piezaAtacante->setHechizoDisponible(true);
-    piezaDefensor->setHechizoDisponible(true);
 
     // Definine los puntos de spawn fijos
     sf::Vector2f spawnIzquierda(150.f, 300.f);
@@ -491,10 +495,11 @@ void Motor::actualizar(double dt) {
 
     // Lanzar Hechizo Luz (Tecla Q)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-        if (pLuz->getHechizoDisponible()) {
-            pLuz->usarHechizo(Hitboxes, pOsc);
-            pLuz->setHechizoDisponible(false);
-            std::cout << pLuz->stats.nombre << " hizo uso de su hechizo!" << std::endl;
+        if (pLuz->puedeLanzar()) {
+            pLuz->intentarUsarHechizo(Hitboxes, pOsc);
+        }
+        else {
+            std::cout << "Ya has usado el hechizo o no te quedan cargas" << std::endl;
         }
     }
     // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
@@ -502,15 +507,17 @@ void Motor::actualizar(double dt) {
     if (pLuz != nullptr) {
         pLuz->actualizarMinions(dt, this->arena, pOsc, Hitboxes); 
     }
+
     // OSCURIDAD: Flechitas, disparo con ENTER, inicialmente mira a la izq
     procesarInput(pOsc, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Enter, sf::Vector2f(-1.f, 0.f));
 
     // Lanzar Hechizo Oscuridad (Tecla M)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
-        if (pOsc->getHechizoDisponible()) {
-            pOsc->usarHechizo(Hitboxes, pLuz);
-            pOsc->setHechizoDisponible(false);
-            std::cout << pOsc->stats.nombre << " hizo uso de su hechizo!" << std::endl;
+        if (pOsc->puedeLanzar()) {
+            pOsc->intentarUsarHechizo(Hitboxes, pLuz);
+        }
+        else {
+            std::cout << "Ya has usado el hechizo o no te quedan cargas" << std::endl;
         }
     }
     

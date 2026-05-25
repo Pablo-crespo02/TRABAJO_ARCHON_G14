@@ -81,7 +81,6 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     // --- DATOS DE LA PIEZA ---
 
     if (seleccionada != nullptr) {
-       // --- TÍTULO DE LA UNIDAD (Estilo THUNDERHAWK) ---
         sf::Text textoNombre;
         textoNombre.setFont(*fuente);
         textoNombre.setCharacterSize(55); // Aumentado para que destaque como en la foto
@@ -136,8 +135,6 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
         dibujarDato(window, "VALOR PTS:", std::to_string(ptsValor), margenX, yActual, sf::Color(150, 255, 150));
 
-        // Velocidad de Ataque
-        dibujarDato(window, "VEL. ATQ:", std::to_string((int)seleccionada->stats.velAtaque), margenX, yActual, sf::Color::White);
 
         // Patrón de movimiento
         std::string pTxt = "";
@@ -148,6 +145,19 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         default:                          pTxt = "OTRO";                      break;
         }
         dibujarDato(window, "PATRON:", pTxt, margenX, yActual, sf::Color(255, 255, 150));
+
+        //Hechizos
+
+        // 1. Contador de hechizos restantes
+        int restantes = seleccionada->getHechizosRestantes();
+        sf::Color colHechizo = (restantes > 0) ? sf::Color(100, 200, 255) : sf::Color::Red;
+
+        dibujarDato(window, "HECHIZOS:", std::to_string(restantes) + " / 3", margenX, yActual, colHechizo);
+
+        // 2. Descripción del hechizo
+        // Nota: Si quieres que el texto sea pequeño, ajusta la lógica de dibujarDato
+        // o crea una llamada específica para texto largo.
+        dibujarDato(window, "EFECTO:", seleccionada->getDescripcionHechizo(), margenX, yActual, sf::Color(200, 200, 200));
     }
 
     // 3.MARCADOR DE PUNTOS EN EL TABLERO (ABAJO A LA IZQUIERDA) 
