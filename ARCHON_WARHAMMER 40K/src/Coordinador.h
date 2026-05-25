@@ -38,7 +38,7 @@ private:
     std::string nombreGanador = "";
     bool modoGuardar = false;
     bool partidaEnCurso = false;
-    DatosGuardados ranuras[8];
+    DatosGuardados ranuras[3];
 
     // FICHERO
     void guardarDatosEnFichero();

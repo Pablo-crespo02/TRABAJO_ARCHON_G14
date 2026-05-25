@@ -9,7 +9,7 @@ private:
     sf::Text textoTitulo;
     std::vector<sf::Text> opciones;
     int indiceSeleccionado;
-    const int NUM_RANURAS = 9; // Ranuras 1,2,3,4,5,6,7,8 y volver
+    const int NUM_RANURAS = 4; // Ranura 1, 2, 3 y volver
 
 public:
     PantallaCarga(sf::Font& font, sf::Vector2u tamanoVentana);
@@ -17,6 +17,6 @@ public:
     void moverArriba();
     void moverAbajo();
     int getIndiceSeleccionado() const { return indiceSeleccionado; }
-    void actualizarTextosRanuras(const std::vector<bool>& ocupadas);
+    void actualizarTextosRanuras(bool r1, bool r2, bool r3);
 };
 
