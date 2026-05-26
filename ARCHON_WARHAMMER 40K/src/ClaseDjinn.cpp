@@ -28,13 +28,13 @@ ClaseDjinn::ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo)
     }
 }
 void ClaseDjinn::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
-    PiezaTeletransporte::procesarMovimientoArena(direccion, dt, arena);
-
     //Actualizamos la imagen visible con nuestra máquina de estados
     if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
         Pieza::Animar(dt, direccion);
     }
+        
+    //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
+    PiezaTeletransporte::procesarMovimientoArena(direccion, dt, arena);
 }
 
 void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
@@ -57,29 +57,13 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
-            if (seleccionado) {
-                formaVisual.setOutlineThickness(4.0f);
-                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
-            }
-            else {
-                formaVisual.setOutlineThickness(0.0f);
-            }
-            window.draw(formaVisual);
-        }
     }
     else if (estadoActual == Estado::Arena) {
         if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            window.draw(formaVisual);
-        }
-
+       
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
 
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);

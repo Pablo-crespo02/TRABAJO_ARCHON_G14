@@ -10,12 +10,6 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     seleccionado = false;
     hechizoDisponible = true;
 
-    // Inicialización visual básica
-    formaVisual.setRadius(20.f);
-    formaVisual.setOrigin(20.f, 20.f);
-
-    // Las stats y el rango se llenarán en el constructor de la clase hija
-    formaVisual.setFillColor(sf::Color::Magenta);
 }
 
 // SINCRONIZACIÓN VISUAL
@@ -28,7 +22,6 @@ void Pieza::sincronizarPosicionTablero() {
 
     // Guardamos la posición y movemos el sprite o forma
     posicionAbsoluta = sf::Vector2f(px, py);
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // MOVIMIENTO EN EL TABLERO
@@ -41,7 +34,6 @@ void Pieza::mover(sf::Vector2i destino) {
 void Pieza::moverEnArena(float dx, float dy) {
     posicionAbsoluta.x += dx;
     posicionAbsoluta.y += dy;
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // DETECTAR CONFLICTO (Combate)

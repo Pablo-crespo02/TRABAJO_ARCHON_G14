@@ -49,8 +49,7 @@ protected:
     sf::Clock relojAtaque;
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
-    sf::CircleShape formaVisual;
-
+   
     bool hechizoDisponible;//Hechizo sólo una vez por combate
     //Hechizo del basilisco, va en pieza y no en ClaseUnicornio porque la inmovilización puede afectar a cualquier pieza no a sí misma:
     bool inmovilizado = false;
@@ -133,10 +132,6 @@ public:
 
     Bando getBando() const { return bando; }
 
-    sf::Color getColorVisual() const {
-        return formaVisual.getFillColor();
-    }
-
     sf::FloatRect getHitbox() const {
         return sf::FloatRect(posicionAbsoluta.x - 15.f, posicionAbsoluta.y - 15.f, 30.f, 30.f);
     }
@@ -158,8 +153,6 @@ public:
     // Setter para la posición en la arena
     void setPosicionAbsoluta(sf::Vector2f nuevaPos) {
         posicionAbsoluta = nuevaPos;
-        formaVisual.setPosition(posicionAbsoluta); // Actualizamos la forma visual al instante
-    
     }
 
     //Setter para establecer tiempos de recarga diferentes para cada pieza:
