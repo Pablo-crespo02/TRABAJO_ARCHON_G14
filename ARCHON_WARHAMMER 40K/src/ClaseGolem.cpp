@@ -26,14 +26,10 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     //CARGA DE SPRITES
     cargarConfigurarSprites(tipo);
 
-    //REGISTRO DE ANIMACIONES EN EL DICCIONARIO:
     if (animador) {
-        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
-        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
         animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
-        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
-        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
+
 }
 
 //ENLACE DE FÍSICAS Y ANIMACIÓN
@@ -43,46 +39,7 @@ void ClaseGolem::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
 
     //Actualizamos la imagen visible con nuestra máquina de estados
     if (this->stats.nombre == "DREADNOUGHT" || this->stats.nombre == "CARNIFEX") {
-        animar(dt, direccion);
-    }
-}
-
-void ClaseGolem::animar(float dt, sf::Vector2f direccion) {
-    if (!animador) return;
-
-    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
-    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
-
-    if (estaAtacando) {
-        animador->jugar("ATAQUE");
-    }
-    else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
-    }
-    else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
-    }
-    else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
-    }
-    else {
-        animador->jugar("QUIETO");
-    }
-
-    actualizarAnimacion(dt);
-
-    //ARREGLO DEL EFECTO ESPEJO
-    float escalaArena = piezaAlturaArena / altoFrame;
-    if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
-    }
-    else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
-    }
-    else {
-        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
-        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
-        spriteArena.setScale(escalaActualX, escalaArena);
+        Pieza::Animar(dt, direccion);
     }
 }
 
@@ -106,28 +63,14 @@ void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
-            if (seleccionado) {
-                formaVisual.setOutlineThickness(4.0f);
-                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
-            }
-            else {
-                formaVisual.setOutlineThickness(0.0f);
-            }
-            window.draw(formaVisual);
-        }
+        
     }
     else if (estadoActual == Estado::Arena) {
         if (this->stats.nombre == "DREADNOUGHT" || this->stats.nombre == "CARNIFEX") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            window.draw(formaVisual);
-        }
+      
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);

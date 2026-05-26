@@ -5,7 +5,8 @@
 Hitbox::Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapidez, sf::Color color,
     Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
     bool esDoT, bool erratico, bool inmoviliza, double duracionControl,
-    bool esGranadaParam, double radioExp) {
+    bool esGranadaParam, double radioExp,
+    bool empuja, float fuerza, bool ralentiza, double factorRal, double duracionRal) {
     forma.setRadius(radio);
     forma.setOrigin(radio, radio);
     forma.setPosition(posicionInicial);
@@ -51,6 +52,16 @@ Hitbox::Hitbox(sf::Vector2f posicionInicial, sf::Vector2f direccion, double rapi
     explotando = false;
     yaDanoAtacante = false;
     yaDanoDefensor = false;
+
+    //Empuje Valkyria
+    this->causaEmpuje = empuja;
+    this->fuerzaEmpuje = fuerza;
+
+    //Ralentización Gárgola:
+    this->causaRalentizacion = ralentiza;
+    this->factorRalentizacion = factorRal;
+    this->duracionRalentizacion = duracionRal;
+
 }
 
 void Hitbox::ActualizarHitbox(double dt) {

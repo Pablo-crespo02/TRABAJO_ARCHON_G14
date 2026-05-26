@@ -200,9 +200,8 @@ void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
         }
     }
 
-    // =========================================================================
-    // 2. EFECTO ESPEJO SEGURO (Usando la constante del Helicóptero)
-    // =========================================================================
+    
+    
     float escalaHeli = HELI_ALTURA_ARENA / altoFrame;
 
     if (direccion.x < 0.f) {

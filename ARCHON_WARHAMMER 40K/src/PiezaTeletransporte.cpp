@@ -1,7 +1,6 @@
 #include "PiezaTeletransporte.h"
 #include <cmath>
 
-
 PiezaTeletransporte::PiezaTeletransporte(Bando b, sf::Vector2i pos) : Pieza(b, pos) {}
 
 bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
@@ -28,36 +27,41 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
 }
 
 void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    //  Obtenemos el color actual de la pieza visual
-    sf::Color colorActual = formaVisual.getFillColor();
 
-    //Parálisis del basilisco:
-    this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
-    if (this->getInmovilizado()) return;//Si está paralizado, termina
+    // Parálisis del basilisco y gestión de ralentizaciones:
+    this->gestionarEstadosAlterados(static_cast<double>(dt));
+    if (this->getInmovilizado()) return; // Si está paralizado, termina
+
+    // Leemos el color y opacidad actuales del sprite en la arena
+    sf::Color colorSprite = spriteArena.getColor();
 
     // Si NO hay teclas de movimiento pulsadas (Dirección 0,0)
     if (direccion.x == 0.f && direccion.y == 0.f) {
         // La pieza reaparece (se vuelve totalmente opaca)
-        if (colorActual.a != 255) {
-            colorActual.a = 255;
-            formaVisual.setFillColor(colorActual);
+        if (colorSprite.a != 255) {
+            colorSprite.a = 255;
+            spriteArena.setColor(colorSprite);
         }
-        return; // Terminamos la función aquí porque no hay desplazamiento físico
+        return;
     }
 
-    //  Si se está moviendo, se vuelve invisible (translucido)->colorActual = 40    invisible ->colorActual = 0
-
-    if (colorActual.a != 0) {
-        colorActual.a = 40;//Si se pone a 0 desaparece
-        formaVisual.setFillColor(colorActual);
+    // Si se está moviendo, se vuelve invisible
+    if (colorSprite.a != 0) {
+        colorSprite.a = 0; // Si se pone a 0 desaparece completamente
+        spriteArena.setColor(colorSprite);
     }
 
-    // Movimiento a alta velocidad 
-    float velocidadTeletransporte = 500.f;
-    sf::Vector2f desplazamiento = direccion * velocidadTeletransporte * dt;
+    // Normalización de vector
+    float magnitud = std::hypot(direccion.x, direccion.y);
+    if (magnitud != 0.f) direccion /= magnitud;
+
+    float velocidadBase = 500.f;
+    // Aplicamos el factor de ralentización
+    float velocidadFinal = velocidadBase * this->multiplicadorVelocidadActual;
+
+    sf::Vector2f desplazamiento = direccion * velocidadFinal * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
 
-    // Ignora colisiones (como voladora)
     if (arena.esPosicionValida(nuevaPos, 20.f, true)) {
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }

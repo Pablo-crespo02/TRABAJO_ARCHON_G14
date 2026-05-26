@@ -29,60 +29,6 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     //CARGA DE SPRITES (Chibi)
     cargarConfigurarSprites(tipo);
 
-
-        std::string rutaTablero = (tipo == "ASSAULT MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
-        }
-
-        else {
-
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-       
-
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-
-        else {
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-        
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
-
-    // 4. REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO
-    if (animador) {
-        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
-        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
-        animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
-        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
-        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
-
-    }
 }
 
 //ENLACE DE FÍSICAS Y ANIMACIÓN
@@ -91,6 +37,7 @@ void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Ar
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
+
     if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
         animar(dt, direccion);
     }
@@ -134,6 +81,7 @@ void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
         //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
         float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
         spriteArena.setScale(escalaActualX, escalaArena);
+
     }
 }
 
@@ -157,28 +105,14 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
-            if (seleccionado) {
-                formaVisual.setOutlineThickness(4.0f);
-                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
-            }
-            else {
-                formaVisual.setOutlineThickness(0.0f);
-            }
-            window.draw(formaVisual);
-        }
+       
     }
     else if (estadoActual == Estado::Arena) {
         if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            window.draw(formaVisual);
-        }
+       
 
         //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
@@ -187,12 +121,36 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     }
 }
 void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // El Golem se repara a sí mismo (Heal)
-    float curacion = 10.0f;
-    this->stats.vida += curacion;
+   
+    if (this->stats.nombre == "ASSAULT_MARINE") {
+        sf::Vector2f dirFija(0.f, 0.f);
 
-    // Evitamos que se cure por encima de su vida máxima
-    if (this->stats.vida > this->stats.vidaMaxima) {
-        this->stats.vida = this->stats.vidaMaxima;
+        hitboxes.emplace_back(
+            this->posicionAbsoluta,
+            dirFija,
+            0.0,
+            sf::Color(255, 255, 100, 160),         // Circulo amarillo
+            this,
+            0.0,                                   // No hace daño
+            3.0,                                   // AUMENTADO: El escudo dura 3 segundos activo
+            150.0,                                 // AUMENTADO: Un área generosa alrededor de la pieza
+            false, false, false, 0.0, false, 0.0,
+            true,                                  // causaEmpuje activado
+            600.0f                                 
+        );
+
+        this->stats.relojHabilidad.restart();
+        std::cout << "¡La Valkyria despliega un campo repulsor!" << std::endl;
+    }
+    else if (this->stats.nombre == "GARGOLA") {
+        // Calculamos la dirección hacia el enemigo para lanzar un proyectil (o puede ser estático)
+        sf::Vector2f dirAtaque = enemigo->getPosicionAbsoluta() - this->posicionAbsoluta;
+        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+        if (magnitud != 0.f) dirAtaque /= magnitud; // Normalizamos
+
+        enemigo->aplicarRalentizacion(0.5, 4.0); //50% de ralentización durante 4 segundos
+
+        this->stats.relojHabilidad.restart();
+        std::cout << "¡GARGOLA lanza una maldición que ralentiza al enemigo!" << std::endl;
     }
 }

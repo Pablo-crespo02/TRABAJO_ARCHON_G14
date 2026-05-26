@@ -26,15 +26,18 @@ bool PiezaVoladora::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& 
 void PiezaVoladora::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     if (direccion == sf::Vector2f(0.f, 0.f)) return;
 
-    //Parálisis del basilisco:
-    this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
-    if (this->getInmovilizado()) return;//Si está paralizado, termina
+    this->gestionarEstadosAlterados(static_cast<double>(dt));
+    if (this->getInmovilizado()) return;
 
-    float velocidad = 250.f; // Suelen ser más rápidas
-    sf::Vector2f desplazamiento = direccion * velocidad * dt;
+    float magnitud = std::hypot(direccion.x, direccion.y);
+    if (magnitud != 0.f) direccion /= magnitud;
+
+    float velocidadBase = 250.f;
+    float velocidadFinal = velocidadBase * this->multiplicadorVelocidadActual;
+
+    sf::Vector2f desplazamiento = direccion * velocidadFinal * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
 
-    // Se pasa 'true' porque es voladora (ignora obstáculos del suelo)
     if (arena.esPosicionValida(nuevaPos, 20.f, true)) {
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }

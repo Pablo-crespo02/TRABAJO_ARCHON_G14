@@ -10,12 +10,9 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     seleccionado = false;
     hechizoDisponible = true;
 
-    // Inicialización visual básica
-    formaVisual.setRadius(20.f);
-    formaVisual.setOrigin(20.f, 20.f);
-
-    // Las stats y el rango se llenarán en el constructor de la clase hija
-    formaVisual.setFillColor(sf::Color::Magenta);
+    // Inicialización de los estados alterados (Ralentización Gárgola)
+    this->tiempoRalentizado = 0.0;
+    this->multiplicadorVelocidadActual = 1.0;
 }
 
 // SINCRONIZACIÓN VISUAL
@@ -28,7 +25,6 @@ void Pieza::sincronizarPosicionTablero() {
 
     // Guardamos la posición y movemos el sprite o forma
     posicionAbsoluta = sf::Vector2f(px, py);
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // MOVIMIENTO EN EL TABLERO
@@ -41,7 +37,6 @@ void Pieza::mover(sf::Vector2i destino) {
 void Pieza::moverEnArena(float dx, float dy) {
     posicionAbsoluta.x += dx;
     posicionAbsoluta.y += dy;
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // DETECTAR CONFLICTO (Combate)
@@ -66,17 +61,21 @@ bool Pieza::puedeAtacar() const {
     }
     return false;
 }
+
 void Pieza::reiniciarRelojHitbox() {
-   stats.relojHitbox.restart();
-   barrasArena.reiniciarRecarga();
+    stats.relojHitbox.restart();
+    barrasArena.reiniciarRecarga();
 }
+
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
     inmovilizado = true;
     temporizadorInmovilizacion = duracion;
 }
+
 //Gestiona inmovilización e invulnerabilidad 
 void Pieza::gestionarEstadosAlterados(double dt) {
+    //parálisis basilisco
     if (inmovilizado) {
         temporizadorInmovilizacion -= dt;
         if (temporizadorInmovilizacion <= 0.0) {
@@ -84,17 +83,47 @@ void Pieza::gestionarEstadosAlterados(double dt) {
             temporizadorInmovilizacion = 0.0;
         }
     }
+    //invulnerabildiad unicornio
     if (invulnerable) {
         temporizadorInvulnerabilidad -= dt; // Restamos el tiempo por frame
         if (temporizadorInvulnerabilidad <= 0.0) {
             invulnerable = false;
         }
     }
+    //ralentización Gárgola
+    if (tiempoRalentizado > 0.0) {
+        tiempoRalentizado -= dt;
+        if (tiempoRalentizado <= 0.0) {
+            tiempoRalentizado = 0.0;
+            // Restauramos la velocidad a la normalidad (100%)
+            multiplicadorVelocidadActual = 1.0;
+        }
+    }
 }
+
 //Invulnerabilidad del unicornio: (la activa y controla el tiempo)
 void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
     temporizadorInvulnerabilidad = duracion;
+}
+
+//Ralentización de la Gárgola:
+void Pieza::aplicarRalentizacion(double factor, double duracion) {
+    // Si ya estaba ralentizado, se sobreescribe con el nuevo valor. 
+    this->multiplicadorVelocidadActual = factor;
+    this->tiempoRalentizado = duracion;
+}
+
+void Pieza::actualizarEstadosAlterados(double dt) {
+    if (this->tiempoRalentizado > 0.0) {
+        this->tiempoRalentizado -= dt;
+
+        // Si el tiempo se agota, restauramos la velocidad base
+        if (this->tiempoRalentizado <= 0.0) {
+            this->tiempoRalentizado = 0.0;
+            this->multiplicadorVelocidadActual = 1.0;
+        }
+    }
 }
 
 //SPRITES Y ANIMACIONES:
@@ -152,7 +181,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         spriteTablero.setScale(escalaTablero, escalaTablero);
     }
 
-    //Gestión de la carga de la textura y el sprite de la ARENA:
+    //Gestión de la carga de la textura, sprite y animaciones de la ARENA:
     if (!texturaArena.loadFromFile(rutaArena)) {
         std::cout << "ERROR: TEXTURA NO ENCONTRADA ARENA: " << rutaArena << std::endl;
     }
@@ -180,11 +209,59 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         //Vincula "AnimadorSprites" con el sprite de la arena, su alto y su ancho.
         //Los punteros inteligentes se eliminan automáticamente de la RAM cuando la pieza el eliminada, evitando fugas de memoria.
         animador = std::make_unique<AnimadorSprites>(spriteArena, anchoFrame, altoFrame);
-        
-        animador->   jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
+
+        animador->jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
+
+        //Registro de animaciones comunes:
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
+
+        animador->jugar("QUIETO"); //animación default, la pieza está quieta
+    }
+}
+
+//MÉTODO DE ANIMAR GENÉRICO DE APLICACIÓN PARA TODAS LAS PIEZAS, ARREGLO DEL EFECTO ESPEJO: COMENTAR!!!!!!!!!!!!
+void Pieza::Animar(float dt, sf::Vector2f direccion) {
+    if (!animador) return;
+
+    //Comprobamos el reloj interno compartido por todas las piezas:
+    bool estaAtacando = (stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f); //Por qué compara el reloj con 0.2 en vezde otro valor?
+
+    if (estaAtacando) {
+        animador->jugar("ATAQUE");
+    }
+    else if (direccion.x != 0) {
+        animador->jugar("CAMINAR_LATERAL");
+    }
+    else if (direccion.y > 0) {
+        animador->jugar("ABAJO");
+    }
+    else if (direccion.y < 0) {
+        animador->jugar("ARRIBA");
+    }
+    else {
+        animador->jugar("QUIETO");
     }
 
+    actualizarAnimacion(dt);
+
+    //Arreglo del efecto espejo genérico: ¿qué es el efecto espejo que se está arreglando? ¿CÓMO FUNCIONA?
+    float escalaArena = piezaAlturaArena / altoFrame;
+    if (direccion.x < 0) {
+        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
+    }
+    else if (direccion.x > 0) {
+        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
+    }
+    else {
+        // Respeta la dirección actual
+        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
+        spriteArena.setScale(escalaActualX, escalaArena);
+    }
 }
+
 void Pieza::actualizarAnimacion(double dt) {
     if (animador) animador->actualizar(dt);
 }

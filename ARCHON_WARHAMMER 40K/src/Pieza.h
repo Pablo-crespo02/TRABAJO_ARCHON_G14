@@ -49,8 +49,7 @@ protected:
     sf::Clock relojAtaque;
     sf::Vector2i posicionTablero;
     sf::Vector2f posicionAbsoluta;
-    sf::CircleShape formaVisual;
-
+   
     bool hechizoDisponible;//Hechizo sólo una vez por combate
     //Hechizo del basilisco, va en pieza y no en ClaseUnicornio porque la inmovilización puede afectar a cualquier pieza no a sí misma:
     bool inmovilizado = false;
@@ -58,6 +57,9 @@ protected:
     //Hechizo del unicornio, se vuelve invulnerable:
     bool invulnerable = false;
     double temporizadorInvulnerabilidad = 0.0;
+    // Hechizo Gárgola, ralentiza al contrario:
+    double tiempoRalentizado = 0.0;
+    double multiplicadorVelocidadActual = 1.0; //100% de su velocidad en la inicialización
 
     // Amistades para que el Renderizador y el Motor sigan funcionando sin cambios pesados
     friend class Motor;
@@ -126,16 +128,16 @@ public:
 
     //Invulnerabilidad del unicornio:
     bool getInvulnerable() const { return invulnerable; }
-    void aplicarInvulnerabilidad(double duracion);
+    void aplicarInvulnerabilidad(double duracion); 
+
+    //Ralentización de la Gárgola:
+    void aplicarRalentizacion(double factor, double duracion); //Recibe el Hechizo
+    void actualizarEstadosAlterados(double dt); //Temporizador para la gárgola
 
     //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
     sf::Vector2i getPosicionTablero() const { return posicionTablero; }
 
     Bando getBando() const { return bando; }
-
-    sf::Color getColorVisual() const {
-        return formaVisual.getFillColor();
-    }
 
     sf::FloatRect getHitbox() const {
         return sf::FloatRect(posicionAbsoluta.x - 15.f, posicionAbsoluta.y - 15.f, 30.f, 30.f);
@@ -158,8 +160,6 @@ public:
     // Setter para la posición en la arena
     void setPosicionAbsoluta(sf::Vector2f nuevaPos) {
         posicionAbsoluta = nuevaPos;
-        formaVisual.setPosition(posicionAbsoluta); // Actualizamos la forma visual al instante
-    
     }
 
     //Setter para establecer tiempos de recarga diferentes para cada pieza:
@@ -216,6 +216,9 @@ public:
     void cargarConfigurarSprites(const std::string& tipo);
 
     void actualizarAnimacion(double dt);
+
+    //´MÉTODP DE ANIMAR GENÉRICO PARA TODAS LAS PIEZAS:
+    void Animar(float dt, sf::Vector2f direccion);
 
     //FUNCIONES HIT FLASH
     void activarFlashDano() { temporizadorFlashDano = 0.15f; } // Dura 0.15 segundos

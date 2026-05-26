@@ -538,7 +538,8 @@ void Motor::actualizar(double dt) {
         fenixDefensor->actualizarLogicaHechizo(dt);
     }
 
-    //////////// 4. BUCLE DE ACTUALIZACION Y COLISIONES DE HITBOXES (LIMPIO) /////////
+    // 4. Hitbox de las colisiones:
+
     for (size_t i = 0; i < Hitboxes.size(); ++i) {
 
         Hitboxes[i].ActualizarHitbox(dt);
@@ -547,8 +548,14 @@ void Motor::actualizar(double dt) {
         sf::Vector2f posH = Hitboxes[i].getPosicionHitbox();
         float radioH = Hitboxes[i].getFormaHitbox().getRadius();
 
+        // Obtenemos el vector de velocidad. 
+        // Si ambos componentes son 0, es un ataque melee o área estática.
+        sf::Vector2f velH = Hitboxes[i].getVelocidadHitbox();
+        bool esEstaticoOMelee = (velH.x == 0.f && velH.y == 0.f);
+
         // Colisión con el escenario
-        if (!arena.esPosicionValida(posH, radioH, false)) {
+        // Se ignoran los muros si es un campo de empuje o un ataque melee (rapidez 0).
+        if (!Hitboxes[i].getCausaEmpuje() && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, false)) {
             if (Hitboxes[i].getEsErratico()) {
                 Hitboxes[i].rebotar();
                 posH = Hitboxes[i].getPosicionHitbox();
@@ -562,7 +569,7 @@ void Motor::actualizar(double dt) {
             }
         }
 
-        // --- 4.1: COLISIÓN TRADICIONAL CONTRA LOS HÉROES (SOLO PROYECTILES/GRANADAS) ---
+        // 4.1 Colisión contra héroes (granadas, hechizos, etc).
         Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
         for (Pieza* obj : objetivos) {
             if (!obj) continue;
@@ -615,14 +622,47 @@ void Motor::actualizar(double dt) {
                     }
                     if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                     else Hitboxes[i].setYaDanoDefensor(true);
-
+                    //Inmovilización Basilisco
                     if (Hitboxes[i].getCausaInmovilizacion()) { obj->aplicarInmovilizacion(Hitboxes[i].getDuracionCC()); }
-
+                    // Ralentización Gárgola
+                    if (Hitboxes[i].getCausaRalentizacion()) {
+                        obj->aplicarRalentizacion(
+                            Hitboxes[i].getFactorRalentizacion(),
+                            Hitboxes[i].getDuracionRalentizacion()
+                        );
+                        
+                    }
                     sf::Vector2f vel = Hitboxes[i].getVelocidadHitbox();
                     if (vel.x != 0.f || vel.y != 0.f) { Hitboxes[i].setEstadoHitbox(false); }
                 }
+                // --- EVALUACIÓN FÍSICA CONTINUA (EMPUJE) ---
+                // Al colocar esto aquí, el motor aplica la fuerza en cada frame (dt) 
+                // independientemente de si la pieza ya recibió daño inicial o no.
+                if (Hitboxes[i].getCausaEmpuje()) {
+                    sf::Vector2f dirEmpuje = obj->getPosicionAbsoluta() - Hitboxes[i].getPosicionHitbox();
+                    float mag = std::hypot(dirEmpuje.x, dirEmpuje.y);
+
+                    if (mag == 0.f) {
+                        dirEmpuje = sf::Vector2f(1.f, 0.f);
+                        mag = 1.f;
+                    }
+
+                    dirEmpuje /= mag; // Normalización del vector
+
+                    // Desplazamiento frame a frame para generar resistencia constante
+                    float fuerzaDesplazamiento = Hitboxes[i].getFuerzaEmpuje() * dt;
+
+                    sf::Vector2f posPrueba = obj->getPosicionAbsoluta() + (dirEmpuje * fuerzaDesplazamiento);
+                    bool esVoladora = (obj->tipoMov == TipoMovimiento::Volador);
+
+                    if (arena.esPosicionValida(posPrueba, 20.f, esVoladora)) {
+                        obj->setPosicionAbsoluta(posPrueba);
+                    }
+                }
             }
-        }
+        } // Fin del for de objetivos
+            
+        
 
         // Si el proyectil actual fue destruido al impactar con un héroe, no evaluamos los minions
         if (!Hitboxes[i].getEstadoHitbox()) continue;

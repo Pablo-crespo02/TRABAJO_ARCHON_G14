@@ -27,6 +27,7 @@ public:
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     //FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
+
     void animar(float dt, sf::Vector2f direccion);
     std::string getDescripcionHechizo() const override {
         if (this->stats.nombre == "ASSAULT MARINE") {
@@ -34,4 +35,5 @@ public:
         }
         return "GENERA 3 CAPARAZONES QUE\nBLOQUEAN PROYECTILES";
     }
+
 };
