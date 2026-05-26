@@ -74,7 +74,8 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 }
 void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
    
-    if (this->stats.nombre == "ASSAULT_MARINE") {
+    if (this->stats.nombre == "ASSAULT MARINE") {
+   
         sf::Vector2f dirFija(0.f, 0.f);
 
         hitboxes.emplace_back(
