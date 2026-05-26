@@ -50,13 +50,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
-                sf::CircleShape anilloSeleccion(25.f);
-                anilloSeleccion.setOrigin(25.f, 25.f);
-                anilloSeleccion.setPosition(posicionAbsoluta);
-                anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
-                anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
-                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
-                window.draw(anilloSeleccion);
+                dibujarAnilloSeleccion(window);
             }
 
             spriteTablero.setPosition(posicionAbsoluta);
