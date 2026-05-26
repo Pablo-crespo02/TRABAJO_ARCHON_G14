@@ -72,13 +72,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
-                sf::CircleShape anilloSeleccion(25.f);
-                anilloSeleccion.setOrigin(25.f, 25.f);
-                anilloSeleccion.setPosition(posicionAbsoluta);
-                anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
-                anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
-                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
-                window.draw(anilloSeleccion);
+                dibujarAnilloSeleccion(window);
             }
 
             spriteTablero.setPosition(posicionAbsoluta);
@@ -196,7 +190,7 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::
         // 1. IA Comportamental
         if (minion->stats.rol == 2. && distanciaRealJugador > 120.f) {
             float factorAnticipacion = 100.f;
-            sf::Vector2f dirEnemigo = enemigo->getUltimaDireccion();
+            sf::Vector2f dirEnemigo = enemigo->getultimadireccion();
             puntoObjetivo = posicionJugador + (dirEnemigo * factorAnticipacion);
         }
 
