@@ -17,28 +17,28 @@ void MenuNoInteractivo::inicializarTextos() {
     textoInstrucciones.setOutlineColor(sf::Color::Black);
     textoInstrucciones.setOutlineThickness(4.0f);
     textoInstrucciones.setString(
-        "         OBJETIVO DE LA CRUZADA\n"
-        "Domina los 5 Nodos de Poder o aniquila al enemigo.\n\n"
+        "         OBJETIVO DE LA PARTIDA\n"
+        "Domina los 5 Puntos de Poder o aniquila al enemigo para ganar.\n\n"
         "         FASE ESTRATEGICA (Tablero)\n"
         "- Raton (Click Izquierdo) para mover unidades.\n\n"
         "         FASE DE COMBATE (Arena)\n"
-        "- IMPERIUM: WASD para mover. ESPACIO dispara. Q Hechizo.\n"
-        "- XENOS: FLECHAS para mover. ENTER dispara. M Hechizo.\n\n\n"
+        "- IMPERIUM: WASD para mover. ESPACIO ataca. Q Hechizo.\n"
+        "- XENOS: FLECHAS para mover. ENTER ataca. M Hechizo. \n\n\n"
         "      (Pulsa ESC para volver al Menu Principal)"
     );
 
     // Configuración de los créditos:
     textoCreditos.setFont(fuente);
     textoCreditos.setCharacterSize(40);
-    textoCreditos.setFillColor(sf::Color::White);
+    textoCreditos.setFillColor(sf::Color::Yellow);
     textoCreditos.setOutlineColor(sf::Color::Black);
-    textoCreditos.setOutlineThickness(3.0f);
+    textoCreditos.setOutlineThickness(4.0f);
     textoCreditos.setString(
-        "           CREDITOS DE LA OBRA\n\n"
-        "Desarrollado de forma integra por:\n"
-        "            JAVIER MONRIO\n            GONZALO CASTRO\n            PABLO CRESPO\n            CECILIA BARRIO\n            JAVIER LERIN\n\n"
-        "Musica y Efectos: Warhammer 40K Fan Assets\n"
-        "Libreria Grafica: SFML 2.6.x\n\n\n"
+        "CREDITOS:\n\n"
+        "DESARROLLO, DEBUG, PLAYTESTING:\n\n"
+        "            Javier Monrio\n            Gonzalo Castro\n            Pablo Crespo\n            Cecilia Barrio\n            Javier Lerin\n\n"
+        "MUSICA Y EFECTOS:\n\nWarhammer 40K Fan Assets,\nimagenes generadas mediante Nano Banana de Google\n\n"
+        "LIBRERIA GRAFICA\n\nSFML 2.6.x\n\n\n"
         "    (Pulsa ESC para volver al Menu Principal)"
     );
 
