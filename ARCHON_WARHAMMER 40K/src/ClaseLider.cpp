@@ -9,35 +9,35 @@
 ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTeletransporte(b, pos)
 {
-    //ESTADÍSTICAS 
+    //Estadísticas:
     this->stats.nombre = tipo;
     this->stats.vida = 50.0f;
     this->stats.vidaMaxima = 50.0f; // Ajusta a valores en el futuro
     this->stats.ataque = 12.0f;
     this->stats.defensa = 20.0f;
     this->stats.velAtaque = 0.9f;
-    // --- Lógica de tipos ---
+    // Lógica de tipos:
     this->stats.esRango = true;    // El Lider es Rango
 
     this->rangoMovimiento = 5;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Teletransporte;  // Solo para el HUD
 
-    //TAMAÑO DE LOS SPRITES:
+    //Tamaño de los sprites:
     this->piezaAlturaTablero = 80.0f;
     this->piezaAlturaArena = 150.0f;
 
-    //CARGA DE SPRITES
+    //Carga de los sprites:
     cargarConfigurarSprites(tipo);
 
-    //AÑADIMOS AIMACIÓN PARTICULAR; "INVOCANDO":
+    // Animación "invocando":
     if (animador) {
         animador->agreganAnimacion("INVOCANDO", 1, 2, 2, 0.4, true);
         animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.15f, true); //APAÑO spritesheet
     }
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
+// Físicas y animación:
 void ClaseLider::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
     PiezaTeletransporte::procesarMovimientoArena(direccion, dt, arena);
@@ -48,7 +48,7 @@ void ClaseLider::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     }
 }
 
-void ClaseLider::animar(float dt, sf::Vector2f direccion) { //MÉTODO SOBREEESCRITO POT LA ANIMACIÓN EXCLUSIVA
+void ClaseLider::animar(float dt, sf::Vector2f direccion) { // Sobreescrito por "animación exclusiva"
     if (!animador) return;
 
     // Leemos el reloj de la habilidad. Si hace menos de 0.4 segundos que pulsamos la M, mostramos la pose.
@@ -70,7 +70,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE TYRANT") {
 
-            //CÍRCULO DE SELECCIÓN AMARILLO
+            //Círculo de selección amarillo
             if (seleccionado) {
                 sf::CircleShape anilloSeleccion(25.f);
                 anilloSeleccion.setOrigin(25.f, 25.f);
@@ -92,12 +92,12 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             window.draw(spriteArena);
         }
        
-        // 2. DIBUJADO DE SUS MINIONS
+        // 2. Dibujo de los minions:
         for (Pieza* minion : minionsInvocados) {
             // Llamamos al propio método dibujar del minion (que al ser un Termagant ejecutará su sprite Chibi)
             minion->dibujar(window, estadoActual);
         }
-        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
+        // Dibujo de la barra sobre la pieza:
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
 
@@ -110,9 +110,8 @@ void ClaseLider::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     this->stats.relojHabilidad.restart();
     limpiarMinions();
 
-    // =========================================================================
-    // CASO 1: EL LÍDER ES EL CAPITÁN (IMPERIUM) -> INVOCA UN HELICÓPTERO
-    // =========================================================================
+  //Líder del imperio invoca un helicóptero
+
     if (this->stats.nombre == "CAPTAIN") {
         // Spawnea un poco desplazado hacia arriba para simular que entra volando
         sf::Vector2f puntoSpawnHeli = this->posicionAbsoluta + sf::Vector2f(0.f, -50.f);
@@ -122,9 +121,9 @@ void ClaseLider::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
 
         std::cout << "El Capitan ha solicitado apoyo aereo! Helicoptero desplegado." << std::endl;
     }
-    // =========================================================================
-    // CASO 2: EL OTRO LÍDER (TIRÁNIDO) -> INVOCA 2 TERMAGANTS
-    // =========================================================================
+ 
+    //Líder tiránido invoca dos minions
+
     else {
         int numeroMinions = 2;
         float offsetsX[2] = { -40.f, 40.f };
@@ -162,9 +161,7 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::
     while (it != minionsInvocados.end()) {
         Pieza* minion = *it;
 
-        // ---------------------------------------------------------------------
-        // COMPORTAMIENTO SI EL MINION ES EL HELICÓPTERO (CAPITÁN)
-        // ---------------------------------------------------------------------
+       //Comportamiento del helicóptero:
         ClaseHelicoptero* heliMinion = dynamic_cast<ClaseHelicoptero*>(minion);
         if (heliMinion != nullptr) {
             // Delegamos toda su IA de vuelo y disparo automático a su propia clase
@@ -182,9 +179,7 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::
             continue; // Saltamos al siguiente minion, ignorando la lógica terrestre
         }
 
-        // ---------------------------------------------------------------------
-        // COMPORTAMIENTO SI EL MINION ES TERRESTRE (TERMAGANTS)
-        // ---------------------------------------------------------------------
+        //Comportamiento de los minions:
         sf::Vector2f posicionJugador = enemigo->getPosicionAbsoluta();
         sf::Vector2f puntoObjetivo = posicionJugador;
 

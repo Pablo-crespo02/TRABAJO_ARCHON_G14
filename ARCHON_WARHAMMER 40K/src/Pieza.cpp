@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-// CONSTRUCTOR BASE
+// Constructor
 // Ahora es mucho más sencillo y recibe los datos mínimos obligatorios
 Pieza::Pieza(Bando b, sf::Vector2i pos) {
     bando = b;
@@ -15,7 +15,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     this->multiplicadorVelocidadActual = 1.0;
 }
 
-// SINCRONIZACIÓN VISUAL
+// Sincronización visual:
 // Esto es igual para todas las piezas: todas se dibujan en el tablero
 void Pieza::sincronizarPosicionTablero() {
     // 60.f es el valor de tu TAMANOCASILLA. 
@@ -27,19 +27,19 @@ void Pieza::sincronizarPosicionTablero() {
     posicionAbsoluta = sf::Vector2f(px, py);
 }
 
-// MOVIMIENTO EN EL TABLERO
+// Movimiento en el tablero:
 void Pieza::mover(sf::Vector2i destino) {
     posicionTablero = destino;
     sincronizarPosicionTablero();
 }
 
-// MOVIMIENTO EN LA ARENA
+// Movimiento en la arena:
 void Pieza::moverEnArena(float dx, float dy) {
     posicionAbsoluta.x += dx;
     posicionAbsoluta.y += dy;
 }
 
-// DETECTAR CONFLICTO (Combate)
+// Detecta conflicto y pasa al combate:
 // Esta lógica es universal: si estoy en la misma celda que un enemigo, hay conflicto
 bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
     for (const auto* otra : otrasPiezas) {
@@ -126,7 +126,7 @@ void Pieza::actualizarEstadosAlterados(double dt) {
     }
 }
 
-//SPRITES Y ANIMACIONES:
+// Sprites y animaciones:
 
 void Pieza::cargarConfigurarSprites(const std::string& tipo) {
     std::string rutaTablero = "";
@@ -221,7 +221,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
     }
 }
 
-//MÉTODO DE ANIMAR GENÉRICO DE APLICACIÓN PARA TODAS LAS PIEZAS, ARREGLO DEL EFECTO ESPEJO: COMENTAR!!!!!!!!!!!!
+// Animación del efecto espejo:
 void Pieza::Animar(float dt, sf::Vector2f direccion) {
     if (!animador) return;
 

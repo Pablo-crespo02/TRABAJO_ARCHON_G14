@@ -3,16 +3,16 @@
 #include "Pieza.h"
 Coordinador::Coordinador():motor(window, fuente)
 {
-    // CARGA DE LA FUENTE:
+    // Carga de la fuente:
     if (!fuente.loadFromFile("fuentes/fuente_pixel.ttf")) {
         std::cout << "Error cargando fuente" << std::endl;
         return;
     }
 
-    // 1. INIIALIZAMOS LOS MENÚS NO INTERACTIVOS:
+    // 1. Inicializamos menús no interactivos:
     pantallainfo.inicializarTextos();  
 
-    // 2. CARGAMOS EL SONIDO DEL CLICK EN EL MENU
+    // 2. Sonido del click en el menú
     if (!bufferClick.loadFromFile("sonidos/click.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido click.wav" << std::endl;
     }
@@ -21,7 +21,7 @@ Coordinador::Coordinador():motor(window, fuente)
         sonidoClick.setVolume(50.f);
     }
 
-    //2.1 MUSICA MENU
+    //2.1 Música del menú:
     if (!musicaMenu.openFromFile("sonidos/musica_menu.mp3")) {
         std::cout << "Aviso: No se encontro musica_menu.mp3" << std::endl;
     }
@@ -31,17 +31,17 @@ Coordinador::Coordinador():motor(window, fuente)
         musicaMenu.play();
     }
 
-    // 3. CREAMOS LA VENTANA
+    // 3. Creación de la ventana:
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
 
-    // 4. INICIALIZAMOS LAS PANTALLAS
+    // 4. Se inicializan las pantallas:
     pantallaCarga = new PantallaCarga(fuente, window.getSize());
     menuPausa = new MenuPausa(fuente, window.getSize());
     menuNombre = new MenuNombre(fuente, window.getSize());
     
 
-    // 5. CONFIGURACIÓN FINAL
+    // 5. Configuración final:
     estadoActual = Estado::MenuPrincipal;
     vistaUI = window.getDefaultView();
     vistaTablero.setSize(620.f, 620.f);
@@ -81,7 +81,7 @@ void Coordinador::gestionarEventos() {
                 estadoActual = estadoAnterior; }
             }
         
-        //MENÚ PRINCIPAL
+        //Menú principal:
         if (estadoActual == Estado::MenuPrincipal) {
             // Actualizamos la apariencia del botón "Reanudar" (gris o normal)
             pantallaInicio.setPartidaActiva(partidaEnCurso);
@@ -101,27 +101,27 @@ void Coordinador::gestionarEventos() {
                 if (evento.key.code == sf::Keyboard::Enter||evento.key.code == sf::Keyboard::Return) {
                     int seleccion = pantallaInicio.getIndiceSeleccionado();
                     switch (seleccion) {
-                    case 0: // INICIAR PARTIDA
+                    case 0: // Iniciar partida:
                         this->reiniciarPartida();
                         partidaEnCurso = true;
                         estadoActual = Estado::Tablero;
                         motor.setEstado(Estado::Tablero);
                         break;
 
-                    case 1: // REANUDAR PARTIDA
+                    case 1: // Reanudar partida:
                         if (partidaEnCurso) {
                             estadoActual = Estado::Tablero;
                             motor.setEstado(Estado::Tablero);
                         }
                         break;
 
-                    case 2: //INSTRUCCIONES
+                    case 2: // Instrucciones:
                     {
                           estadoAnterior = Estado::MenuPrincipal;
                           estadoActual = Estado::Instrucciones; 
                           break;
                     }
-                    case 3://RANKING
+                    case 3:// Ranking:
                     {
                         estadoAnterior = Estado::MenuPrincipal;
                         estadoActual = Estado::Ranking;
@@ -133,11 +133,11 @@ void Coordinador::gestionarEventos() {
                         estadoActual = Estado::Creditos; 
                         break;
                     }
-                    case 5: // SALIR DEL JUEGO
+                    case 5: // Salir del juego:
                         window.close();
                         break;
 
-                    case 6: // CARGAR PARTIDA (Lleva al menú de ranuras)
+                    case 6: // Cargar partida (Lleva al menú de ranuras)
                         modoGuardar = false;
                         pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
                         estadoActual = Estado::SeleccionCarga;
@@ -146,7 +146,7 @@ void Coordinador::gestionarEventos() {
                 }
             }
         }
-        //MENÚ DE PAUSA
+        //Menú de pausa
         else if (estadoActual == Estado::Pausa) {
             if (evento.type == sf::Event::KeyPressed) {
                 if (evento.key.code == sf::Keyboard::Up)
@@ -163,28 +163,28 @@ void Coordinador::gestionarEventos() {
                 if (evento.key.code == sf::Keyboard::Enter || evento.key.code == sf::Keyboard::Return) {
                     int selPausa = menuPausa->getIndiceSeleccionado();
                     switch (selPausa) {
-                    case 0: estadoActual = estadoAnterior; break; // REANUDAR
-                    case 1: reiniciarPartida(); estadoActual = Estado::Tablero; break; // REINICIAR
-                    case 2: estadoActual = Estado::MenuPrincipal; break; // VOLVER AL MENU
+                    case 0: estadoActual = estadoAnterior; break; // Reanudar
+                    case 1: reiniciarPartida(); estadoActual = Estado::Tablero; break; // Reiniciar
+                    case 2: estadoActual = Estado::MenuPrincipal; break; // Volver al menú
                     case 3: { 
                         estadoAnterior = Estado::Pausa;
                         estadoActual = Estado::Instrucciones; break; 
-                    } // INSTRUCCIONES
+                    } // Instrucciones
 
-                    case 4: // GUARDAR PARTIDA (Lleva al menú de ranuras)
+                    case 4: // Guardar partida (Lleva al menú de ranuras)
                         modoGuardar = true;
                         pantallaCarga->actualizarTextosRanuras(ranuras[0].ocupada, ranuras[1].ocupada, ranuras[2].ocupada);
                         estadoActual = Estado::SeleccionGuardar;
                         break;
 
-                    case 5: // SALIR AL ESCRITORIO
+                    case 5: // Salir al escritorio
                         window.close();
                         break;
                     }
                 }
             }
         }
-        //MENUS DE CARGA Y GUARDADO:
+        //Menús de carga y de guardado:
         else if (estadoActual == Estado::SeleccionCarga || estadoActual == Estado::SeleccionGuardar) {
             if (evento.type == sf::Event::KeyPressed) {
                 if (evento.key.code == sf::Keyboard::Up)
@@ -200,7 +200,7 @@ void Coordinador::gestionarEventos() {
 
                 if (evento.key.code == sf::Keyboard::Enter) {
                     int ranura = pantallaCarga->getIndiceSeleccionado();
-                    if (ranura == 3) { // Opción "VOLVER"
+                    if (ranura == 3) { // Opción "volver"
                         estadoActual = (estadoActual == Estado::SeleccionGuardar) ? Estado::Pausa : Estado::MenuPrincipal;
                         }
                     else {
@@ -229,7 +229,7 @@ void Coordinador::gestionarEventos() {
             }
             else if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
                 if (!menuNombre->getNombre().empty()) {
-                    // ESCRITURA EN FICHERO DE REGISTRO DE PARTIDAS
+                    //  Escritura en el fichero de guardado de partidas:
                     std::ofstream archivoEscritura("ranking.txt", std::ios::app); 
                     if (archivoEscritura.is_open()) {
                         std::string bandoGanador = (motor.getGanador() == 1) ? "IMPERIUM" : "XENOS";
@@ -280,15 +280,15 @@ void Coordinador::dibujar() {
         window.setView(vistaTablero);
         motor.renderizar();
     }
-    // SI ES PAUSA, dibujamos el menú de pausa al final del todo (encima de todo)
+    // Si es pausa, dibujamos el menú de pausa al final del todo (encima de todo)
     if (estadoActual == Estado::Pausa) {
         menuPausa->dibujar(window);
     }
-    //MENU NOMBRE
+    //Menú nombre:
     else if (estadoActual == Estado::Nombre) {
         menuNombre->dibujar(window);
     }
-    //PANTALLA VICTORIA:
+    //Pantalla Victoria:
     else if (estadoActual == Estado::Victoria) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaVictoria(window);
@@ -297,18 +297,18 @@ void Coordinador::dibujar() {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaRanking(window);
     }
-    //PANTALLA INSTRUCCIONES
+    //Pantalla instrucciones:
     else if (estadoActual == Estado::Instrucciones) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaInstrucciones(window);
     }
-    //MENÚ DE CARGA:
+    //Menú de carga:
     else if (estadoActual == Estado::SeleccionCarga) {
         pantallaInicio.dibujar(window); // Dibujamos el fondo del marine y el tiranido
         window.setView(vistaUI);
         pantallaCarga->dibujar(window); // Dibujamos las ranuras encima
     }
-    // 7. MENÚ DE GUARDADO:
+    // 7. Menú de guardado:
     else if (estadoActual == Estado::SeleccionGuardar) {
 
         //Se respeta el renderizado del mapa y el fondo anterior, sólo se puede acceder a esta pantalla desde el menú de pausa del juego:
@@ -317,7 +317,7 @@ void Coordinador::dibujar() {
         window.setView(vistaUI);
         pantallaCarga->dibujar(window);
     }
-    // 8. PANTALLA CRÉDITOS
+    // 8. Pantalla de créditos
     else if (estadoActual == Estado::Creditos) {
         window.setView(vistaUI);
         pantallainfo.dibujarPantallaCreditos(window);
@@ -327,7 +327,7 @@ void Coordinador::dibujar() {
 
 void Coordinador::actualizar(float dt) {
 
-    //CONTROL DE LA MÚSICA DE MENÚS
+    //Control físico de los menús
     bool estamosEnUnMenu = (estadoActual == Estado::MenuPrincipal ||
         estadoActual == Estado::Pausa ||
         estadoActual == Estado::Instrucciones ||
@@ -347,7 +347,7 @@ void Coordinador::actualizar(float dt) {
             musicaMenu.pause();
         }
     }
-    //  EL TEMPORIZADOR GLOBAL 
+    //  El temporizador global:
     if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
         motor.setTiempoJugado(motor.getTiempoJugado() + dt);
     }
@@ -367,7 +367,7 @@ void Coordinador::actualizar(float dt) {
         menuNombre->dibujar(window);
     }
 
-    // SOLO se actualiza si NO estamos en pausa
+    // Sólo se actualiza si NO estamos en pausa
     if (estadoActual != Estado::Pausa) {
         motor.actualizar(dt);
     }
@@ -433,7 +433,7 @@ void Coordinador::cargarDesdeRanura(int indice) {
         motor.setPuntosOscuridad(ranuras[indice].puntosOscuridad);
         motor.setTiempoJugado(ranuras[indice].tiempoJugado);
 
-        // 4. MATERIALIZAMOS LAS PIEZAS
+        // 4. Materalizamos las piezas:
         for (const DatosPiezaLigera& datosP : ranuras[indice].piezasLigeras) {
             Bando b = static_cast<Bando>(datosP.bando);
             sf::Vector2i pos(datosP.posX, datosP.posY);
@@ -455,7 +455,7 @@ void Coordinador::cargarDesdeRanura(int indice) {
     }
 }
 
-// FUNCION QUE LEE EL ARCHIVO
+// Función que lee el archivo:
 void Coordinador::cargarDatosDeFichero() {
     std::ifstream archivo("partidas_guardadas.txt");
 
@@ -484,8 +484,7 @@ void Coordinador::cargarDatosDeFichero() {
             int numPiezas;
             if (!(archivo >> numPiezas)) break;
 
-            // OPTIMIZACIÓN CLAVE: Ya no hay punteros pesados (Pieza*) que borrar aquí.
-            // Simplemente limpiamos nuestro vector de datos ligeros.
+         
             ranuras[i].piezasLigeras.clear();
 
             // Reconstruimos en memoria de texto puro (Súper rápido, sin tocar imágenes)

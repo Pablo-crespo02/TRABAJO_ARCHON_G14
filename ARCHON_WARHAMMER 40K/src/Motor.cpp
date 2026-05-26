@@ -24,7 +24,7 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
-    //  CARGA DE SONIDO MOVER
+    //  Sonido Mover:
     if (!bufferMover.loadFromFile("sonidos/mover.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido mover.wav" << std::endl;
     }
@@ -32,7 +32,7 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoMover.setBuffer(bufferMover);
         sonidoMover.setVolume(70.f); 
     }
-    //CARGA DEL SONIDO DE ERROR
+    //Sonido de error (pieza en el tablero)
     if (!bufferError.loadFromFile("sonidos/error.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
     }
@@ -40,7 +40,7 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoError.setBuffer(bufferError);
         sonidoError.setVolume(50.f); 
     }
-    //CARGA DE SONIDOS DE MUERTE
+    //Sonidos de muerte (pieza muere)
     if (!bufferMuerteLuz.loadFromFile("sonidos/muerte_luz.mp3")) {
         std::cout << "Aviso: No se pudo cargar el sonido muerte_luz.mp3" << std::endl;
     }
@@ -56,7 +56,7 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
         sonidoMuerteOscuridad.setVolume(70.f);
     }
-    // CARGA DEL SONIDO MOTOSIERRA
+    // Sonido de la motosierra:
     if (!bufferMotosierra.loadFromFile("sonidos/motosierra.ogg")) {
         std::cout << "Aviso: No se pudo cargar el sonido motosierra.mp3" << std::endl;
     }
@@ -128,7 +128,7 @@ void Motor::renderizar() {
     }
 }
 
-/////////////////////////  CÁLCULO DEL MODIFICADOR DEL TERRENO  //////////////////////////
+//Modificador del terreno:
 
 double calcularmodificadorterreno(Bando bando, ColorActual colorcasilla) {
 
@@ -189,7 +189,7 @@ void Motor::intentarAccionJugador(int idJugador) {
     }
 }
 
-/////////////////////////////////  REINICIO DEL JUEGO  //////////////////////////////////
+//Reinicio del juego:
 
 void Motor::reiniciarJuego(){
     //Se limpian los contenedores de piezas y hitboxes:
@@ -220,7 +220,7 @@ void Motor::reiniciarJuego(){
     estadoActual = Estado::MenuPrincipal;  
 }
 
-/////////////////////  COMPROBACIÓN DE LAS CONDICIONES DE VICTORIA  /////////////////////
+//Condiciones de victoria:
 
 void Motor::VerificarVictoria() {
     int piezasLuz = 0;
@@ -266,7 +266,6 @@ void Motor::VerificarVictoria() {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
 
 
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
@@ -285,7 +284,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     sf::Vector2f spawnIzquierda(150.f, 300.f);
     sf::Vector2f spawnDerecha(650.f, 300.f);
 
-    // LÓGICA DE POSICIONAMIENTO: Luz siempre a la izquierda
+    // Lógica de posicionamiemto: Luz siempre a la izquierda
     if (piezaAtacante->getBando() == Bando::LUZ) {
         piezaAtacante->setPosicionAbsoluta(spawnIzquierda);
         piezaDefensor->setPosicionAbsoluta(spawnDerecha);
@@ -298,7 +297,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
         piezaAtacante->setPosicionAbsoluta(spawnDerecha);
         piezaDefensor->setPosicionAbsoluta(spawnIzquierda);
         //Inicialización:
-        // --- DIRECCIÓN INICIAL ---
+        // Dirección inicial:
         piezaAtacante->setultimadireccion(sf::Vector2f(-1.f, 0.f)); // Oscuridad mira a la izq
         piezaDefensor->setultimadireccion(sf::Vector2f(1.f, 0.f));  // Luz mira a la derecha
 
@@ -316,7 +315,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
         piezaAtacante->multiplicadorArena = calcularmodificadorterreno(piezaAtacante->getBando(), colorArenaCombate);
         piezaDefensor->multiplicadorArena = calcularmodificadorterreno(piezaDefensor->getBando(), colorArenaCombate);
 
-        //CHIVATOS DEBUG:
+        // Chivatos del debug:
         std::cout << "DEBUG MULTIPLICADORES: Modificador Atacante: " << piezaAtacante->multiplicadorArena << "x" << std::endl;
         std::cout << "DEBUG MULTIPLICADORES: Modificador Defensor: " << piezaDefensor->multiplicadorArena << "x" << std::endl;
 
@@ -324,7 +323,7 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 }
 
 
-//MANEJO DE CLICKS EN EL TABLERO:
+//Manejo de clicks en el tablero:
 
 void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
@@ -364,7 +363,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
         }
     }
     else {
-        // LÓGICA CON PIEZA SELECCIONADA
+        // Lógica con la pieza seleccionada:
         if (celdaClickeada == piezaSeleccionada->posicionTablero) {
             piezaSeleccionada->seleccionado = false;
             piezaSeleccionada = nullptr;
@@ -417,7 +416,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 }
 
 
-//GESTIÓN DEL TECLADO ARENA
+//Gestión del teclado de la arena:
 void Motor::actualizar(double dt) {
  
     // 1. Filtro de estado obligatorio
@@ -432,12 +431,12 @@ void Motor::actualizar(double dt) {
     Pieza* pLuz = (piezaAtacante->getBando() == Bando::LUZ) ? piezaAtacante : piezaDefensor;
     Pieza* pOsc = (piezaAtacante->getBando() == Bando::OSCURIDAD) ? piezaAtacante : piezaDefensor;
 
-    //ACTUALIZAR GAME FEEL (TEMBLOR Y FLASH)
+    // Actualiza los temblores de la pantalla cuando una pieza recibe daño
     arena.actualizarTemblor(dt);
     if (pLuz) pLuz->actualizarFlash(dt);
     if (pOsc) pOsc->actualizarFlash(dt);
     
-    // LÓGICA DE INPUT Y COMBATE REUTILIZABLE:
+    // Imput y combate reutilizable:
     // Creamos una variable anónima "lambda" que "captura" por referencia las variables del entorno: [capturas](parámetros)->tipo_retorno{función}
     // No especificamos el tipo de retorno porque en C++ no es imprescindible.
 
@@ -502,7 +501,7 @@ void Motor::actualizar(double dt) {
             std::cout << "Ya has usado el hechizo o no te quedan cargas" << std::endl;
         }
     }
-    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+    // Los minions se actualizan autónomamente
    // Delegamos al Líder de la Luz que actualice sus piezas auxiliares pasándole la arena y el rival
     if (pLuz != nullptr) {
         pLuz->actualizarMinions(dt, this->arena, pOsc, Hitboxes); 

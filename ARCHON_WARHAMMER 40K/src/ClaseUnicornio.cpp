@@ -5,29 +5,29 @@
 ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)
 {
-    //ESTADÍSTICAS 
+    //Estadísticas;
     this->stats.nombre = tipo;
     this->stats.vida = 25.0f;
     this->stats.vidaMaxima = 25.0f; // Ajusta a valores en el futuro
     this->stats.ataque = 10.0f;
     this->stats.defensa = 15.0f;
     this->stats.velAtaque = 1.0f;
-    // --- Lógica de tipos ---
+    // Lógica de tipos:
     this->stats.esRango = false;    // El Golem es melee
 
     this->rangoMovimiento = 3;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
 
-    // CONFIGURACIÓN DE TAMAÑOS SPRITES:
+    // Tamaño sprites
     this->piezaAlturaTablero = 90;
     this->piezaAlturaArena = 120;
 
-    //CARGA DE SPRITES (Chibi)
+    // Sprites de los cabezones:
     cargarConfigurarSprites(tipo);
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
+//Físicas y animación:
 void ClaseUnicornio::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
     PiezaTerrestre::procesarMovimientoArena(direccion, dt, arena);
@@ -44,7 +44,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         if (this->stats.nombre == "PRIMARIS" || this->stats.nombre == "TOXICRENO") {
 
-            //CÍRCULO DE SELECCIÓN AMARILLO
+            //Círculo de selección amarillo
             if (seleccionado) {
                 dibujarAnilloSeleccion(window);
             }
@@ -61,7 +61,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
        
 
-        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
+        //Barra de vida sobre la pieza:
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
 

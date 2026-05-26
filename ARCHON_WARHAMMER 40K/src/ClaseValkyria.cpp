@@ -8,30 +8,30 @@ const float PIEZA_ALTURA_ARENA = 120.0f;
 ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
-    //ESTADÍSTICAS 
+    // Estadísticas:
     this->stats.nombre = tipo;
     this->stats.vida = 35.0f;
     this->stats.vidaMaxima = 35.0f; // Ajusta a valores en el futuro
     this->stats.ataque = 5.0f;
     this->stats.defensa = 20.0f;
     this->stats.velAtaque = 1.2f;
-    // --- Lógica de tipos ---
+    // Lógica de tipos:
     this->stats.esRango = true;    // La valkiria es rango
 
     this->rangoMovimiento = 4;
     this->patronMovimiento = PatronMovimiento::Ambos;
     this->tipoMov = TipoMovimiento::Volador;  // Solo para el HUD
 
-    //TAMAÑO DE LOS SPRITES:
+    // Tamaño de los sprites:
     this->piezaAlturaTablero = 80.0f;
     this->piezaAlturaArena = 120.0f;
 
-    //CARGA DE SPRITES (Chibi)
+    // Sprites cabezón
     cargarConfigurarSprites(tipo);
 
 }
 
-//ENLACE DE FÍSICAS Y ANIMACIÓN
+// Físicas y animación
 void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     //Dejamos que la clase padre (PiezaTerrestre) mueva las coordenadas físicas
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
@@ -49,7 +49,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
 
-            //CÍRCULO DE SELECCIÓN AMARILLO
+            // Círculo de selección
             if (seleccionado) {
                 dibujarAnilloSeleccion(window);
             }
@@ -66,7 +66,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
        
 
-        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
+        // Barra de vida encima de la pieza:
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
 
@@ -85,8 +85,8 @@ void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
             sf::Color(255, 255, 100, 160),         // Circulo amarillo
             this,
             0.0,                                   // No hace daño
-            3.0,                                   // AUMENTADO: El escudo dura 3 segundos activo
-            150.0,                                 // AUMENTADO: Un área generosa alrededor de la pieza
+            3.0,                                   // El escudo dura 3 segundos activo
+            150.0,                                 // Un área generosa alrededor de la pieza
             false, false, false, 0.0, false, 0.0,
             true,                                  // causaEmpuje activado
             600.0f                                 

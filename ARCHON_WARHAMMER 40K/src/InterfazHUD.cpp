@@ -17,7 +17,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     float inicioUI = ancho * 0.66f;
     float anchoHUD = ancho - inicioUI;
 
-    // 1.CABECERA (RONDA, CICLO, TURNO) ---
+    // 1.Cabezera (Ronda, ciclo, turno)
     sf::Text textoTop;
     textoTop.setFont(*fuente);
     textoTop.setOutlineThickness(2);
@@ -45,7 +45,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     }
     textoTop.setPosition(ancho * 0.375f, 35.f);
     window.draw(textoTop);
-    // --- PANEL LATERAL ---
+    // Panel lateral:
     sf::RectangleShape panel({ anchoHUD, alto });
     panel.setPosition(inicioUI, 0);
     panel.setFillColor(sf::Color(18, 18, 22));
@@ -78,7 +78,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
     yActual += 360.f;
 
-    // --- DATOS DE LA PIEZA ---
+    // Datos de la pieza:
 
     if (seleccionada != nullptr) {
         sf::Text textoNombre;
@@ -95,7 +95,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         // Dejamos un margen generoso después del nombre
         yActual += 90.f;
 
-        // LISTA DE DATOS 
+        // Lista de datos:
 
         // Vida y Ataque
         dibujarDato(window, "VIDA:", std::to_string((int)seleccionada->stats.vida), margenX, yActual, sf::Color(100, 255, 100));
@@ -121,7 +121,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         sf::Color colCom = seleccionada->stats.esRango ? sf::Color(255, 215, 0) : sf::Color(255, 80, 80);
         dibujarDato(window, "COMBATE:", seleccionada->stats.esRango ? "DISTANCIA" : "MELEE", margenX, yActual, colCom);
 
-        // --- VALOR EN PUNTOS DE LA PIEZA SELECCIONADA ---
+        // Valor de los puntos de cada pieza:
         int ptsValor = 0;
         std::string n = seleccionada->stats.nombre;
         if (n == "CAPTAIN" || n == "HIVE TYRANT") ptsValor = 2000;
@@ -160,7 +160,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         dibujarDato(window, "EFECTO:", seleccionada->getDescripcionHechizo(), margenX, yActual, sf::Color(200, 200, 200));
     }
 
-    // 3.MARCADOR DE PUNTOS EN EL TABLERO (ABAJO A LA IZQUIERDA) 
+    // 3. Marcador de puntos en el tablero:
     sf::Text textoPuntosHUD;
     textoPuntosHUD.setFont(*fuente);
     textoPuntosHUD.setCharacterSize(28);
@@ -176,7 +176,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     textoPuntosHUD.setPosition(40.f, alto - 90.f);
     window.draw(textoPuntosHUD);
 
-    //4.CRONOMETRO DE LA PARTIDA 
+    //4.Cronómetro:
     sf::Text textoTiempoHUD;
     textoTiempoHUD.setFont(*fuente);
     textoTiempoHUD.setCharacterSize(28);

@@ -10,7 +10,7 @@ ClaseHelicoptero::ClaseHelicoptero(Bando b, sf::Vector2f posArena)
     // Asignamos la posición física inicial directamente en la arena
     this->posicionAbsoluta = posArena;
 
-    // STATS DE UNIDAD PESADA (Más fuerte que un minion común)
+    // Stats
     this->stats.nombre = "HELICOPTER";
     this->stats.vida = 15.0f;       // Bastante más vida que los Termagants
     this->stats.vidaMaxima = 15.0f;
@@ -20,8 +20,8 @@ ClaseHelicoptero::ClaseHelicoptero(Bando b, sf::Vector2f posArena)
     this->stats.esRango = true;     // Ataca con proyectiles
     this->bando = b;
 
-    // CARGA DE SPRITESHEET
-    // Cambia "imagenes/Helicoptero-Sheet.png" por la ruta real de tus sprites
+    // Carga de los sprites
+   
     if (!texturaArena.loadFromFile("imagenes/Chibi-HELICOPTER-Humanidad-1.0.png")) {
         std::cout << "Error: No se encontro el sprite del helicopetero" << std::endl;
     }
@@ -65,7 +65,7 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
     sf::Vector2f posHeli = this->posicionAbsoluta;
     sf::Vector2f posEnemigo = enemigo->getPosicionAbsoluta();
 
-    // 1. CÁLCULO DE DISTANCIA
+    // 1. Cálculo de distancia
     sf::Vector2f dir = posEnemigo - posHeli;
     float distancia = std::hypot(dir.x, dir.y);
     if (distancia != 0.f) dir /= distancia; // Normalizar vector
@@ -86,13 +86,13 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
         moviendose = true;
     }
     else {
-        // DENTRO DE LA ZONA MUERTA: 
+        // Dentro de la zona muerta: 
         // El helicóptero se queda quieto, solo debe mirar al enemigo.
         dirMovimiento = sf::Vector2f(0.f, 0.f);
         moviendose = false;
     }
 
-    // 2. MOVIMIENTO Y COLISIONES
+    // 2. Movimiento y colisiones
     if (moviendose) {
         float velocidadVuelo = 130.f;
         sf::Vector2f desplazamiento = dirMovimiento * velocidadVuelo * dt;
@@ -109,7 +109,7 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
         this->animar(dt, sf::Vector2f(0.f, 0.f));
     }
 
-    // 3. DISPARO AUTOMÁTICO POR COOLDOWN
+    // 3. Disparo automático 
     if (relojDisparoAuto.getElapsedTime().asSeconds() >= this->stats.velAtaque) {
         // Disparamos siempre hacia la posición del enemigo
         sf::Vector2f dirBala = posEnemigo - this->posicionAbsoluta;
@@ -148,31 +148,31 @@ void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
         colFinal = 0;
     }
     else if (direccion.x != 0.f) {
-        // SECUENCIA DE VUELO LATERAL (Fila 0, Columnas de la 1 a la 4)
+        // Vuelo lateral (Fila 0, Columnas de la 1 a la 4)
         fila = 0;
         colInicial = 2;
         colFinal = 3;
     }
     else if (direccion.y > 0.f) {
-        // FOTOGRAMA DE DESCENSO / ABAJO (Fila 1, Columna 3)
+        // Fotograma de descenso / Movimiento hacia abajo (Fila 1, Columna 3)
         fila = 1;
         colInicial = 1;
         colFinal = 2;
     }
     else if (direccion.y < 0.f) {
-        // FOTOGRAMA DE ASCENSO / ARRIBA (Fila 1, Columna 4)
+        // Fotograma de ascenso / Movimiento hacia arriba (Fila 1, Columna 4)
         fila = 1;
         colInicial = 3;
         colFinal = 4;
     }
     else {
-        // FOTOGRAMA ESTÁTICO / QUIETO (Fila 0, Columna 0)
+        // Fotograma estático / No se está moviendo (Fila 0, Columna 0)
         fila = 0;
         colInicial = 0;
         colFinal = 1;
     }
 
-    // 1. GESTIÓN DE CAMBIO DE FRAME / FILA
+    // 1. Gestión de cambio de frame / fila
     int posY_Textura = fila * altoFrame;
     int posY_Actual = spriteArena.getTextureRect().top;
 

@@ -53,7 +53,7 @@ void Tablero::dibujar(sf::RenderWindow& window) {
     window.draw(fondoBorde);
 
 
-    // 2. DIBUJAMOS LAS CASILLAS
+    // 2. Dibujar la casillas:
 
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
