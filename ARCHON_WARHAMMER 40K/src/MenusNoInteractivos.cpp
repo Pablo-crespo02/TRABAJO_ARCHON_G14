@@ -183,7 +183,7 @@ void MenuNoInteractivo::dibujarPantallaInstrucciones(sf::RenderWindow& window) {
     window.setView(window.getDefaultView());
 
     // Aseguramos cargar el fondo que queramos para las instrucciones
-    if (!texturaFondo.loadFromFile("imagenes/pantalla_inicio.png")) {
+    if (!texturaFondo.loadFromFile("imagenes/Pantalla_Instrucciones.png")) {
         std::cout << "Error cargando la pantalla de Instrucciones" << std::endl;
     }
 

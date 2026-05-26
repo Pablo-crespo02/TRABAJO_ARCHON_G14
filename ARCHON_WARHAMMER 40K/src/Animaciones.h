@@ -33,7 +33,7 @@ public:
 		animaciones[nombre] = { fila,colInicio,colFin,velocidad,bucle};
 	}
 
-	void jugar(const std::string& nombre) {  //Cambia el estado viaual de la pieza
+	void reproducir(const std::string& nombre) {  //Cambia el estado viaual de la pieza
 		if (animacionActual == nombre)return; //Si ya se está reproduciendo la animación, se evita que se reinicie
 
 		if (animaciones.find(nombre) != animaciones.end()) {  //Si la animación existe en el diccionario unordered map...
