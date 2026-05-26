@@ -30,8 +30,8 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     cargarConfigurarSprites(tipo);
 
 
-        std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
+        std::string rutaTablero = (tipo == "ASSAULT MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
+        std::string rutaArena = (tipo == "ASSAULT MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
         int columnas = 5;
         int filas = 2;
 
@@ -91,7 +91,7 @@ void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Ar
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
-    if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
+    if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
         animar(dt, direccion);
     }
 }
@@ -141,7 +141,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
+        if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -171,7 +171,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
+        if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

@@ -48,7 +48,7 @@ void ClaseLider::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     PiezaTeletransporte::procesarMovimientoArena(direccion, dt, arena);
 
     //Actualizamos la imagen visible con nuestra máquina de estados
-    if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
+    if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE TYRANT") {
         animar(dt, direccion);
     }
 }
@@ -101,7 +101,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
 
-        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE TYRANT") {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
@@ -131,7 +131,7 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         }
     }
     else if (estadoActual == Estado::Arena) {
-        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
+        if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE TYRANT") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }

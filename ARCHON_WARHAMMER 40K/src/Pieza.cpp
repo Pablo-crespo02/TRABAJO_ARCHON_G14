@@ -123,7 +123,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         rutaTablero = (tipo == "INTERCESSOR") ? "imagenes/BASE-INTERCESSOR-Humanidad.png" : "imagenes/BASE-TERMAGANT-TYRANIDS.png";
         rutaArena = (tipo == "INTERCESSOR") ? "imagenes/Chibi-INTERCESSOR-Humanidad.png" : "imagenes/Chibi-TERMAGANT-TYRANIDS-1.0.png";
     }
-    else if (tipo == "CAPTAIN" || tipo == "HIVE_TYRANT") {
+    else if (tipo == "CAPTAIN" || tipo == "HIVE TYRANT") {
         rutaTablero = (tipo == "CAPTAIN") ? "imagenes/BASE-CAPTAIN-Humanidad.png" : "imagenes/BASE-HIVE_TYRANT-TYRANIDS.png";
         rutaArena = (tipo == "CAPTAIN") ? "imagenes/Chibi-CAPTAIN-Humanidad-1.0.png" : "imagenes/Chibi-HIVE_TYRANT-TYRANIDS-1.0.png";
     }
@@ -131,9 +131,9 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         rutaTablero = (tipo == "PRIMARIS") ? "imagenes/BASE-PRIMARIS-Humanidad.png" : "imagenes/BASE-TOXICRENO-TYRANIDS.png";
         rutaArena = (tipo == "PRIMARIS") ? "imagenes/Chibi-PRIMARIS-Humanidad-1.0.png" : "imagenes/Chibi-TOXICRENO-TYRANIDS-1.0.png";
     }
-    else if (tipo == "ASSAULT_MARINE" || tipo == "GARGOLA") {
-        rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
+    else if (tipo == "ASSAULT MARINE" || tipo == "GARGOLA") {
+        rutaTablero = (tipo == "ASSAULT MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
+        rutaArena = (tipo == "ASSAULT MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
     }
 
     //Todas las hojas de sprites comparten número de filas y columnas:

@@ -78,10 +78,10 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
     else if (tipo == "INTERCESSOR"||tipo=="TERMAGANT") {
         nuevaPieza = new ClaseKnight(bando, pos, tipo);
     }
-    else if (tipo == "CAPTAIN"|| tipo == "HIVE_TYRANT") {
+    else if (tipo == "CAPTAIN"|| tipo == "HIVE TYRANT") {
     nuevaPieza = new ClaseLider(bando, pos, tipo);
     }
-    else if (tipo == "ASSAULT_MARINE"|| tipo == "GARGOLA" ) {
+    else if (tipo == "ASSAULT MARINE"|| tipo == "GARGOLA" ) {
     nuevaPieza = new ClaseValkyria(bando, pos, tipo);
     }   
 
@@ -94,7 +94,7 @@ void Generador::AnadirUnidad(Motor& motor, Bando bando, std::string tipo, sf::Ve
 void Generador::GenerarDespliegueUnidades(Motor& motor) {
     // --- DESPLIEGUE IMPERIUM (Luz) - Columna 0 y 1 ---
 
-    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 0));
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT MARINE", sf::Vector2i(0, 0));
     AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 1));
     AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 2));
     AnadirUnidad(motor, Bando::LUZ, "CULEXUS", sf::Vector2i(0, 3));
@@ -102,7 +102,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::LUZ, "LIBRARIAN", sf::Vector2i(0, 5));
     AnadirUnidad(motor, Bando::LUZ, "PRIMARIS", sf::Vector2i(0, 6));
     AnadirUnidad(motor, Bando::LUZ, "DREADNOUGHT", sf::Vector2i(0, 7));
-    AnadirUnidad(motor, Bando::LUZ, "ASSAULT_MARINE", sf::Vector2i(0, 8));
+    AnadirUnidad(motor, Bando::LUZ, "ASSAULT MARINE", sf::Vector2i(0, 8));
 
     AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 0));
     AnadirUnidad(motor, Bando::LUZ, "VINDICARE", sf::Vector2i(1, 8));
@@ -116,7 +116,7 @@ void Generador::GenerarDespliegueUnidades(Motor& motor) {
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 1));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 2));
     AnadirUnidad(motor, Bando::OSCURIDAD, "GENESTEALER", sf::Vector2i(8, 3));
-    AnadirUnidad(motor, Bando::OSCURIDAD, "HIVE_TYRANT", sf::Vector2i(8, 4));//LÍDER 
+    AnadirUnidad(motor, Bando::OSCURIDAD, "HIVE TYRANT", sf::Vector2i(8, 4));//LÍDER 
     AnadirUnidad(motor, Bando::OSCURIDAD, "HARPY", sf::Vector2i(8, 5));
     AnadirUnidad(motor, Bando::OSCURIDAD, "TOXICRENO", sf::Vector2i(8, 6));
     AnadirUnidad(motor, Bando::OSCURIDAD, "CARNIFEX", sf::Vector2i(8, 7));

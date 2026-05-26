@@ -34,6 +34,14 @@ public:
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 
     void animar(float dt, sf::Vector2f direccion);
+
+    std::string getDescripcionHechizo() const override {
+        if (this->stats.nombre == "INTERCESSOR") {
+            return "LANZA UNA GRANADA\nEXPLOSIVA";
+        }
+        return "REALIZA UN SALTO\nACECHANTE";
+    }
+
     
     //PARA QUE LOS MINIONS INVOCADOS SEAN MAS PEQUEÑOS
     void setEscalaMinion(float porcentaje) {

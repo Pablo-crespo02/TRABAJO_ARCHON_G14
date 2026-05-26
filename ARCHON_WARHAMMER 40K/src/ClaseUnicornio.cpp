@@ -138,7 +138,7 @@ void ClaseUnicornio::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 void ClaseUnicornio::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     if (this->bando == Bando::LUZ) {
         this->aplicarInvulnerabilidad(5.0);
-        std::cout << "¡El Unicornio alza un escudo de luz impenetrable!" << std::endl;
+        std::cout << "El Unicornio alza un escudo de luz impenetrable" << std::endl;
     }
     else if (this->bando == Bando::OSCURIDAD) {
         sf::Vector2f dirAtaque = this->getultimadireccion();

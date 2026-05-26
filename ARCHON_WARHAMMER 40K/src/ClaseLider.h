@@ -31,6 +31,13 @@ public:
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
     void animar(float dt, sf::Vector2f direccion);
 
+    std::string getDescripcionHechizo() const override {
+        if (this->stats.nombre == "CAPTAIN") {
+            return "SOLICITA APOYO AEREO\nINVOCA A UN HELICOPTERO";
+        }
+        return "INVOCA 2 SIERVOS PARA\nQUE LO PROTEJAN";
+    }
+
     //Añadimos std::vector<Hitbox>& hitboxes para que el helicóptero dispare 
     void actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::vector<Hitbox>& hitboxes);
 

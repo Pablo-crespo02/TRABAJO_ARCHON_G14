@@ -36,4 +36,10 @@ public:
     // FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
     void animar(float dt, sf::Vector2f direccion);
+    std::string getDescripcionHechizo() const override {
+        if (this->stats.nombre == "LIBRARIAN") {
+            return "GENERA UNA AREA DE FUEGO\nQUE DURA 10 SEGUNDOS ";
+        }
+        return "LANZA UN RAYO ROBAVIDA\nSI ESTA CERCA DEL RIVAL";
+    }
 };

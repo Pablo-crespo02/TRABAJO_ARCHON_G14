@@ -29,10 +29,18 @@ public:
         ClaseArcher* clon = new ClaseArcher(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
+    // FUNCIONES VISUALES
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
+    //FUNCIONES VISUALES
     void animar(float dt, sf::Vector2f direccion);
     void dibujar(sf::RenderWindow& window, Estado estadoActual)override;
+    std::string getDescripcionHechizo() const override {
+        if (this->stats.nombre == "VINDICARE") {
+            return "AUMENTA DRASTICAMENTE SU\nVELOCIDAD DE MOVIMIENTO ";
+        }
+        return "SE VUELVE INVISIBLE \nDURANTE UN BREVE PERIODO";
+    }
 
     void gestionarInvisibilidad(double dt);//sirve para controlar el tiempo que permanece invisible en función del tiempo "dt"
     void gestionarBoostVelocidad(double dt); //controla el tiempo que dura el boost de velocidad

@@ -187,23 +187,6 @@ public:
 
     void intentarUsarHechizo(std::vector<Hitbox>& Hitboxes, Pieza* enemigo);
        
-    //Aviso que salta cuando te quedas sin hechizops
-    void configurarAviso() {
-        fuente.loadFromFile("fuentes/fuente_pixel.ttf");
-        textoAviso.setFont(fuente);
-        textoAviso.setString("SIN HECHIZOS");
-        textoAviso.setFillColor(sf::Color::Blue);
-        textoAviso.setCharacterSize(14);
-    }
-    
-    void dibujarAviso(sf::RenderWindow& window, sf::Vector2f pos) {
-        if (!puedeLanzar()) {
-            // Colocamos el texto un poco por encima de la posición dada
-            textoAviso.setPosition(pos.x, pos.y - 50);
-            window.draw(textoAviso);
-        }
-    }
-
     virtual std::string getDescripcionHechizo() const { return "Hechizo basico de unidad"; }
 
     virtual void actualizarMinions(float dt, Arena& arena, Pieza* enemigo,std::vector<Hitbox>& hitboxes) {}

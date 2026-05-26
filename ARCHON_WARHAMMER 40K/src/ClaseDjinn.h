@@ -25,11 +25,19 @@ public:
     }
 
     //FUNCIONES DE MOVIMIENTO  
+    void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
     //FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
     void animar(float dt, sf::Vector2f direccion);
-    void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
+
+    std::string getDescripcionHechizo() const override {
+        if (this->stats.nombre == "CULEXUS") {
+            return "GENERA UN TORBELLINO\nERRATICO";
+        }
+        return "COPIA LA FORMA Y STATS\nDE LA PIEZA RIVAL";
+    }
+
 };
 
 

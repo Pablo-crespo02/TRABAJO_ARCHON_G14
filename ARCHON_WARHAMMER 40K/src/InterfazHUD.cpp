@@ -124,10 +124,10 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
         // --- VALOR EN PUNTOS DE LA PIEZA SELECCIONADA ---
         int ptsValor = 0;
         std::string n = seleccionada->stats.nombre;
-        if (n == "CAPTAIN" || n == "HIVE_TYRANT") ptsValor = 2000;
+        if (n == "CAPTAIN" || n == "HIVE TYRANT") ptsValor = 2000;
         else if (n == "LIBRARIAN" || n == "HARPY") ptsValor = 750;
         else if (n == "CULEXUS" || n == "GENESTEALER") ptsValor = 750;
-        else if (n == "ASSAULT_MARINE" || n == "GARGOLA") ptsValor = 300;
+        else if (n == "ASSAULT MARINE" || n == "GARGOLA") ptsValor = 300;
         else if (n == "DREADNOUGHT" || n == "CARNIFEX") ptsValor = 300;
         else if (n == "PRIMARIS" || n == "TOXICRENO") ptsValor = 300;
         else if (n == "VINDICARE" || n == "LICTOR") ptsValor = 150;

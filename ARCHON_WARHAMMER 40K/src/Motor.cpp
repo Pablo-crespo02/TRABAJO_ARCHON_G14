@@ -801,7 +801,7 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
 //Calulamos los puntos de la pieza
 
 int Motor::calcularPuntosPieza(const std::string& nombre) {
-    if (nombre == "CAPTAIN" || nombre == "HIVE_TYRANT") return 2000;
+    if (nombre == "CAPTAIN" || nombre == "HIVE TYRANT") return 2000;
     if (nombre == "LIBRARIAN" || nombre == "HARPY") return 750;
     if (nombre == "CULEXUS" || nombre == "GENESTEALER") return 750;
     if (nombre == "ASSAULT_MARINE" || nombre == "GARGOLA") return 300; 
