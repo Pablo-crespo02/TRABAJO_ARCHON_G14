@@ -210,7 +210,6 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         //Los punteros inteligentes se eliminan automáticamente de la RAM cuando la pieza el eliminada, evitando fugas de memoria.
         animador = std::make_unique<AnimadorSprites>(spriteArena, anchoFrame, altoFrame);
 
-        animador->jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
 
         //Registro de animaciones comunes:
         animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
@@ -218,7 +217,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
         animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
 
-        animador->jugar("QUIETO"); //animación default, la pieza está quieta
+        animador->reproducir("QUIETO"); //animación default, la pieza está quieta
     }
 }
 
@@ -230,19 +229,19 @@ void Pieza::Animar(float dt, sf::Vector2f direccion) {
     bool estaAtacando = (stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f); //Por qué compara el reloj con 0.2 en vezde otro valor?
 
     if (estaAtacando) {
-        animador->jugar("ATAQUE");
+        animador->reproducir("ATAQUE");
     }
     else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
+        animador->reproducir("CAMINAR_LATERAL");
     }
     else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
+        animador->reproducir("ABAJO");
     }
     else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
+        animador->reproducir("ARRIBA");
     }
     else {
-        animador->jugar("QUIETO");
+        animador->reproducir("QUIETO");
     }
 
     actualizarAnimacion(dt);
@@ -278,6 +277,16 @@ void Pieza::actualizarFlash(float dt) {
         spriteArena.setColor(sf::Color(255, 255, 255, spriteArena.getColor().a));
     }
 }
+
+void Pieza::dibujarAnilloSeleccion(sf::RenderWindow& window) {
+        sf::CircleShape anilloSeleccion(25.f);
+        anilloSeleccion.setOrigin(25.f, 25.f);
+        anilloSeleccion.setPosition(posicionAbsoluta);
+        anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
+        anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
+        anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
+        window.draw(anilloSeleccion);
+    }
 
 void Pieza::intentarUsarHechizo(std::vector<Hitbox>& Hitboxes, Pieza* enemigo) {
     // Regla 1: ¿Tengo cargas en la ronda?

@@ -39,49 +39,7 @@ void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Ar
     //Actualizamos la imagen visible con nuestra máquina de estados
 
     if (this->stats.nombre == "ASSAULT MARINE" || this->stats.nombre == "GARGOLA") {
-        animar(dt, direccion);
-    }
-}
-
-void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
-    if (!animador) return;
-
-    // Leemos el reloj interno para comprobar el estado de ataque
-    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
-
-    // 1. EVALUACIÓN DE ESTADOS (Máquina de estados visual)
-    if (estaAtacando) {
-        animador->jugar("ATAQUE");
-    }
-    else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
-    }
-    else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
-    }
-    else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
-    }
-    else {
-        animador->jugar("QUIETO");
-    }
-
-    // 2. AVANCE DEL TIEMPO DE ANIMACIÓN CENTRALIZADA
-    actualizarAnimacion(dt);
-
-    //ARREGLO DEL EFECTO ESPEJO
-    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-    if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
-    }
-    else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
-    }
-    else {
-        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
-        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
-        spriteArena.setScale(escalaActualX, escalaArena);
-
+        Pieza::Animar(dt, direccion);
     }
 }
 
@@ -93,13 +51,7 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
             //CÍRCULO DE SELECCIÓN AMARILLO
             if (seleccionado) {
-                sf::CircleShape anilloSeleccion(25.f);
-                anilloSeleccion.setOrigin(25.f, 25.f);
-                anilloSeleccion.setPosition(posicionAbsoluta);
-                anilloSeleccion.setFillColor(sf::Color::Transparent); // Fondo vacío
-                anilloSeleccion.setOutlineThickness(4.f);             // Borde grueso
-                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion); // Amarillo
-                window.draw(anilloSeleccion);
+                dibujarAnilloSeleccion(window);
             }
 
             spriteTablero.setPosition(posicionAbsoluta);
@@ -122,7 +74,8 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 }
 void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
    
-    if (this->stats.nombre == "ASSAULT_MARINE") {
+    if (this->stats.nombre == "ASSAULT MARINE") {
+   
         sf::Vector2f dirFija(0.f, 0.f);
 
         hitboxes.emplace_back(

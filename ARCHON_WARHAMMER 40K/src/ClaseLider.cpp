@@ -55,7 +55,7 @@ void ClaseLider::animar(float dt, sf::Vector2f direccion) { //MÉTODO SOBREEESCR
     bool estaInvocando = (this->stats.relojHabilidad.getElapsedTime().asSeconds() < 0.4f);
  
     if (estaInvocando) {
-        animador->jugar("INVOCANDO");
+        animador->reproducir("INVOCANDO");
         actualizarAnimacion(dt);
     }
 

@@ -541,21 +541,18 @@ void Motor::actualizar(double dt) {
     // 4. Hitbox de las colisiones:
 
     for (size_t i = 0; i < Hitboxes.size(); ++i) {
-
         Hitboxes[i].ActualizarHitbox(dt);
         if (!Hitboxes[i].getEstadoHitbox()) continue;
 
         sf::Vector2f posH = Hitboxes[i].getPosicionHitbox();
         float radioH = Hitboxes[i].getFormaHitbox().getRadius();
-
-        // Obtenemos el vector de velocidad. 
-        // Si ambos componentes son 0, es un ataque melee o área estática.
         sf::Vector2f velH = Hitboxes[i].getVelocidadHitbox();
         bool esEstaticoOMelee = (velH.x == 0.f && velH.y == 0.f);
 
-        // Colisión con el escenario
-        // Se ignoran los muros si es un campo de empuje o un ataque melee (rapidez 0).
-        if (!Hitboxes[i].getCausaEmpuje() && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, false)) {
+        
+        bool esOndaExpansiva = Hitboxes[i].getCausaEmpuje();
+
+        if (!esOndaExpansiva && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, false)) {
             if (Hitboxes[i].getEsErratico()) {
                 Hitboxes[i].rebotar();
                 posH = Hitboxes[i].getPosicionHitbox();
@@ -624,6 +621,21 @@ void Motor::actualizar(double dt) {
                     else Hitboxes[i].setYaDanoDefensor(true);
                     //Inmovilización Basilisco
                     if (Hitboxes[i].getCausaInmovilizacion()) { obj->aplicarInmovilizacion(Hitboxes[i].getDuracionCC()); }
+                    //Empuje Valkyria
+                    if (Hitboxes[i].getCausaEmpuje()) {
+                        sf::Vector2f dirEmpuje = obj->getPosicionAbsoluta() - Hitboxes[i].getPosicionHitbox();
+                        float mag = std::hypot(dirEmpuje.x, dirEmpuje.y);
+                        if (mag == 0.f) { dirEmpuje = sf::Vector2f(1.f, 0.f); mag = 1.f; }
+                        dirEmpuje /= mag;
+
+                        float fuerzaDesplazamiento = Hitboxes[i].getFuerzaEmpuje() * dt;
+                        sf::Vector2f posPrueba = obj->getPosicionAbsoluta() + (dirEmpuje * fuerzaDesplazamiento);
+                        bool esVoladora = (obj->tipoMov == TipoMovimiento::Volador);
+
+                        if (arena.esPosicionValida(posPrueba, 20.f, esVoladora)) {
+                            obj->setPosicionAbsoluta(posPrueba);
+                        }
+                    }
                     // Ralentización Gárgola
                     if (Hitboxes[i].getCausaRalentizacion()) {
                         obj->aplicarRalentizacion(

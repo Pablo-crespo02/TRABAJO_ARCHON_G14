@@ -51,13 +51,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         this->sincronizarPosicionTablero();
         if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
             if (seleccionado) {
-                sf::CircleShape anilloSeleccion(25.f);
-                anilloSeleccion.setOrigin(25.f, 25.f);
-                anilloSeleccion.setPosition(posicionAbsoluta);
-                anilloSeleccion.setFillColor(sf::Color::Transparent);
-                anilloSeleccion.setOutlineThickness(4.f);
-                anilloSeleccion.setOutlineColor(Colores::ColorOutlineSeleccion);
-                window.draw(anilloSeleccion);
+                dibujarAnilloSeleccion(window);
             }
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
