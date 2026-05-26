@@ -187,12 +187,25 @@ void ClaseValkyria::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     }
 }
 void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // El Golem se repara a sí mismo (Heal)
-    float curacion = 10.0f;
-    this->stats.vida += curacion;
+   
+    if (this->stats.nombre == "ASSAULT_MARINE") {
+        sf::Vector2f dirFija(0.f, 0.f);
 
-    // Evitamos que se cure por encima de su vida máxima
-    if (this->stats.vida > this->stats.vidaMaxima) {
-        this->stats.vida = this->stats.vidaMaxima;
+        hitboxes.emplace_back(
+            this->posicionAbsoluta,
+            dirFija,
+            0.0,
+            sf::Color(255, 255, 100, 160),         // Circulo amarillo
+            this,
+            0.0,                                   // No hace daño
+            3.0,                                   // AUMENTADO: El escudo dura 3 segundos activo
+            150.0,                                 // AUMENTADO: Un área generosa alrededor de la pieza
+            false, false, false, 0.0, false, 0.0,
+            true,                                  // causaEmpuje activado
+            600.0f                                 
+        );
+
+        this->stats.relojHabilidad.restart();
+        std::cout << "¡La Valkyria despliega un campo repulsor!" << std::endl;
     }
 }
