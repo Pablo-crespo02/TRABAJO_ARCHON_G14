@@ -538,7 +538,8 @@ void Motor::actualizar(double dt) {
         fenixDefensor->actualizarLogicaHechizo(dt);
     }
 
-    //////////// 4. BUCLE DE ACTUALIZACION Y COLISIONES DE HITBOXES (LIMPIO) /////////
+    // 4. Hitbox de las colisiones:
+
     for (size_t i = 0; i < Hitboxes.size(); ++i) {
 
         Hitboxes[i].ActualizarHitbox(dt);
@@ -547,8 +548,14 @@ void Motor::actualizar(double dt) {
         sf::Vector2f posH = Hitboxes[i].getPosicionHitbox();
         float radioH = Hitboxes[i].getFormaHitbox().getRadius();
 
+        // Obtenemos el vector de velocidad. 
+        // Si ambos componentes son 0, es un ataque melee o área estática.
+        sf::Vector2f velH = Hitboxes[i].getVelocidadHitbox();
+        bool esEstaticoOMelee = (velH.x == 0.f && velH.y == 0.f);
+
         // Colisión con el escenario
-        if (!Hitboxes[i].getCausaEmpuje() && !arena.esPosicionValida(posH, radioH, false)) { //no aplica al empuje de la valjyria las colisiones con el escenario
+        // Se ignoran los muros si es un campo de empuje o un ataque melee (rapidez 0).
+        if (!Hitboxes[i].getCausaEmpuje() && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, false)) {
             if (Hitboxes[i].getEsErratico()) {
                 Hitboxes[i].rebotar();
                 posH = Hitboxes[i].getPosicionHitbox();
@@ -562,7 +569,7 @@ void Motor::actualizar(double dt) {
             }
         }
 
-        // --- 4.1: COLISIÓN TRADICIONAL CONTRA LOS HÉROES (SOLO PROYECTILES/GRANADAS) ---
+        // 4.1 Colisión contra héroes (granadas, hechizos, etc).
         Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
         for (Pieza* obj : objetivos) {
             if (!obj) continue;
