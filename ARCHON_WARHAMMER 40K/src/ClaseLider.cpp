@@ -84,28 +84,14 @@ void ClaseLider::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             spriteTablero.setPosition(posicionAbsoluta);
             window.draw(spriteTablero);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            formaVisual.setFillColor(bando == Bando::LUZ ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
-            if (seleccionado) {
-                formaVisual.setOutlineThickness(4.0f);
-                formaVisual.setOutlineColor(Colores::ColorOutlineSeleccion);
-            }
-            else {
-                formaVisual.setOutlineThickness(0.0f);
-            }
-            window.draw(formaVisual);
-        }
+       
     }
     else if (estadoActual == Estado::Arena) {
         if (this->stats.nombre == "CAPTAIN" || this->stats.nombre == "HIVE_TYRANT") {
             spriteArena.setPosition(posicionAbsoluta);
             window.draw(spriteArena);
         }
-        else {
-            formaVisual.setPosition(posicionAbsoluta);
-            window.draw(formaVisual);
-        }
+       
         // 2. DIBUJADO DE SUS MINIONS
         for (Pieza* minion : minionsInvocados) {
             // Llamamos al propio método dibujar del minion (que al ser un Termagant ejecutará su sprite Chibi)

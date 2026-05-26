@@ -1,7 +1,6 @@
 #include "PiezaTeletransporte.h"
 #include <cmath>
 
-
 PiezaTeletransporte::PiezaTeletransporte(Bando b, sf::Vector2i pos) : Pieza(b, pos) {}
 
 bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pieza*>& otrasPiezas, bool esDestinoOcupado) {
@@ -28,22 +27,28 @@ bool PiezaTeletransporte::poderMover(sf::Vector2i destino, const std::vector<Pie
 }
 
 void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
-    sf::Color colorActual = formaVisual.getFillColor();
 
+    // Parálisis del basilisco y gestión de ralentizaciones:
     this->gestionarEstadosAlterados(static_cast<double>(dt));
-    if (this->getInmovilizado()) return;
+    if (this->getInmovilizado()) return; // Si está paralizado, termina
 
+    // Leemos el color y opacidad actuales del sprite en la arena
+    sf::Color colorSprite = spriteArena.getColor();
+
+    // Si NO hay teclas de movimiento pulsadas (Dirección 0,0)
     if (direccion.x == 0.f && direccion.y == 0.f) {
-        if (colorActual.a != 255) {
-            colorActual.a = 255;
-            formaVisual.setFillColor(colorActual);
+        // La pieza reaparece (se vuelve totalmente opaca)
+        if (colorSprite.a != 255) {
+            colorSprite.a = 255;
+            spriteArena.setColor(colorSprite);
         }
         return;
     }
 
-    if (colorActual.a != 0) {
-        colorActual.a = 40;
-        formaVisual.setFillColor(colorActual);
+    // Si se está moviendo, se vuelve invisible
+    if (colorSprite.a != 0) {
+        colorSprite.a = 0; // Si se pone a 0 desaparece completamente
+        spriteArena.setColor(colorSprite);
     }
 
     // Normalización de vector

@@ -10,14 +10,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
     seleccionado = false;
     hechizoDisponible = true;
 
-    // Inicialización visual básica
-    formaVisual.setRadius(20.f);
-    formaVisual.setOrigin(20.f, 20.f);
-
-    // Las stats y el rango se llenarán en el constructor de la clase hija
-    formaVisual.setFillColor(sf::Color::Magenta);
-
-    //Ralentización Gárgola:
+    // Inicialización de los estados alterados (Ralentización Gárgola)
     this->tiempoRalentizado = 0.0;
     this->multiplicadorVelocidadActual = 1.0;
 }
@@ -32,7 +25,6 @@ void Pieza::sincronizarPosicionTablero() {
 
     // Guardamos la posición y movemos el sprite o forma
     posicionAbsoluta = sf::Vector2f(px, py);
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // MOVIMIENTO EN EL TABLERO
@@ -45,7 +37,6 @@ void Pieza::mover(sf::Vector2i destino) {
 void Pieza::moverEnArena(float dx, float dy) {
     posicionAbsoluta.x += dx;
     posicionAbsoluta.y += dy;
-    formaVisual.setPosition(posicionAbsoluta);
 }
 
 // DETECTAR CONFLICTO (Combate)
@@ -70,15 +61,18 @@ bool Pieza::puedeAtacar() const {
     }
     return false;
 }
+
 void Pieza::reiniciarRelojHitbox() {
-   stats.relojHitbox.restart();
-   barrasArena.reiniciarRecarga();
+    stats.relojHitbox.restart();
+    barrasArena.reiniciarRecarga();
 }
+
 //Gestión de la inmovilización del basilisco (activación y tiempo)
 void Pieza::aplicarInmovilizacion(double duracion) {
     inmovilizado = true;
     temporizadorInmovilizacion = duracion;
 }
+
 //Gestiona inmovilización e invulnerabilidad 
 void Pieza::gestionarEstadosAlterados(double dt) {
     //parálisis basilisco
@@ -106,6 +100,7 @@ void Pieza::gestionarEstadosAlterados(double dt) {
         }
     }
 }
+
 //Invulnerabilidad del unicornio: (la activa y controla el tiempo)
 void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
@@ -214,8 +209,8 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         //Vincula "AnimadorSprites" con el sprite de la arena, su alto y su ancho.
         //Los punteros inteligentes se eliminan automáticamente de la RAM cuando la pieza el eliminada, evitando fugas de memoria.
         animador = std::make_unique<AnimadorSprites>(spriteArena, anchoFrame, altoFrame);
-        
-        animador->   jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
+
+        animador->jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
 
         //Registro de animaciones comunes:
         animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
