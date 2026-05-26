@@ -73,12 +73,48 @@ void ClaseGolem::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     }
 }
 void ClaseGolem::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // El Golem se repara a sí mismo (Heal)
-    float curacion = 10.0f;
-    this->stats.vida += curacion;
 
-    // Evitamos que se cure por encima de su vida máxima
-    if (this->stats.vida > this->stats.vidaMaxima) {
-        this->stats.vida = this->stats.vidaMaxima;
+    // Hechizo Dreadnought
+    if (this->stats.nombre == "DREADNOUGHT") {
+        // Se repara a sí mismo ( curación )
+        float curacion = 10.0f;
+        this->stats.vida += curacion;
+
+        // Evitamos que se cure por encima de su vida máxima
+        if (this->stats.vida > this->stats.vidaMaxima) {
+            this->stats.vida = this->stats.vidaMaxima;
+        }
+        std::cout << "¡DREADNOUGHT activa los protocolos de reparacion!" << std::endl;
+    }
+
+    // Hechizo carnifex (Oscuridad)
+    else if (this->stats.nombre == "CARNIFEX") {
+        sf::Vector2f dirFija(0.f, 0.f);
+
+        // Atrae al centro del Carnifex
+        hitboxes.emplace_back(
+            this->posicionAbsoluta,                // 1. Origen: el centro del Carnifex
+            dirFija,                               // 2. Dirección
+            0.0,                                   // 3. Rapidez 0 (área estática)
+            sf::Color(139, 0, 0, 160),           
+            this,                                  // Propietario
+            2.0,                                   // Daño: Un daño muy leve por arrastre
+            2.0,                                   // Dura dos segundos
+            350.0,                                 // Radio de 350 pixeles
+            false,                                 // esDoT
+            false,                                 // erratico
+            false,                                 // inmoviliza
+            0.0,                                   // duracionControl
+            false,                                 // esGranada
+            0.0,                                   // radioExp
+            true,                                  // causaEmpuje: True (en vez de empujar atrae)
+            -300.0f,                               // fuerzaEmpuje: atracción
+            false,                                 // ralentiza
+            1.0,                                   // factorRal
+            0.0                                    // duracionRal
+        );
+
+        this->stats.relojHabilidad.restart();
+        std::cout << "¡El CARNIFEX desata un pozo gravitatorio!" << std::endl;
     }
 }
