@@ -30,9 +30,9 @@ public:
 
     std::string getDescripcionHechizo() const override {
         if (this->stats.nombre == "ASSAULT MARINE") {
-            return "CAMBIA SU ATAQUE POR UN\nLANZALLAMAS ";
+            return "CAMPO DE FUERZA\nEMPUJA AL ENEMIGO ";
         }
-        return "GENERA 3 CAPARAZONES QUE\nBLOQUEAN PROYECTILES";
+        return "RALENTIZA AL ENEMIGO";
     }
 
 };

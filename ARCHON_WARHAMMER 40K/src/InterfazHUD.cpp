@@ -4,11 +4,19 @@
 
 InterfazHUD::InterfazHUD(sf::RenderWindow& win, sf::Font& font) {
     this->window = &win;
+    if (!texImperium.loadFromFile("imagenes/logo_ultramarines.png")) {
+        // Log de error opcional
+    }
+    texXenos.loadFromFile("imagenes/logo_tiranidos.png");
     this->fuente = &font;
 }
 
 bool InterfazHUD::cargarFuente(const std::string& ruta) {
     return fuente->loadFromFile(ruta);
+}
+void InterfazHUD::cargarTexturas() {
+    texImperium.loadFromFile("imagenes/logo_ultramarines.png");
+    texXenos.loadFromFile("imagenes/logo_tiranidos.png");
 }
 
 void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int jugadorActual, Pieza* seleccionada) {
@@ -66,7 +74,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
     // Marcos de imagen
     float anchoMarco = (anchoHUD - 70.f) / 2.f;
-    sf::RectangleShape marco({ anchoMarco, 320.f });
+    sf::RectangleShape marco({ anchoMarco, 290.f });
     marco.setOutlineThickness(3);
     marco.setOutlineColor(sf::Color(80, 80, 90));
     marco.setFillColor(sf::Color(25, 25, 30));
@@ -75,8 +83,28 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     window.draw(marco);
     marco.setPosition(margenX + anchoMarco + 20.f, yActual);
     window.draw(marco);
+    //Dibujo de bando en el HUD
+    if (seleccionada) {
+        sf::Sprite spriteBando;
+        spriteBando.setTexture(seleccionada->getBando() == Bando::LUZ ? texImperium : texXenos);
 
-    yActual += 360.f;
+        // 1. Obtenemos el tamaño del marco
+        sf::Vector2f tamanoMarco(anchoMarco, anchoMarco);
+
+        // 2. Calculamos la escala necesaria para llenar el cuadrado (ancho / anchoOriginal, alto / altoOriginal)
+        float escalaX = tamanoMarco.x / spriteBando.getLocalBounds().width;
+        float escalaY = tamanoMarco.y / spriteBando.getLocalBounds().height;
+
+        // 3. Aplicamos la escala (esto deformará la imagen para que encaje perfectamente)
+        spriteBando.setScale(escalaX, escalaY);
+
+        // 4. Posicionamos en el marco derecho
+        spriteBando.setPosition(margenX + anchoMarco + 20.f, yActual);
+
+        window.draw(spriteBando);
+}
+    //Aqui deberia ir la foto de cada tropa
+    yActual += 340.f;
 
     // Datos de la pieza:
 
