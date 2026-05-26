@@ -29,60 +29,6 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     //CARGA DE SPRITES (Chibi)
     cargarConfigurarSprites(tipo);
 
-
-        std::string rutaTablero = (tipo == "ASSAULT_MARINE") ? "imagenes/BASE-ASSAULT_MARINE-Humanidad.png" : "imagenes/BASE-GARGOLA-TYRANIDS.png";
-        std::string rutaArena = (tipo == "ASSAULT_MARINE") ? "imagenes/Chibi-ASSAULT_MARINE-Humanidad-1.0.png" : "imagenes/Chibi-GARGOLA-TYRANIDS-1.0.png";
-        int columnas = 5;
-        int filas = 2;
-
-        if (!texturaTablero.loadFromFile(rutaTablero)) {
-            std::cout << "Error: No se encontro " << rutaTablero << std::endl;
-        }
-
-        else {
-
-            spriteTablero.setTexture(texturaTablero);
-            spriteTablero.setOrigin(texturaTablero.getSize().x / 2.0f, texturaTablero.getSize().y / 2.0f);
-
-            float escalaTablero = PIEZA_ALTURA_TABLERO / texturaTablero.getSize().y;
-            spriteTablero.setScale(escalaTablero, escalaTablero);
-        }
-       
-
-        if (!texturaArena.loadFromFile(rutaArena)) {
-            std::cout << "Error: No se encontro " << rutaArena << std::endl;
-        }
-
-        else {
-            spriteArena.setTexture(texturaArena);
-
-            anchoFrame = texturaArena.getSize().x / columnas;
-            altoFrame = texturaArena.getSize().y / filas;
-
-            spriteArena.setTextureRect(sf::IntRect(0, 0, anchoFrame, altoFrame));
-            spriteArena.setOrigin(anchoFrame / 2.0f, altoFrame / 2.0f);
-
-            float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-            if (this->bando == Bando::OSCURIDAD) {
-                spriteArena.setScale(-escalaArena, escalaArena);
-            }
-            else {
-                spriteArena.setScale(escalaArena, escalaArena);
-            }
-        }
-        
-        frameActual = 0;
-        temporizadorAnimacion = 0.0f;
-
-    // 4. REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO
-    if (animador) {
-        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
-        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
-        animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
-        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
-        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
-
-    }
 }
 
 //ENLACE DE FÍSICAS Y ANIMACIÓN
@@ -92,48 +38,7 @@ void ClaseValkyria::procesarMovimientoArena(sf::Vector2f direccion, float dt, Ar
 
     //Actualizamos la imagen visible con nuestra máquina de estados
     if (this->stats.nombre == "ASSAULT_MARINE" || this->stats.nombre == "GARGOLA") {
-        animar(dt, direccion);
-    }
-}
-
-void ClaseValkyria::animar(float dt, sf::Vector2f direccion) {
-    if (!animador) return;
-
-    // Leemos el reloj interno para comprobar el estado de ataque
-    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
-
-    // 1. EVALUACIÓN DE ESTADOS (Máquina de estados visual)
-    if (estaAtacando) {
-        animador->jugar("ATAQUE");
-    }
-    else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
-    }
-    else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
-    }
-    else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
-    }
-    else {
-        animador->jugar("QUIETO");
-    }
-
-    // 2. AVANCE DEL TIEMPO DE ANIMACIÓN CENTRALIZADA
-    actualizarAnimacion(dt);
-
-    //ARREGLO DEL EFECTO ESPEJO
-    float escalaArena = PIEZA_ALTURA_ARENA / altoFrame;
-    if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
-    }
-    else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
-    }
-    else {
-        //Si va hacia arriba, abajo, ataca o se queda quieto, respeta la dirección a la que miraba
-        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
-        spriteArena.setScale(escalaActualX, escalaArena);
+        Pieza::Animar(dt, direccion);
     }
 }
 

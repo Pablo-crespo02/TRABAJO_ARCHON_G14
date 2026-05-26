@@ -234,6 +234,9 @@ public:
 
     void actualizarAnimacion(double dt);
 
+    //´MÉTODP DE ANIMAR GENÉRICO PARA TODAS LAS PIEZAS:
+    void Animar(float dt, sf::Vector2f direccion);
+
     //FUNCIONES HIT FLASH
     void activarFlashDano() { temporizadorFlashDano = 0.15f; } // Dura 0.15 segundos
     void actualizarFlash(float dt);
