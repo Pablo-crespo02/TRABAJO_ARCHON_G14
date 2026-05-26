@@ -497,9 +497,6 @@ void Motor::actualizar(double dt) {
         if (pLuz->puedeLanzar()) {
             pLuz->intentarUsarHechizo(Hitboxes, pOsc);
         }
-        else {
-            std::cout << "Ya has usado el hechizo o no te quedan cargas" << std::endl;
-        }
     }
     // Los minions se actualizan autónomamente
    // Delegamos al Líder de la Luz que actualice sus piezas auxiliares pasándole la arena y el rival
@@ -514,9 +511,6 @@ void Motor::actualizar(double dt) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
         if (pOsc->puedeLanzar()) {
             pOsc->intentarUsarHechizo(Hitboxes, pLuz);
-        }
-        else {
-            std::cout << "Ya has usado el hechizo o no te quedan cargas" << std::endl;
         }
     }
     

@@ -6,6 +6,7 @@ class InterfazHUD {
 private:
     sf::RenderWindow* window;
     sf::Font* fuente;
+    sf::Texture texImperium, texXenos;
 
     int puntosLuz = 0;
     int puntosOscuridad = 0;
@@ -16,6 +17,7 @@ private:
 public:
     InterfazHUD(sf::RenderWindow& win, sf::Font& font);
     bool cargarFuente(const std::string& ruta);
+    void cargarTexturas();
 
     void setDatosHUD(int luz, int osc, float tiempo) {
         puntosLuz = luz;
