@@ -46,8 +46,8 @@ void PiezaTeletransporte::procesarMovimientoArena(sf::Vector2f direccion, float 
     }
 
     // Si se está moviendo, se vuelve invisible
-    if (colorSprite.a != 0) {
-        colorSprite.a = 0; // Si se pone a 0 desaparece completamente
+    if (colorSprite.a != 100) {
+        colorSprite.a = 100; // Si se pone a 0 desaparece completamente
         spriteArena.setColor(colorSprite);
     }
 

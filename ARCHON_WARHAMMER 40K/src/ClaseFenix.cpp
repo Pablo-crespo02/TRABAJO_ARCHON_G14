@@ -31,7 +31,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
 
     //Animación de ataque en función de las posiciones en el spritesheet (APAÑO)
     if (animador) {
-        animador->agreganAnimacion("ATAQUE", 1, 1, 0, 0.20f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.1f, true);
     }
 }
 
@@ -42,10 +42,7 @@ void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     }
 }
 
-
-// =========================================================================
-// INTERFAZ DE DIBUJADO (Soporta el renderizado autónomo del tentáculo)
-// =========================================================================
+// INTERFAZ DE DIBUJADO (Soporta el renderizado autónomo del tentáculo
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();

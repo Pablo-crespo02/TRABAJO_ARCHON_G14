@@ -24,7 +24,7 @@ ClaseDjinn::ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo)
      
     //Animación de ataque en función de las posiciones en el spritesheet (APAÑO)
     if (animador) {
-        animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.1f, true);
     }
 }
 void ClaseDjinn::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
