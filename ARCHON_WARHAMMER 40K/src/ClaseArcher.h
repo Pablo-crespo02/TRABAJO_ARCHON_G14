@@ -31,8 +31,8 @@ public:
     }
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
-    void animar(float dt, sf::Vector2f direccion);
     void dibujar(sf::RenderWindow& window, Estado estadoActual)override;
+    void animar(float dt, sf::Vector2f direccion); //Función animación específica debido a la presencia de animaciones particulares
 
     void gestionarInvisibilidad(double dt);//sirve para controlar el tiempo que permanece invisible en función del tiempo "dt"
     void gestionarBoostVelocidad(double dt); //controla el tiempo que dura el boost de velocidad
