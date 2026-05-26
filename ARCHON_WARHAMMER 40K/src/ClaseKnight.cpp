@@ -26,15 +26,8 @@ ClaseKnight::ClaseKnight(Bando b, sf::Vector2i pos, std::string tipo)
 
     //CARGA DE SPRITES (Chibi)
     cargarConfigurarSprites(tipo);
-
-    //REGISTRO DE CLIPS DE ANIMACIÓN EN EL DICCIONARIO:
     if (animador) {
-      //  animador->agreganAnimacion("ESTA_SALTANDO", 1, 2, 2, 0.20f, true);
-        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
-        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
         animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.15f, true);
-        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
-        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
 }
 
@@ -55,39 +48,20 @@ void ClaseKnight::procesarMovimientoArena(sf::Vector2f direccion, float dt, Aren
 
     // Actualizamos la animación normal (caminar/quieto/atacar)
     if (this->stats.nombre == "INTERCESSOR" || this->stats.nombre == "TERMAGANT") {
-        animar(dt, direccion);
+        Pieza::Animar(dt, direccion);
     }
 }
 
+//Clase animadora particular para gestionar la animación del salto acechante:
 void ClaseKnight::animar(float dt, sf::Vector2f direccion) {
 
-    // Leemos el reloj interno. Si hace menos de 0.2 segundos que disparamos, estamos atacando.
-    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
-
-    if (estaAtacando) {
-        animador->jugar("ATAQUE");
-    }
-
-    else if (estaSaltando) {
+    if (estaSaltando) {
         // Mientras esté saltando, congelamos la animación en el fotograma de ataque
         animador->jugar("ATAQUE");
-    }
-    else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
-    }
-    else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
-    }
-    else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
-    }
-    else {
-        animador->jugar("QUIETO");
+        actualizarAnimacion(dt);
     }
 
-    actualizarAnimacion(dt);
-
-     //ARREGLO DEL EFECTO ESPEJO
+    //ARREGLO DEL EFECTO ESPEJO MANUAL, DURANTE EL SALTO: repetirlo es poco elegante, podríamos crear una función que lo hiciera
     float escalaArena = piezaAlturaArena / altoFrame;
     if (direccion.x < 0) {
         spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda

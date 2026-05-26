@@ -35,5 +35,5 @@ public:
 
     // FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
-    void animar(float dt, sf::Vector2f direccion);
+   
 };

@@ -28,7 +28,6 @@ public:
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
     //FUNCIONES VISUALES
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
-    void animar(float dt, sf::Vector2f direccion);
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
 };
 

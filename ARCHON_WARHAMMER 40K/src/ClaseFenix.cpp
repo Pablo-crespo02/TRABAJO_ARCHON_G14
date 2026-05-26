@@ -29,59 +29,19 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     // CARGA DE SPRITES
     cargarConfigurarSprites(tipo);
 
-    //REGISTRO DE ANIMACIONES EN EL DICCIONARIO
+    //Animación de ataque en función de las posiciones en el spritesheet (APAÑO)
     if (animador) {
-        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
-        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
         animador->agreganAnimacion("ATAQUE", 1, 1, 1, 0.20f, true);
-        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
-        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
     }
 }
 
 void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     PiezaVoladora::procesarMovimientoArena(direccion, dt, arena);
     if (this->stats.nombre == "LIBRARIAN" || this->stats.nombre == "HARPY") {
-        animar(dt, direccion);
+        Pieza::Animar(dt, direccion);
     }
 }
 
-void ClaseFenix::animar(float dt, sf::Vector2f direccion) {
-    if (!animador) return;
-
-    bool estaAtacando = (this->stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f);
-
-    if (estaAtacando) {
-        animador->jugar("ATAQUE");
-    }
-    else if (direccion.x != 0) {
-        animador->jugar("CAMINAR_LATERAL");
-    }
-    else if (direccion.y > 0) {
-        animador->jugar("ABAJO");
-    }
-    else if (direccion.y < 0) {
-        animador->jugar("ARRIBA");
-    }
-    else {
-        animador->jugar("QUIETO");
-    }
-
-    actualizarAnimacion(dt);
-
-    //  ARREGLO DEL EFECTO ESPEJO:
-    float escalaArena = piezaAlturaArena / altoFrame;
-    if (direccion.x < 0) {
-        spriteArena.setScale(-escalaArena, escalaArena);
-    }
-    else if (direccion.x > 0) {
-        spriteArena.setScale(escalaArena, escalaArena);
-    }
-    else {
-        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
-        spriteArena.setScale(escalaActualX, escalaArena);
-    }
-}
 
 // =========================================================================
 // INTERFAZ DE DIBUJADO (Soporta el renderizado autónomo del tentáculo)

@@ -152,7 +152,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         spriteTablero.setScale(escalaTablero, escalaTablero);
     }
 
-    //Gestión de la carga de la textura y el sprite de la ARENA:
+    //Gestión de la carga de la textura, sprite y animaciones de la ARENA:
     if (!texturaArena.loadFromFile(rutaArena)) {
         std::cout << "ERROR: TEXTURA NO ENCONTRADA ARENA: " << rutaArena << std::endl;
     }
@@ -182,9 +182,57 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
         animador = std::make_unique<AnimadorSprites>(spriteArena, anchoFrame, altoFrame);
         
         animador->   jugar("QUIETO");//Obliga al estado inicial de la pieza a ser "QUIETO":
+
+        //Registro de animaciones comunes:
+        animador->agreganAnimacion("QUIETO", 0, 0, 0, 0.20f, true);
+        animador->agreganAnimacion("CAMINAR_LATERAL", 0, 1, 4, 0.15f, true);
+        animador->agreganAnimacion("ABAJO", 1, 3, 3, 0.20f, true);
+        animador->agreganAnimacion("ARRIBA", 1, 4, 4, 0.20f, true);
+
+        animador->jugar("QUIETO"); //animación default, la pieza está quieta
+    }
+}
+
+//MÉTODO DE ANIMAR GENÉRICO DE APLICACIÓN PARA TODAS LAS PIEZAS, ARREGLO DEL EFECTO ESPEJO: COMENTAR!!!!!!!!!!!!
+void Pieza::Animar(float dt, sf::Vector2f direccion) {
+    if (!animador) return;
+
+    //Comprobamos el reloj interno compartido por todas las piezas:
+    bool estaAtacando = (stats.relojHitbox.getElapsedTime().asSeconds() < 0.2f); //Por qué compara el reloj con 0.2 en vezde otro valor?
+
+    if (estaAtacando) {
+        animador->jugar("ATAQUE");
+    }
+    else if (direccion.x != 0) {
+        animador->jugar("CAMINAR_LATERAL");
+    }
+    else if (direccion.y > 0) {
+        animador->jugar("ABAJO");
+    }
+    else if (direccion.y < 0) {
+        animador->jugar("ARRIBA");
+    }
+    else {
+        animador->jugar("QUIETO");
     }
 
+    actualizarAnimacion(dt);
+
+    //Arreglo del efecto espejo genérico: ¿qué es el efecto espejo que se está arreglando? ¿CÓMO FUNCIONA?
+    float escalaArena = piezaAlturaArena / altoFrame;
+    if (direccion.x < 0) {
+        spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
+    }
+    else if (direccion.x > 0) {
+        spriteArena.setScale(escalaArena, escalaArena);  // Mira a la derecha
+    }
+    else {
+        // Respeta la dirección actual
+        float escalaActualX = (spriteArena.getScale().x > 0) ? escalaArena : -escalaArena;
+        spriteArena.setScale(escalaActualX, escalaArena);
+    }
 }
+
 void Pieza::actualizarAnimacion(double dt) {
     if (animador) animador->actualizar(dt);
 }
