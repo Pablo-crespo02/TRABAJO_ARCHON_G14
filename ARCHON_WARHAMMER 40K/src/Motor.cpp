@@ -622,9 +622,16 @@ void Motor::actualizar(double dt) {
                     }
                     if (esAtacanteArena) Hitboxes[i].setYaDanoAtacante(true);
                     else Hitboxes[i].setYaDanoDefensor(true);
-
+                    //Inmovilización Basilisco
                     if (Hitboxes[i].getCausaInmovilizacion()) { obj->aplicarInmovilizacion(Hitboxes[i].getDuracionCC()); }
-
+                    // Ralentización Gárgola
+                    if (Hitboxes[i].getCausaRalentizacion()) {
+                        obj->aplicarRalentizacion(
+                            Hitboxes[i].getFactorRalentizacion(),
+                            Hitboxes[i].getDuracionRalentizacion()
+                        );
+                        
+                    }
                     sf::Vector2f vel = Hitboxes[i].getVelocidadHitbox();
                     if (vel.x != 0.f || vel.y != 0.f) { Hitboxes[i].setEstadoHitbox(false); }
                 }

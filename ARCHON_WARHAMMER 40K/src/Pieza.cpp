@@ -16,6 +16,10 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
 
     // Las stats y el rango se llenarán en el constructor de la clase hija
     formaVisual.setFillColor(sf::Color::Magenta);
+
+    //Ralentización Gárgola:
+    this->tiempoRalentizado = 0.0;
+    this->multiplicadorVelocidadActual = 1.0;
 }
 
 // SINCRONIZACIÓN VISUAL
@@ -77,6 +81,7 @@ void Pieza::aplicarInmovilizacion(double duracion) {
 }
 //Gestiona inmovilización e invulnerabilidad 
 void Pieza::gestionarEstadosAlterados(double dt) {
+    //parálisis basilisco
     if (inmovilizado) {
         temporizadorInmovilizacion -= dt;
         if (temporizadorInmovilizacion <= 0.0) {
@@ -84,10 +89,20 @@ void Pieza::gestionarEstadosAlterados(double dt) {
             temporizadorInmovilizacion = 0.0;
         }
     }
+    //invulnerabildiad unicornio
     if (invulnerable) {
         temporizadorInvulnerabilidad -= dt; // Restamos el tiempo por frame
         if (temporizadorInvulnerabilidad <= 0.0) {
             invulnerable = false;
+        }
+    }
+    //ralentización Gárgola
+    if (tiempoRalentizado > 0.0) {
+        tiempoRalentizado -= dt;
+        if (tiempoRalentizado <= 0.0) {
+            tiempoRalentizado = 0.0;
+            // Restauramos la velocidad a la normalidad (100%)
+            multiplicadorVelocidadActual = 1.0;
         }
     }
 }
@@ -95,6 +110,25 @@ void Pieza::gestionarEstadosAlterados(double dt) {
 void Pieza::aplicarInvulnerabilidad(double duracion) {
     invulnerable = true;
     temporizadorInvulnerabilidad = duracion;
+}
+
+//Ralentización de la Gárgola:
+void Pieza::aplicarRalentizacion(double factor, double duracion) {
+    // Si ya estaba ralentizado, se sobreescribe con el nuevo valor. 
+    this->multiplicadorVelocidadActual = factor;
+    this->tiempoRalentizado = duracion;
+}
+
+void Pieza::actualizarEstadosAlterados(double dt) {
+    if (this->tiempoRalentizado > 0.0) {
+        this->tiempoRalentizado -= dt;
+
+        // Si el tiempo se agota, restauramos la velocidad base
+        if (this->tiempoRalentizado <= 0.0) {
+            this->tiempoRalentizado = 0.0;
+            this->multiplicadorVelocidadActual = 1.0;
+        }
+    }
 }
 
 //SPRITES Y ANIMACIONES:

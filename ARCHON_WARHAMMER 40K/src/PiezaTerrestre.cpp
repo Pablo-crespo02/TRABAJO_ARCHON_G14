@@ -42,15 +42,22 @@ bool PiezaTerrestre::poderMover(sf::Vector2i destino, const std::vector<Pieza*>&
 void PiezaTerrestre::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) {
     if (direccion == sf::Vector2f(0.f, 0.f)) return;
 
-    //Parálisis del basilisco:
-    this->gestionarEstadosAlterados(static_cast<double>(dt));//estado alterado de parálisis
-    if (this->getInmovilizado()) return;//Si está paralizado, termina
+    // 1. Actualiza todos los estados (incluida la ralentización)
+    this->gestionarEstadosAlterados(static_cast<double>(dt));
+    if (this->getInmovilizado()) return;
 
-    float velocidad = 250.f; // Velocidad base terrestre
-    sf::Vector2f desplazamiento = direccion * velocidad * dt;
+    // 2. Normalizamos la dirección para evitar que el movimiento en diagonal sea más rápido
+    float magnitud = std::hypot(direccion.x, direccion.y);
+    if (magnitud != 0.f) direccion /= magnitud;
+
+    // 3. Calculamos la velocidad final aplicando el multiplicador
+    float velocidadBase = 250.f;
+    float velocidadFinal = velocidadBase * this->multiplicadorVelocidadActual;
+
+    // 4. Resolvemos físicas
+    sf::Vector2f desplazamiento = direccion * velocidadFinal * dt;
     sf::Vector2f nuevaPos = posicionAbsoluta + desplazamiento;
 
-    // 'false' indica que colisiona con obstáculos ambientales (rocas)
     if (arena.esPosicionValida(nuevaPos, 20.f, false)) {
         this->moverEnArena(desplazamiento.x, desplazamiento.y);
     }

@@ -113,4 +113,15 @@ void ClaseValkyria::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         this->stats.relojHabilidad.restart();
         std::cout << "¡La Valkyria despliega un campo repulsor!" << std::endl;
     }
+    else if (this->stats.nombre == "GARGOLA") {
+        // Calculamos la dirección hacia el enemigo para lanzar un proyectil (o puede ser estático)
+        sf::Vector2f dirAtaque = enemigo->getPosicionAbsoluta() - this->posicionAbsoluta;
+        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
+        if (magnitud != 0.f) dirAtaque /= magnitud; // Normalizamos
+
+        enemigo->aplicarRalentizacion(0.5, 4.0); //50% de ralentización durante 4 segundos
+
+        this->stats.relojHabilidad.restart();
+        std::cout << "¡GARGOLA lanza una maldición que ralentiza al enemigo!" << std::endl;
+    }
 }

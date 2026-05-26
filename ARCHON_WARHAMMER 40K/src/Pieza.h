@@ -58,6 +58,9 @@ protected:
     //Hechizo del unicornio, se vuelve invulnerable:
     bool invulnerable = false;
     double temporizadorInvulnerabilidad = 0.0;
+    // Hechizo Gárgola, ralentiza al contrario:
+    double tiempoRalentizado = 0.0;
+    double multiplicadorVelocidadActual = 1.0; //100% de su velocidad en la inicialización
 
     // Amistades para que el Renderizador y el Motor sigan funcionando sin cambios pesados
     friend class Motor;
@@ -126,7 +129,11 @@ public:
 
     //Invulnerabilidad del unicornio:
     bool getInvulnerable() const { return invulnerable; }
-    void aplicarInvulnerabilidad(double duracion);
+    void aplicarInvulnerabilidad(double duracion); 
+
+    //Ralentización de la Gárgola:
+    void aplicarRalentizacion(double factor, double duracion); //Recibe el Hechizo
+    void actualizarEstadosAlterados(double dt); //Temporizador para la gárgola
 
     //Getters Públicos: Para que otras piezas puedan consultarse entre sí sin errores de acceso
     sf::Vector2i getPosicionTablero() const { return posicionTablero; }

@@ -37,6 +37,10 @@ private:
 // Mecánica:Valkyria
     bool causaEmpuje;
     float fuerzaEmpuje;
+// Mecánica Gárgola
+    bool causaRalentizacion;
+    double factorRalentizacion;
+    double duracionRalentizacion;
 public:
     // Atributo público
     bool esGranada;
@@ -46,7 +50,8 @@ public:
         Pieza* propietario, double danoHitbox, double tiempodevida, double radio,
         bool esDoT = false, bool erratico = false, bool inmoviliza = false, double duracionControl = 0.0,
         bool esGranadaParam = false, double radioExp = 0.0,
-        bool empuja = false, float fuerza = 0.0f);
+        bool empuja = false, float fuerza = 0.0f,
+        bool ralentiza = false, double factorRal = 1.0, double duracionRal = 0.0);
 
     // Asegúrate de que en el .cpp uses exactamente 'double dt' si aquí lo dejas como double
     void ActualizarHitbox(double dt);
@@ -80,6 +85,11 @@ public:
     //Empuje de la Valkyria
     bool getCausaEmpuje() const { return causaEmpuje; }
     float getFuerzaEmpuje() const { return fuerzaEmpuje; }
+
+    //Ralentización de la Gárgola:
+    bool getCausaRalentizacion() const { return causaRalentizacion; }
+    double getFactorRalentizacion() const { return factorRalentizacion; }
+    double getDuracionRalentizacion() const { return duracionRalentizacion; }
 
     // SETTERS
     void setEstadoHitbox(bool estadoHitbox) { activo = estadoHitbox; }
