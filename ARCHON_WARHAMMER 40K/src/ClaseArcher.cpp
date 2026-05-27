@@ -33,10 +33,14 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     cargarConfigurarSprites(tipo);
 
     //Resgistro de la animación independiente:
-    if (animador) {
+    if (animador) { 
+        animador->agreganAnimacion("ATAQUE", 1, 1, 2, 0.20f, true); //APAÑO spritesheet
         animador->agreganAnimacion("PREPARANDO_SIGILO", 1, 2, 2, 0.20f, true);
         animador->agreganAnimacion("PREPARANDO_SIGILO", 1, 2, 2, 0.20f, true); //Apaño posiciones spritesheet
     }
+
+       
+
 }
 //Método de animar sobreescrito por la animación exclusia:
 void ClaseArcher::animar(float dt, sf::Vector2f direccion) {

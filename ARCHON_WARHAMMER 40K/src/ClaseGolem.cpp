@@ -27,7 +27,7 @@ ClaseGolem::ClaseGolem(Bando b, sf::Vector2i pos, std::string tipo)
     cargarConfigurarSprites(tipo);
 
     if (animador) {
-        animador->agreganAnimacion("ATAQUE", 1, 2, 2, 0.20f, true);
+        animador->agreganAnimacion("ATAQUE", 1, 1, 2, 0.20f, true);
     }
 
 }
