@@ -30,7 +30,30 @@ Coordinador::Coordinador():motor(window, fuente)
         musicaMenu.setVolume(60.f);
         musicaMenu.play();
     }
-
+    //2.2 Música del Tablero
+    if (!musicaTablero.openFromFile("sonidos/musica_tablero.mp3")) {
+        std::cout << "Aviso: No se encontro musica_tablero.mp3" << std::endl;
+    }
+    else {
+        musicaTablero.setLoop(true);  
+        musicaTablero.setVolume(40.f); 
+    }
+    //2.3 Música de la Arena
+    if (!musicaArena.openFromFile("sonidos/musica_arena.mp3")) {
+        std::cout << "Aviso: No se encontro musica_arena.mp3" << std::endl;
+    }
+    else {
+        musicaArena.setLoop(true);   
+        musicaArena.setVolume(40.f); 
+    }
+    //2.4 Música de la Victoria
+    if (!musicaVictoria.openFromFile("sonidos/musica_victoria.mp3")) {
+        std::cout << "Aviso: No se encontro musica_victoria.mp3" << std::endl;
+    }
+    else {
+        musicaVictoria.setLoop(true);
+        musicaVictoria.setVolume(40.f);
+    }
     // 3. Creación de la ventana:
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     window.create(desktop, "ARCHON WARHAMMER 40K", sf::Style::Fullscreen);
@@ -336,17 +359,45 @@ void Coordinador::actualizar(float dt) {
         estadoActual == Estado::SeleccionCarga);
 
     if (estamosEnUnMenu) {
-        // Si venimos de jugar y la música está pausada, la reanudamos:
         if (musicaMenu.getStatus() != sf::SoundSource::Playing) {
             musicaMenu.play();
         }
+        if (musicaTablero.getStatus() == sf::SoundSource::Playing) musicaTablero.pause();
+        if (musicaArena.getStatus() == sf::SoundSource::Playing) musicaArena.pause();
+        if (musicaVictoria.getStatus() == sf::SoundSource::Playing) {
+            musicaVictoria.stop();
+        }
     }
     else {
-        // Si estamos jugando (Tablero/Arena/Victoria) y la música sigue sonando, la pausamos
+        // Si estamos jugando o en pantallas de fin de partida, la música del menú se apaga
         if (musicaMenu.getStatus() == sf::SoundSource::Playing) {
             musicaMenu.pause();
         }
+        // Tablero 
+        if (estadoActual == Estado::Tablero) {
+            if (musicaTablero.getStatus() != sf::SoundSource::Playing) musicaTablero.play();
+            if (musicaArena.getStatus() == sf::SoundSource::Playing) musicaArena.stop();
+            if (musicaVictoria.getStatus() == sf::SoundSource::Playing) musicaVictoria.stop();
+        }
+        // Arena 
+        else if (estadoActual == Estado::Arena) {
+            if (musicaTablero.getStatus() == sf::SoundSource::Playing) musicaTablero.pause();
+            if (musicaArena.getStatus() != sf::SoundSource::Playing) musicaArena.play();
+            if (musicaVictoria.getStatus() == sf::SoundSource::Playing) musicaVictoria.stop();
+        }
+        // Victoria y Nombre
+        else if (estadoActual == Estado::Nombre || estadoActual == Estado::Victoria) {
+            if (musicaTablero.getStatus() == sf::SoundSource::Playing) musicaTablero.stop();
+            if (musicaArena.getStatus() == sf::SoundSource::Playing) musicaArena.stop();
+            if (musicaVictoria.getStatus() != sf::SoundSource::Playing) musicaVictoria.play();
+        }
+        else {
+            if (musicaTablero.getStatus() == sf::SoundSource::Playing) musicaTablero.stop();
+            if (musicaArena.getStatus() == sf::SoundSource::Playing) musicaArena.stop();
+            if (musicaVictoria.getStatus() == sf::SoundSource::Playing) musicaVictoria.stop();
+        }
     }
+
     //  El temporizador global:
     if (estadoActual == Estado::Tablero || estadoActual == Estado::Arena) {
         motor.setTiempoJugado(motor.getTiempoJugado() + dt);

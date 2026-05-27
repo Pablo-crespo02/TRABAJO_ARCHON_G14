@@ -57,7 +57,9 @@ private:
     sf::Sound sonidoClick;
 
     sf::Music musicaMenu;
-
+    sf::Music musicaTablero;
+    sf::Music musicaArena;
+    sf::Music musicaVictoria;
     
     // Componentes
     Motor motor; // El motor se inicializa 

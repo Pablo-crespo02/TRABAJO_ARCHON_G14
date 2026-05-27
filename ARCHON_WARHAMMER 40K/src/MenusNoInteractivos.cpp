@@ -37,7 +37,7 @@ void MenuNoInteractivo::inicializarTextos() {
         "CREDITOS:\n\n"
         "DESARROLLO, DEBUG, PLAYTESTING:\n\n"
         "            Javier Monrio\n            Gonzalo Castro\n            Pablo Crespo\n            Cecilia Barrio\n            Javier Lerin\n\n"
-        "MUSICA Y EFECTOS:\n\nWarhammer 40K Fan Assets,\nimagenes generadas mediante Nano Banana de Google\n\n"
+        "MUSICA Y EFECTOS:\n\nWarhammer 40K Fan Assets\nMusica Tablero:The Mystery Man - AVI \nMusica ARENA: Good Day To Die - Miguel Johnson\nMusica Victoria:The Glorious Army - Luis Humanoide\nImagenes generadas mediante Nano Banana de Google\n\n"
         "LIBRERIA GRAFICA\n\nSFML 2.6.x\n\n\n"
         "    (Pulsa ESC para volver al Menu Principal)"
     );

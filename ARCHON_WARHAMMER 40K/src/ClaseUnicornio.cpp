@@ -86,7 +86,8 @@ void ClaseUnicornio::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) 
 
         hitboxes.emplace_back(
             puntoSpawn, dirAtaque, 900.0, sf::Color(148, 0, 211), this,
-            1.0, 1.5, 12.0, false, false, true, 3.0
+            1.0, 1.5, 
+            .0, false, false, true, 3.0
         );
         std::cout << "¡El Basilisco dispara un proyectil paralizante!" << std::endl;
     }
