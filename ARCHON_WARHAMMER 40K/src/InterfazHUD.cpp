@@ -20,7 +20,7 @@ void InterfazHUD::cargarTexturas()  {
         mapaTexturas["DREADNOUGHT"].loadFromFile("imagenes/RETRATO_DREADNOUGHT.png");
         mapaTexturas["PRIMARIS"].loadFromFile("imagenes/RETRATO_PRIMARIS.png");
         mapaTexturas["VINDICARE"].loadFromFile("imagenes/RETRATO_VINDICARE.png");
-        mapaTexturas["INTERCESSOR"].loadFromFile("imagenes/PORTRAIT_INTERCESSOR.png");
+        mapaTexturas["INTERCESSOR"].loadFromFile("imagenes/RETRATO_INTERCESSOR.png");
 
         mapaTexturas["HIVE TYRANT"].loadFromFile("imagenes/RETRATO_HIVE_TYRANT.png");
         mapaTexturas["HARPY"].loadFromFile("imagenes/RETRATO_HARPY.png");
