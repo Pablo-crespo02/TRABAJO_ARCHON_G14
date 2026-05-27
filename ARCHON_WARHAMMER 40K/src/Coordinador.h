@@ -34,7 +34,7 @@ struct DatosGuardados {
 
 class Coordinador {
 private:
-    // --- INFRAESTRUCTURA ---
+    // INFRAESTRUCTURA
     sf::View vistaTablero;
     sf::View vistaUI;
     sf::RenderWindow window;

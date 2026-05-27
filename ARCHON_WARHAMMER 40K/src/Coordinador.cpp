@@ -487,17 +487,18 @@ void Coordinador::cargarDatosDeFichero() {
          
             ranuras[i].piezasLigeras.clear();
 
-            // Reconstruimos en memoria de texto puro (Súper rápido, sin tocar imágenes)
             for (int j = 0; j < numPiezas; j++) {
                 DatosPiezaLigera datosP;
 
-                // Leemos exactamente las variables en tu orden original
                 if (!(archivo >> datosP.bando >> datosP.posX >> datosP.posY >> datosP.nombre >> datosP.vida)) {
                     std::cout << "Error de formato en la pieza " << j << " de la ranura " << i + 1 << " CARGA ABORTADA" << std::endl;
                     break;
                 }
 
-                // Guardamos los datos puros en nuestra ranura optimizada
+                for (char& c : datosP.nombre) {
+                    if (c == '_') c = ' ';
+                }
+
                 ranuras[i].piezasLigeras.push_back(datosP);
             }
         }
@@ -530,10 +531,15 @@ void Coordinador::guardarDatosEnFichero() {
 
             // Guardamos los datos de cada pieza plana
             for (const DatosPiezaLigera& p : ranuras[i].piezasLigeras) {
+             // Reemplazamos los espacios por guiones bajos para no romper el operador >>
+                std::string nombreSeguro = p.nombre;
+                for (char& c : nombreSeguro) {
+                    if (c == ' ') c = '_';
+                }
                 archivo << p.bando << " "
                     << p.posX << " "
                     << p.posY << " "
-                    << p.nombre << " "
+                    << nombreSeguro << " "
                     << p.vida << " ";
             }
         }
