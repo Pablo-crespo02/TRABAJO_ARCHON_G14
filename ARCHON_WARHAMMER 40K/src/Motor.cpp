@@ -535,23 +535,27 @@ void Motor::actualizar(double dt) {
         sf::Vector2f velH = Hitboxes[i].getVelocidadHitbox();
         bool esEstaticoOMelee = (velH.x == 0.f && velH.y == 0.f);
 
-        
+        // Determinamos si es un proyectil volador (errático) y si es una onda expansiva
+        bool vuelaSobreRocas = Hitboxes[i].getEsErratico();
         bool esOndaExpansiva = Hitboxes[i].getCausaEmpuje();
 
-        if (!esOndaExpansiva && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, false)) {
+        // Única llamada a esPosicionValida inyectando 'vuelaSobreRocas'
+        if (!esOndaExpansiva && !esEstaticoOMelee && !arena.esPosicionValida(posH, radioH, vuelaSobreRocas)) {
+
             if (Hitboxes[i].getEsErratico()) {
                 Hitboxes[i].rebotar();
                 posH = Hitboxes[i].getPosicionHitbox();
             }
             else if (Hitboxes[i].esGranada) {
-                if (Hitboxes[i].getTiempoVuelo() > 0.0f) { Hitboxes[i].Detonar(); }
+                if (Hitboxes[i].getTiempoVuelo() > 0.0f) {
+                    Hitboxes[i].Detonar();
+                }
             }
             else {
                 Hitboxes[i].setEstadoHitbox(false);
                 continue;
             }
         }
-
         // 4.1 Colisión contra héroes (granadas, hechizos, etc).
         Pieza* objetivos[2] = { piezaDefensor, piezaAtacante };
         for (Pieza* obj : objetivos) {
