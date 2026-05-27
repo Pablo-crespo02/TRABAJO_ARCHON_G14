@@ -18,8 +18,7 @@ Pieza::Pieza(Bando b, sf::Vector2i pos) {
 // Sincronización visual:
 // Esto es igual para todas las piezas: todas se dibujan en el tablero
 void Pieza::sincronizarPosicionTablero() {
-    // 60.f es el valor de tu TAMANOCASILLA. 
-    // Asegúrate de que este número sea el mismo que usas en el Renderizador.
+    // 60.f es el valor de TAMANOCASILLA. 
     float px = (posicionTablero.x * 60.f) + (60.f / 2.f);
     float py = (posicionTablero.y * 60.f) + (60.f / 2.f);
 
@@ -55,7 +54,7 @@ bool Pieza::detectarConflicto(const std::vector<Pieza*>& otrasPiezas) {
 //GESTIÓN DE PROYECTILES:
 
 bool Pieza::puedeAtacar() const {
-    // Ahora usa la velocidad de ataque definida en ClaseGolem (ej: 1.0f)
+    // Usa la velocidad de ataque definida en cada Clase
     if (stats.relojHitbox.getElapsedTime().asSeconds() >= stats.velAtaque) {
         return true;
     }
@@ -221,7 +220,7 @@ void Pieza::cargarConfigurarSprites(const std::string& tipo) {
     }
 }
 
-// Animación del efecto espejo:
+// Lógica de selección de las animaciones:
 void Pieza::Animar(float dt, sf::Vector2f direccion) {
     if (!animador) return;
 
@@ -246,7 +245,7 @@ void Pieza::Animar(float dt, sf::Vector2f direccion) {
 
     actualizarAnimacion(dt);
 
-    //Arreglo del efecto espejo genérico: ¿qué es el efecto espejo que se está arreglando? ¿CÓMO FUNCIONA?
+    //Arreglo del efecto espejo genérico:
     float escalaArena = piezaAlturaArena / altoFrame;
     if (direccion.x < 0) {
         spriteArena.setScale(-escalaArena, escalaArena); // Mira a la izquierda
