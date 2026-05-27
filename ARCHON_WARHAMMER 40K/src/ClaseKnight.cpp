@@ -169,7 +169,7 @@ void ClaseKnight::actualizarSalto(float dt) {
         // Movimiento lineal X/Y (la base del salto)
         sf::Vector2f nuevaPos = posInicioSalto + (posDestinoSalto - posInicioSalto) * progreso;
 
-        // EL TRUCO: La parábola siempre debe ir de 0 a PI (180 grados)
+        // La parábola siempre debe ir de 0 a PI (180 grados)
         // sin importar cuánto dure el tiempo.
         // Al usar 'progreso * 3.14159f', garantizamos que el seno haga 
         // una curva completa de 0 a 180 grados en cualquier duración.

@@ -74,12 +74,12 @@ void ClaseDjinn::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     hitboxes.emplace_back(
         this->posicionAbsoluta,      // Origen: la posición del Djinn
         dirInicial,                  // Dirección inicial
-        150.0f,                      // Rapidez (se moverá por la arena)
+        700.0f,                      // Rapidez (se moverá por la arena)
         sf::Color(0, 255, 255, 120), // Color Cian (místico) con transparencia
         this,                        // Propietario
-        8.0f,                        // Daño por segundo (DoT)
+        30.0f,                        // Daño por segundo (DoT)
         10.0f,                       // Dura 10 segundos
-        60.0f,                       // Radio del torbellino
+        20.0f,                       // Radio del torbellino
         true,                        // Es Daño Continuo (DoT)
         true                         // ¡ES ERRÁTICO!
     );
