@@ -4,20 +4,34 @@
 
 InterfazHUD::InterfazHUD(sf::RenderWindow& win, sf::Font& font) {
     this->window = &win;
-    if (!texImperium.loadFromFile("imagenes/logo_ultramarines.png")) {
-        // Log de error opcional
-    }
-    texXenos.loadFromFile("imagenes/logo_tiranidos.png");
     this->fuente = &font;
+    cargarTexturas();
 }
 
-bool InterfazHUD::cargarFuente(const std::string& ruta) {
-    return fuente->loadFromFile(ruta);
-}
-void InterfazHUD::cargarTexturas() {
-    texImperium.loadFromFile("imagenes/logo_ultramarines.png");
-    texXenos.loadFromFile("imagenes/logo_tiranidos.png");
-}
+void InterfazHUD::cargarTexturas()  {
+
+        mapaTexturas["IMP_LOGO"].loadFromFile("imagenes/logo_ultramarines.png");    
+        mapaTexturas["XEN_LOGO"].loadFromFile("imagenes/logo_tiranidos.png");
+        
+        mapaTexturas["CAPTAIN"].loadFromFile("imagenes/RETRATO_CAPTAIN.png");
+        mapaTexturas["LIBRARIAN"].loadFromFile("imagenes/RETRATO_LIBRARIAN.png");
+        mapaTexturas["CULEXUS"].loadFromFile("imagenes/RETRATO_CULEXUS.png");
+        mapaTexturas["ASSAULT MARINE"].loadFromFile("imagenes/RETRATO_ASSAULT_MARINE.png");
+        mapaTexturas["DREADNOUGHT"].loadFromFile("imagenes/RETRATO_DREADNOUGHT.png");
+        mapaTexturas["PRIMARIS"].loadFromFile("imagenes/RETRATO_PRIMARIS.png");
+        mapaTexturas["VINDICARE"].loadFromFile("imagenes/RETRATO_VINDICARE.png");
+        mapaTexturas["INTERCESSOR"].loadFromFile("imagenes/PORTRAIT_INTERCESSOR.png");
+
+        mapaTexturas["HIVE TYRANT"].loadFromFile("imagenes/RETRATO_HIVE_TYRANT.png");
+        mapaTexturas["HARPY"].loadFromFile("imagenes/RETRATO_HARPY.png");
+        mapaTexturas["GENESTEALER"].loadFromFile("imagenes/RETRATO_GENESTEALER.png");
+        mapaTexturas["CARNIFEX"].loadFromFile("imagenes/RETRATO_CARNIFEX.png");
+        mapaTexturas["TOXICRENO"].loadFromFile("imagenes/RETRATO_TOXICRENO.png");
+        mapaTexturas["GARGOLA"].loadFromFile("imagenes/RETRATO_GARGOLA.png"); 
+        mapaTexturas["LICTOR"].loadFromFile("imagenes/RETRATO_LICTOR.png");
+        mapaTexturas["TERMAGANT"].loadFromFile("imagenes/RETRATO_TERMAGANT.png");
+    }
+
 
 void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int jugadorActual, Pieza* seleccionada) {
     float ancho = (float)window.getSize().x;
@@ -25,7 +39,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     float inicioUI = ancho * 0.66f;
     float anchoHUD = ancho - inicioUI;
 
-    // 1.Cabezera (Ronda, ciclo, turno)
+    // Cabecera
     sf::Text textoTop;
     textoTop.setFont(*fuente);
     textoTop.setOutlineThickness(2);
@@ -42,18 +56,13 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     textoTop.setPosition(ancho * 0.25f, 35.f);
     window.draw(textoTop);
 
-    // Turno del jugador
-    if (jugadorActual == 1) {
-        textoTop.setFillColor(Colores::ColorFichaLuz);
-        textoTop.setString("TURNO: IMPERIUM");
-    }
-    else {
-        textoTop.setFillColor(Colores::ColorFichaOscuridad);
-        textoTop.setString("TURNO: XENOS");
-    }
+    // Turno
+    textoTop.setFillColor(jugadorActual == 1 ? Colores::ColorFichaLuz : Colores::ColorFichaOscuridad);
+    textoTop.setString(jugadorActual == 1 ? "TURNO: IMPERIUM" : "TURNO: XENOS");
     textoTop.setPosition(ancho * 0.375f, 35.f);
     window.draw(textoTop);
-    // Panel lateral:
+
+    // Panel lateral
     sf::RectangleShape panel({ anchoHUD, alto });
     panel.setPosition(inicioUI, 0);
     panel.setFillColor(sf::Color(18, 18, 22));
@@ -62,6 +71,7 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     float margenX = inicioUI + 25.f;
     float yActual = 60.f;
 
+    // Titulo Unidad
     sf::Text textoPanel;
     textoPanel.setFont(*fuente);
     textoPanel.setCharacterSize(35);
@@ -69,10 +79,9 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     textoPanel.setString("UNIDAD");
     textoPanel.setPosition(margenX, yActual);
     window.draw(textoPanel);
-
     yActual += 70.f;
 
-    // Marcos de imagen
+    // Marcos de imagen  
     float anchoMarco = (anchoHUD - 70.f) / 2.f;
     sf::RectangleShape marco({ anchoMarco, 290.f });
     marco.setOutlineThickness(3);
@@ -83,44 +92,28 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
     window.draw(marco);
     marco.setPosition(margenX + anchoMarco + 20.f, yActual);
     window.draw(marco);
-    //Dibujo de bando en el HUD
-    if (seleccionada) {
-        sf::Sprite spriteBando;
-        spriteBando.setTexture(seleccionada->getBando() == Bando::LUZ ? texImperium : texXenos);
 
-        // 1. Obtenemos el tamaño del marco
-        sf::Vector2f tamanoMarco(anchoMarco, anchoMarco);
-
-        // 2. Calculamos la escala necesaria para llenar el cuadrado (ancho / anchoOriginal, alto / altoOriginal)
-        float escalaX = tamanoMarco.x / spriteBando.getLocalBounds().width;
-        float escalaY = tamanoMarco.y / spriteBando.getLocalBounds().height;
-
-        // 3. Aplicamos la escala (esto deformará la imagen para que encaje perfectamente)
-        spriteBando.setScale(escalaX, escalaY);
-
-        // 4. Posicionamos en el marco derecho
-        spriteBando.setPosition(margenX + anchoMarco + 20.f, yActual);
-
-        window.draw(spriteBando);
-}
-    //Aqui deberia ir la foto de cada tropa
-    yActual += 340.f;
-
-    // Datos de la pieza:
-
+    // Dibujo de iconos (Solo si hay selección)
     if (seleccionada != nullptr) {
+       
+
+        std::string claveBando = (seleccionada->getBando() == Bando::LUZ ? "IMP_LOGO" : "XEN_LOGO");
+        //Dibujo bando (derecha)
+        dibujarDesdeMapa(window, claveBando, { margenX + anchoMarco + 20.f, yActual }, { anchoMarco, 290.f });
+        //Dibujo Unidad (izq)
+        dibujarDesdeMapa(window, seleccionada->stats.nombre,{ margenX, yActual }, { anchoMarco, 290.f });
+
+    
+         yActual += 310.f;
+
+        // --- 4. DATOS DE LA PIEZA ---
         sf::Text textoNombre;
         textoNombre.setFont(*fuente);
-        textoNombre.setCharacterSize(55); // Aumentado para que destaque como en la foto
+        textoNombre.setCharacterSize(55);
         textoNombre.setFillColor(sf::Color::White);
         textoNombre.setString(seleccionada->stats.nombre);
-
-        // Posicionamiento tras los marcos de imagen
-        // yActual debería estar aproximadamente en 450.f - 480.f aquí
         textoNombre.setPosition(margenX, yActual);
         window.draw(textoNombre);
-
-        // Dejamos un margen generoso después del nombre
         yActual += 90.f;
 
         // Lista de datos:
@@ -238,4 +231,23 @@ void InterfazHUD::dibujarDato(sf::RenderWindow& window, std::string etiqueta, st
     window.draw(t);
 
     yActual += 48.f;
+}
+void InterfazHUD::dibujarDesdeMapa(sf::RenderWindow& window, std::string nombre, sf::Vector2f pos, sf::Vector2f tamano) {
+    // Verificamos si la textura existe en el mapa para no romper el juego
+    if (mapaTexturas.find(nombre) != mapaTexturas.end()) {
+        sf::Sprite sprite;
+        sprite.setTexture(mapaTexturas[nombre]);
+
+        // Escalar para que ajuste al marco
+        float escalaX = tamano.x / sprite.getLocalBounds().width;
+        float escalaY = tamano.y / sprite.getLocalBounds().height;
+        sprite.setScale(escalaX, escalaY);
+
+        sprite.setPosition(pos);
+        window.draw(sprite);
+    }
+    else {
+        // Opcional: imprimir error si no encuentra la textura
+        // std::cout << "Textura no encontrada: " << nombre << std::endl;
+    }
 }

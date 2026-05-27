@@ -6,8 +6,7 @@ class InterfazHUD {
 private:
     sf::RenderWindow* window;
     sf::Font* fuente;
-    sf::Texture texImperium, texXenos;
-
+    std::unordered_map<std::string, sf::Texture> mapaTexturas;
     int puntosLuz = 0;
     int puntosOscuridad = 0;
 
@@ -16,7 +15,6 @@ private:
 
 public:
     InterfazHUD(sf::RenderWindow& win, sf::Font& font);
-    bool cargarFuente(const std::string& ruta);
     void cargarTexturas();
 
     void setDatosHUD(int luz, int osc, float tiempo) {
@@ -27,4 +25,5 @@ public:
 
     // La función principal que encapsula toda la lógica de dibujo
     void dibujar(sf::RenderWindow& window, int ronda, int ciclo, int jugadorActual, Pieza* seleccionada );
+    void dibujarDesdeMapa(sf::RenderWindow& window, std::string nombre, sf::Vector2f pos, sf::Vector2f tamano);
 };
