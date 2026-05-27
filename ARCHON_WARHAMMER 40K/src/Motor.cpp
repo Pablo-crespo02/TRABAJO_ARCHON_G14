@@ -34,23 +34,23 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     }
     //Sonido de error (pieza en el tablero)
     if (!bufferError.loadFromFile("sonidos/error.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido error.wav" << std::endl;
+        std::cout << "Aviso: No se pudo cargar el sonido error.mp3" << std::endl;
     }
     else {
         sonidoError.setBuffer(bufferError);
         sonidoError.setVolume(50.f); 
     }
     //Sonidos de muerte (pieza muere)
-    if (!bufferMuerteLuz.loadFromFile("sonidos/muerte_luz.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido muerte_luz.mp3" << std::endl;
+    if (!bufferMuerteLuz.loadFromFile("sonidos/muerte_humanidad.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido muerte_humanidad.mp3" << std::endl;
     }
     else {
         sonidoMuerteLuz.setBuffer(bufferMuerteLuz);
         sonidoMuerteLuz.setVolume(70.f);
     }
 
-    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_oscuridad.ogg")) {
-        std::cout << "Aviso: No se pudo cargar el sonido muerte_oscuridad.ogg" << std::endl;
+    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_xenos.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido muerte_xenos.mp3" << std::endl;
     }
     else {
         sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
@@ -58,11 +58,11 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     }
     // Sonido de la motosierra:
     if (!bufferMotosierra.loadFromFile("sonidos/motosierra.ogg")) {
-        std::cout << "Aviso: No se pudo cargar el sonido motosierra.mp3" << std::endl;
+        std::cout << "Aviso: No se pudo cargar el sonido motosierra.ogg" << std::endl;
     }
     else {
         sonidoMotosierra.setBuffer(bufferMotosierra);
-        sonidoMotosierra.setVolume(60.f); // Ajusta a tu gusto
+        sonidoMotosierra.setVolume(60.f);
     }
 
     // 2. Generar el mundo inicial
@@ -153,9 +153,6 @@ double calcularmodificadorterreno(Bando bando, ColorActual colorcasilla) {
     //Convertimos el valor en un porcentaje aplicable:
     return 1 + (ventaja * 0.01);
 }
-
-
-
 
 void Motor::intentarAccionJugador(int idJugador) {
     // Solo hacemos algo si el ID del jugador que pulsó coincide con el turno actual
@@ -266,8 +263,6 @@ void Motor::VerificarVictoria() {
     }
 }
 
-
-
 void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
     piezaAtacante = atacante;
     piezaDefensor = defensor;
@@ -321,7 +316,6 @@ void Motor::iniciarCombate(Pieza* atacante, Pieza* defensor) {
 
         estadoActual = Estado::Arena;
 }
-
 
 //Manejo de clicks en el tablero:
 
@@ -414,7 +408,6 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
         }
     }
 }
-
 
 //Gestión del teclado de la arena:
 void Motor::actualizar(double dt) {

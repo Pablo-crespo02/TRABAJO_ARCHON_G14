@@ -29,6 +29,9 @@ ClaseValkyria::ClaseValkyria(Bando b, sf::Vector2i pos, std::string tipo)
     // Sprites cabezón
     cargarConfigurarSprites(tipo);
 
+    if (animador) {
+        animador->agreganAnimacion("ATAQUE", 1, 1, 2, 0.20f, true);
+    }
 }
 
 // Físicas y animación

@@ -25,6 +25,10 @@ ClaseUnicornio::ClaseUnicornio(Bando b, sf::Vector2i pos, std::string tipo)
 
     // Sprites de los cabezones:
     cargarConfigurarSprites(tipo);
+
+    if (animador) {
+        animador->agreganAnimacion("ATAQUE", 1, 1, 2, 0.30f, true); //APAÑO spritesheet
+    }
 }
 
 //Físicas y animación:
