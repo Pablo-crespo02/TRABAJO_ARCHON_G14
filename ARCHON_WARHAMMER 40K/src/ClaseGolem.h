@@ -8,7 +8,7 @@
 class ClaseGolem : public PiezaTerrestre {
 private:
    
-    //VARIABLES DE ANIMACIÓN (ARENA)
+    //Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
 
@@ -21,10 +21,10 @@ public:
         return clon;
     }
 
-    //FUNCIONES DE MOVIMIENTO  
+    //Funciones de movimiento 
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
-    //FUNCIONES VISUALES
+    //Funciones visuales:
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 
     void animar(float dt, sf::Vector2f direccion);

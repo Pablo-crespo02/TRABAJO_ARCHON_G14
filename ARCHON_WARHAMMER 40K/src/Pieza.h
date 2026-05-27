@@ -9,7 +9,7 @@
 
 class Coordinador;
 
-// ENUMS:
+// Enums:
 enum class Bando { LUZ, OSCURIDAD };
 enum class PatronMovimiento { Ortogonal, Diagonal, Ambos };
 enum class TipoMovimiento { Terrestre, Volador, Teletransporte };

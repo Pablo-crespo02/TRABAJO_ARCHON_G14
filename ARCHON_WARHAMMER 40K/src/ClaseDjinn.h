@@ -8,7 +8,7 @@
 class ClaseDjinn : public PiezaTeletransporte {
 private:
    
-    //VARIABLES DE ANIMACIÓN (ARENA)
+    //Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
    
@@ -24,10 +24,10 @@ public:
         return clon;
     }
 
-    //FUNCIONES DE MOVIMIENTO  
+    //Funciones de movimiento
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
-    //FUNCIONES VISUALES
+    //Funciones visuales
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 
     void animar(float dt, sf::Vector2f direccion);

@@ -3,12 +3,12 @@
 #include <vector>
 #include "GenerarArena.h"
 
-// --- CONSTANTES ---
+// Constantes:
 const float ANCHO_MAPA = 800.f;
 const float ALTO_MAPA = 600.f;
 const float GROSOR_MURO = 20.f;
 
-// --- TIPOS AUXILIARES ---
+// Tipos auxiliares (entorno)
 enum class TipoObjeto { Roca, Item, Decoracion };
 
 struct HitboxCircular {
@@ -37,7 +37,7 @@ private:
     sf::Sprite spriteSuelo;   
     sf::Texture texturaSuelo;
 
-    //VARIABLES SCREEN SHAKE
+    // Variables de temblor de pantalla:
     float tiempoTemblor = 0.f;
     float magnitudTemblor = 0.f;
 
@@ -55,19 +55,19 @@ private:
 public:
     Arena(); // Constructor
 
-    // --- Lógica de Colisiones ---
+    // Lógica de colisiones:
     HitboxesArena obtenerColisiones() const;
     bool esPosicionValida(sf::Vector2f pos, float radio, bool esVoladora = false) const;
     bool esGeneracionValida(sf::Vector2f posActual, float radioActual, TipoObjeto tipo);
 
-    // --- Getters ---
+    // Getters:
     const std::vector<SpawnPoint>& getSpawns() const { return spawns; }
     const std::vector<sf::ConvexShape>& getRocas() const { return rocas; }
     const std::vector<Rejilla>& getRejillas() const { return rejillasSuelo; }
     const std::vector<sf::ConvexShape>& getCharcos() const { return charcosSangre; }
     sf::View getVista() const { return vistaArena; }
 
-    // --- Adders (Inyectores de datos) ---
+    // Los adders (Inyectores de datos)
     void addSpawnPoint(const SpawnPoint& sp) { spawns.push_back(sp); }
     void addRoca(const sf::ConvexShape& roca, const sf::ConvexShape& sombra) {
         rocas.push_back(roca); sombras.push_back(sombra);
@@ -79,7 +79,7 @@ public:
     void addCharcoSangre(const sf::ConvexShape& c) { charcosSangre.push_back(c); }
     void addGotaSangre(const sf::CircleShape& g) { gotasSangre.push_back(g); }
 
-    // --- Otros ---
+    // otros:
     void establecerAmbiente(sf::Color colorCasilla);
     void limpiarTodo() {
         spawns.clear();
@@ -94,7 +94,7 @@ public:
     void dibujar(sf::RenderWindow& window) const;
     void establecerAmbiente(Ambiente tipo);
 
-    //FUNCIONES SCREEN SHAKE
+    //Funciones de temblor de pantalla
     void iniciarTemblor(float duracion, float magnitud);
     void actualizarTemblor(float dt);
 };

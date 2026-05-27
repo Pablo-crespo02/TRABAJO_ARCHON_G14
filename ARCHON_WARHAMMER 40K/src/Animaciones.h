@@ -71,7 +71,7 @@ public:
 	}
 
 
-	//GETTERS PÚBLICOS:
+	//Getters públicos:
 	bool getTerminada()const { return animacionTerminada; }
 	std::string getAnimacionnActual()const { return animacionActual; }
 

@@ -4,7 +4,7 @@
 ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaTerrestre(b, pos)
 {
-    //ESTADÍSTICAS 
+    //Estadísticas:
     this->stats.nombre = tipo;
     this->stats.vida = 18.0f;
     this->stats.vidaMaxima = 18.0f;
@@ -13,7 +13,7 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     this->rangoMovimiento = 3;
     this->stats.velAtaque = 1.2f;
     this->stats.esRango = true;
-    // --- Lógica de tipos ---
+    // Lógica de tipos:
    // Asignación del patrón de movimiento
     this->patronMovimiento = PatronMovimiento::Ortogonal;
     this->tipoMov = TipoMovimiento::Terrestre;  // Solo para el HUD
@@ -29,17 +29,16 @@ ClaseArcher::ClaseArcher(Bando b, sf::Vector2i pos, std::string tipo)
     this->piezaAlturaArena = 120;
     this->piezaAlturaTablero = 90;
 
-    //CARGA DE SPRITES:
+    //Carga de los sprites:
     cargarConfigurarSprites(tipo);
 
-    //REGISTRO DE LA ANIMACIÓN INDEPENDIENTE:
+    //Resgistro de la animación independiente:
     if (animador) {
         animador->agreganAnimacion("PREPARANDO_SIGILO", 1, 2, 2, 0.20f, true);
         animador->agreganAnimacion("PREPARANDO_SIGILO", 1, 2, 2, 0.20f, true); //Apaño posiciones spritesheet
     }
 }
-
-//MÉTODO DE ANIMAR SOBREESCRITO POR LA ANIMACIÓN EXCLUSIVA:
+//Método de animar sobreescrito por la animación exclusia:
 void ClaseArcher::animar(float dt, sf::Vector2f direccion) {
     if (!animador) return;
 
@@ -58,7 +57,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         if (this->stats.nombre == "VINDICARE" || this->stats.nombre == "LICTOR") {
 
-            //CÍRCULO DE SELECCIÓN AMARILLO
+            //Círculo de selección amarillo
             if (seleccionado) {
                 dibujarAnilloSeleccion(window);
             }
@@ -74,7 +73,7 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             window.draw(spriteArena);
         }
        
-        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
+        // Barra de vida sobre la pieza
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         if (!esInvisible) {
             barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
@@ -84,14 +83,14 @@ void ClaseArcher::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 }
 //Hechizo 
 void ClaseArcher::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
-    // ACTIVACIÓN PARA EL LICTOR (OSCURIDAD)
+    // Activación del hechizo del líctor (OSCURIDAD)
     if (this->getBando() == Bando::OSCURIDAD) {
         this->preparandoInvisibilidad = true;
         this->esInvisible = false;
         this->temporizadorInvisibilidad = 0.5; // Iniciamos con el medio segundo de carga "clara"
         std::cout << "El Lictor comienza a camuflarse..." << std::endl;
     }
-    // ACTIVACIÓN PARA EL ARQUERO (LUZ)
+    // Activación del hechizo del arquero (LUZ)
     else if (this->getBando() == Bando::LUZ) {
         this->tieneBoostVelocidad = true;
         this->temporizadorBoost = 5.0; // Duración del sprint (ej: 5 segundos)
@@ -102,7 +101,7 @@ void ClaseArcher::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
 
 
 void ClaseArcher::gestionarInvisibilidad(double dt) {
-    // PASO 1: Fase de preparación (Medio segundo con el sprite especial)
+    // Paso 1: Fase de preparación (Medio segundo con el sprite especial)
     if (preparandoInvisibilidad) {
         temporizadorInvisibilidad -= dt;
 

@@ -16,7 +16,7 @@ class MenuNoInteractivo
 {
 private:
 
-    //PANTALLA DE VICTORIA:
+    //Pantalla de victoria:
     sf::Texture texturaFondo;
     sf::Sprite spriteFondo;
     sf::Font fuente;
@@ -26,7 +26,7 @@ private:
     sf::Text textoTiempo;
     sf::Text textoPuntuaciones;
 
-    //OTRAS PANTALLAS ESTÁTICAS:
+    //Otras pantallas estáticas:
     sf::Text textoCreditos;
     sf::Text textoInstrucciones;
     sf::Text textoRankingTitulo;

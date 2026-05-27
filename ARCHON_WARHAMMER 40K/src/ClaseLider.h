@@ -11,7 +11,7 @@ private:
 
     std::vector<Pieza*> minionsInvocados;
    
-    //VARIABLES DE ANIMACIÓN (ARENA)
+    //Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
     

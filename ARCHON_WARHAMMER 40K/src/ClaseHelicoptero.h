@@ -11,17 +11,17 @@
 
 class ClaseHelicoptero : public PiezaVoladora {
 private:
-    // TEXTURAS Y SPRITES (Solo Arena)
+    // Texturas y sprites (Solo Arena)
     sf::Texture texturaArena;
     sf::Sprite spriteArena;
 
-    // VARIABLES DE ANIMACIÓN
+    // Variables de animación:
     int frameActual;
     float temporizadorAnimacion;
     int anchoFrame;
     int altoFrame;
 
-    // IA Y DISPARO AUTOMÁTICO
+    // IA y disparo automático
     sf::Clock relojDisparoAuto; // Cooldown interno del helicóptero
 
 public:

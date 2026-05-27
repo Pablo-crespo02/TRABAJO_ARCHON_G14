@@ -19,7 +19,7 @@ BarrasArena::BarrasArena(float ancho, float alto) : anchoMaximo(ancho), alto(alt
 
 // Función Actualizar
 void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque, sf::Vector2f posicionPieza) {
-    // --- 1. LÓGICA DE VIDA ---
+    // 1. Lógica de vida:
     float porcentajeVida = (vidaMaxima > 0) ? (std::max(0.f, vidaActual) / vidaMaxima) : 0.f;
     barraActual.setSize(sf::Vector2f(anchoMaximo * porcentajeVida, alto));
 
@@ -28,13 +28,13 @@ void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque
     else if (porcentajeVida > 0.25f) barraActual.setFillColor(sf::Color::Yellow);
     else barraActual.setFillColor(sf::Color::Red);
 
-    // --- 2. LÓGICA DE ATAQUE ---
+    // 2. Lógica de ataque
     float tiempoTranscurrido = relojInterno.getElapsedTime().asSeconds();
     float porcentajeAtaque = (velAtaque > 0) ? (tiempoTranscurrido / velAtaque) : 1.f;
 
     if (porcentajeAtaque >= 1.f) {
         porcentajeAtaque = 1.f; // Se queda llena
-        barraAtaque.setFillColor(sf::Color(200, 200, 200)); // Gris claro: ¡LISTO!
+        barraAtaque.setFillColor(sf::Color(200, 200, 200)); // Gris claro
     }
     else {
         // Mientras carga, usamos el gris oscuro que querías
@@ -43,7 +43,7 @@ void BarrasArena::actualizar(float vidaActual, float vidaMaxima, float velAtaque
 
     barraAtaque.setSize(sf::Vector2f(anchoMaximo * porcentajeAtaque, alto / 3.f));
 
-    // --- 3. POSICIONAMIENTO ---
+    // 3. Posicionamiento:
     float offsetX = anchoMaximo / 2.f;
     float offsetY = 60.f;
     // Posicionamos el conjunto (puedes ajustar el 35.f según el tamaño de tus piezas)

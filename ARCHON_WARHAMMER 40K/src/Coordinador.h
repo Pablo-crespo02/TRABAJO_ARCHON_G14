@@ -34,13 +34,13 @@ struct DatosGuardados {
 
 class Coordinador {
 private:
-    // --- INFRAESTRUCTURA ---
+    // Infraestructura
     sf::View vistaTablero;
     sf::View vistaUI;
     sf::RenderWindow window;
     sf::Font fuente;
     sf::Clock reloj;
-    int ganadorPartida = 0; //0 = NADIE; 1 = LUZ; 2 = OSCURIDAD
+    int ganadorPartida = 0; //0 = Nadie; 1 = Luz; 2 = Oscuridad
     int indiceSeleccionado = 0;
     const int MAX_OPCIONES = 6;
     std::string nombreGanador = "";
@@ -48,18 +48,18 @@ private:
     bool partidaEnCurso = false;
     DatosGuardados ranuras[3];
 
-    // FICHERO
+    // Fichero
     void guardarDatosEnFichero();
     void cargarDatosDeFichero();
 
-    // --- AUDIO ---
+    // Audio
     sf::SoundBuffer bufferClick;
     sf::Sound sonidoClick;
 
     sf::Music musicaMenu;
 
     
-    // --- COMPONENTES ---
+    // Componentes
     Motor motor; // El motor se inicializa 
     PantallaInicio pantallaInicio;
     MenuNoInteractivo pantallainfo;

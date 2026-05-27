@@ -5,7 +5,7 @@
 ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     : PiezaVoladora(b, pos)
 {
-    // ESTADÍSTICAS 
+    // Estadísticas
     this->stats.nombre = tipo;
     this->stats.vida = 25.0f;
     this->stats.vidaMaxima = 25.0f;
@@ -26,7 +26,7 @@ ClaseFenix::ClaseFenix(Bando b, sf::Vector2i pos, std::string tipo)
     this->piezaAlturaArena = 150;
     this->piezaAlturaTablero = 90;
 
-    // CARGA DE SPRITES
+    // Carga de sprites
     cargarConfigurarSprites(tipo);
 
     //Animación de ataque en función de las posiciones en el spritesheet (APAÑO)
@@ -42,7 +42,7 @@ void ClaseFenix::procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena
     }
 }
 
-// INTERFAZ DE DIBUJADO (Soporta el renderizado autónomo del tentáculo
+// Interfaz del dibujado (Soporta el renderizado autónomo del tentáculo
 void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     if (estadoActual == Estado::Tablero) {
         this->sincronizarPosicionTablero();
@@ -57,7 +57,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
     }
     else if (estadoActual == Estado::Arena) {
 
-        // --- RENDERIZADO DEL TENTÁCULO GRUESO
+        // Renderizado del tentáculo
         if (this->stats.nombre == "HARPY" && enemigoEnlazado) {
             float tiempoTranscurrido = this->stats.relojHabilidad.getElapsedTime().asSeconds();
             if (tiempoTranscurrido <= 10.0f) {
@@ -101,10 +101,7 @@ void ClaseFenix::dibujar(sf::RenderWindow& window, Estado estadoActual) {
         barrasArena.dibujar(window);
     }
 }
-
-// =========================================================================
-// ACTIVACIÓN DEL HECHIZO
-// =========================================================================
+//Activamos hechizo
 void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
     // 1. Lógica del LIBRARIAN: No depende del enemigo
     if (this->stats.nombre == "LIBRARIAN") {
@@ -121,7 +118,7 @@ void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
             true   // ¿Es área?
         );
 
-        // ¡IMPORTANTE! Reiniciamos el reloj para que el cooldown actúe
+        // Reiniciamos el reloj para que el cooldown actúe
         this->stats.relojHabilidad.restart();
         std::cout << "El Librarian desata una Supernova!" << std::endl;
     }
@@ -134,9 +131,7 @@ void ClaseFenix::usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) {
         std::cout << "El Harpy activa Enlace de Sangre!" << std::endl;
     }
 }
-// =========================================================================
-// ACTUALIZACIÓN DE VIDA CONTINUA
-// =========================================================================
+//Vida continua:
 void ClaseFenix::actualizarLogicaHechizo(float dt) {
     if (this->stats.nombre != "HARPY" || !enemigoEnlazado) return;
 

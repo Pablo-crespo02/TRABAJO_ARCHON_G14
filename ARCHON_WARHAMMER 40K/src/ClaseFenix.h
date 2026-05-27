@@ -10,10 +10,10 @@
 class ClaseFenix : public PiezaVoladora {
 private:
   
-    // VARIABLES DEL ENLACE DE SANGRE (HARPY)
+    // Variables del hechizo (HARPY)
     Pieza* enemigoEnlazado;
 
-    // VARIABLES DE ANIMACIÓN (ARENA)
+    // Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
     
@@ -26,14 +26,14 @@ public:
         return clon;
     }
 
-    // FUNCIONES DE LÓGICA Y MOVIMIENTO
+    // Funciones de lógica y movimiento
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
 
     // Método encapsulado para procesar el drenaje de vida frame a frame (se llama en motor.cpp)
     void actualizarLogicaHechizo(float dt);
 
-    // FUNCIONES VISUALES
+    // Funciones visuales:
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
 
     void animar(float dt, sf::Vector2f direccion);

@@ -8,16 +8,16 @@
 class ClaseArcher : public PiezaTerrestre {
 private:
 
-    // VARIABLES DE ANIMACIÓN (ARENA)
+    // Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
     
-    // --- VARIABLES DE INVISIBILIDAD (LICTOR - OSCURIDAD) ---
+    // Variables de invisibilidad (LICTOR - OSCURIDAD) 
     bool esInvisible;
     bool preparandoInvisibilidad; // Nuevo: rastrea si está en el medio segundo de carga
     double temporizadorInvisibilidad;
 
-    // --- VARIABLES DE BOOST (LUZ) ---
+    // Variables de boost (LUZ) 
     bool tieneBoostVelocidad;
     double temporizadorBoost;
     float multiplicadorVelocidad;
@@ -29,11 +29,11 @@ public:
         ClaseArcher* clon = new ClaseArcher(this->bando, this->posicionTablero, this->stats.nombre);
         return clon;
     }
-    // FUNCIONES VISUALES
+    // Funciones visuales:
     void usarHechizo(std::vector<Hitbox>& hitboxes, Pieza* enemigo) override;
     void procesarMovimientoArena(sf::Vector2f direccion, float dt, Arena& arena) override;
 
-    //FUNCIONES VISUALES
+    // otras funciones visuales:
     void animar(float dt, sf::Vector2f direccion);
     void dibujar(sf::RenderWindow& window, Estado estadoActual)override;
     std::string getDescripcionHechizo() const override {

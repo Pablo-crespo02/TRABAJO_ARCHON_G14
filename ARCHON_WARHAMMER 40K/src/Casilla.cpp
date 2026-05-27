@@ -17,10 +17,10 @@ void Casilla::Dibujar(sf::RenderWindow& window) {
     const float tamCasilla = 60.0f;
     const float margen = 2.0f;
 
-    // DIBUJO DEL CUADRADO:
+    // Dibujo del cuadrado:
     sf::RectangleShape cuadrado(sf::Vector2f(tamCasilla - margen, tamCasilla - margen));
 
-    // CORRECCIÓN: Quitamos los +50.f y +30.f. 
+    // Corrección: Quitamos los +50.f y +30.f. 
     // Usamos coordenadas puras para alinear con Pieza::sincronizarPosicionTablero()
     float posX = columna * tamCasilla;
     float posY = fila * tamCasilla;
@@ -38,9 +38,9 @@ void Casilla::Dibujar(sf::RenderWindow& window) {
     // Pintamos
     window.draw(cuadrado);
 
-    // DIBUJO DEL POWER POINT:
+    // Dibujo del power point:
     if (powerpoint) {
-        // CORRECCIÓN: Calculamos el centro exacto basado en posX y posY limpios
+        // Corrección: Calculamos el centro exacto basado en posX y posY limpios
         float centroX = posX + ((tamCasilla - margen) / 2.0f);
         float centroY = posY + ((tamCasilla - margen) / 2.0f);
         PowerPoint::Dibujar(window, centroX, centroY);

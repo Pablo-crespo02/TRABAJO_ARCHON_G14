@@ -19,7 +19,7 @@ ClaseDjinn::ClaseDjinn(Bando b, sf::Vector2i pos, std::string tipo)
     this->piezaAlturaArena = 120;
     this->piezaAlturaTablero = 90;
 
-    //CARGA DE SPRITES
+    //Carga de sprites
     cargarConfigurarSprites(tipo);
      
     //Animación de ataque en función de las posiciones en el spritesheet (APAÑO)
@@ -43,7 +43,7 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
 
         if (this->stats.nombre == "CULEXUS" || this->stats.nombre == "GENESTEALER") {
 
-            //CÍRCULO DE SELECCIÓN AMARILLO
+            //Círculo de selección amarillo
             if (seleccionado) {
                 dibujarAnilloSeleccion(window);
             }
@@ -58,7 +58,7 @@ void ClaseDjinn::dibujar(sf::RenderWindow& window, Estado estadoActual) {
             window.draw(spriteArena);
         }
        
-        //DIBUJAMOS BARRA DE VIDA SOBRE LA PIEZA
+        // Barra de vida sobre la pieza
 
         barrasArena.actualizar(stats.vida, stats.vidaMaxima, stats.velAtaque, posicionAbsoluta);
         barrasArena.dibujar(window);
