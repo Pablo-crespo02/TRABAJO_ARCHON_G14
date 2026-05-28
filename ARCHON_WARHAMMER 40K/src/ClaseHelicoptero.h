@@ -7,7 +7,7 @@
 #include "Arena.h"
 #include "Hitboxes.h"
 #include "Color.h"
-
+#include <SFML/Audio.hpp>
 
 class ClaseHelicoptero : public PiezaVoladora {
 private:
@@ -24,6 +24,8 @@ private:
     // IA y disparo automático
     sf::Clock relojDisparoAuto; // Cooldown interno del helicóptero
 
+    sf::SoundBuffer bufferHelic;
+    sf::Sound sonidoHelic;
 public:
     // Constructor adaptado (bando, posición inicial en la arena, y estadísticas base)
     ClaseHelicoptero(Bando b, sf::Vector2f posArena);
@@ -36,7 +38,7 @@ public:
 
     // El helicóptero no se dibuja en el tablero, solo en la arena
     void dibujar(sf::RenderWindow& window, Estado estadoActual) override;
-
+    void reproducirSonidoAtaque() {sonidoHelic.play();}
     // IA autónoma: vuela persiguiendo al enemigo y disparando proyectiles
     void actualizarIA(float dt, Arena& arena, Pieza* enemigo, std::vector<Hitbox>& hitboxes);
 

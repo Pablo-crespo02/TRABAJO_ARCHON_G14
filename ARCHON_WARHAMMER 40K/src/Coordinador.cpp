@@ -14,7 +14,7 @@ Coordinador::Coordinador():motor(window, fuente)
 
     // 2. Sonido del click en el menú
     if (!bufferClick.loadFromFile("sonidos/click.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido click.wav" << std::endl;
+        std::cout << "Aviso: No se pudo cargar el sonido click.mp3" << std::endl;
     }
     else {
         sonidoClick.setBuffer(bufferClick);

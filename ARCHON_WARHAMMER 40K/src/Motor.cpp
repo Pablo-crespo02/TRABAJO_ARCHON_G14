@@ -56,15 +56,47 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
         sonidoMuerteOscuridad.setVolume(70.f);
     }
+    // Sonidos ataques
     // Sonido de la motosierra:
-    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.ogg")) {
-        std::cout << "Aviso: No se pudo cargar el sonido motosierra.ogg" << std::endl;
+    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido motosierra.mp3" << std::endl;
     }
     else {
         sonidoMotosierra.setBuffer(bufferMotosierra);
-        sonidoMotosierra.setVolume(60.f);
+        sonidoMotosierra.setVolume(90.f);
     }
-
+    // Sonido del Punetazo
+    if (!bufferPunetazo.loadFromFile("sonidos/punetazo.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido punetazo.mp3" << std::endl;
+    }
+    else {
+        sonidoPunetazo.setBuffer(bufferPunetazo);
+        sonidoPunetazo.setVolume(90.f);
+    }
+    // Sonido de Melee
+    if (!bufferMelee.loadFromFile("sonidos/melee.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido melee.mp3" << std::endl;
+    }
+    else {
+        sonidoMelee.setBuffer(bufferMelee);
+        sonidoMelee.setVolume(90.f);
+    }
+    // Sonido Distancia
+    if (!bufferDistancia.loadFromFile("sonidos/distancia.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido distancia.mp3" << std::endl;
+    }
+    else {
+        sonidoDistancia.setBuffer(bufferDistancia);
+        sonidoDistancia.setVolume(90.f);
+    }
+    //Sonido Energia
+    if (!bufferEnergia.loadFromFile("sonidos/energia.mp3")) {
+        std::cout << "Aviso: No se pudo cargar el sonido energia.mp3" << std::endl;
+    }
+    else {
+        sonidoEnergia.setBuffer(bufferEnergia);
+        sonidoEnergia.setVolume(90.f);
+    }
     // 2. Generar el mundo inicial
     // Llamamos a tus funciones de generación
     Generador::GenerarTablero(tablero);
@@ -224,7 +256,6 @@ void Motor::VerificarVictoria() {
     int piezasOscuridad = 0;
     int powerPointsLuz = 0;
     int powerPointsOscuridad = 0;
-
     //Se escanean todas las piezas supervivientes del contenedor de piezas:
     for (auto p : listaPiezas) {
         if (p->bando == Bando::LUZ) {
@@ -245,7 +276,6 @@ void Motor::VerificarVictoria() {
             }
         }
     }
-
     //Comprobamos las condiciones de victoria una vez se ha recorrido todo el contenedor:
     //Condiciones LUZ:
     if (piezasOscuridad == 0 || powerPointsLuz >= 5) {
@@ -254,7 +284,6 @@ void Motor::VerificarVictoria() {
         std::cout << "  VICTORIA DEL IMPERIUM" << std::endl;
 
     }
-
     //Condiciones OSCURIDAD:
     else if (piezasLuz == 0 || powerPointsOscuridad >= 5) {
         estadoActual = Estado::Victoria;
@@ -449,7 +478,26 @@ void Motor::actualizar(double dt) {
 
         // Si se pulsa la tecla de ataque y el cooldown permite disparar:
         if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
+            
+            // --- SISTEMA CENTRALIZADO DE SONIDOS DE ATAQUE ---
+            std::string n = p->stats.nombre;
 
+            if (n == "INTERCESSOR") {
+                sonidoMotosierra.play();
+            }
+            else if (n == "VINDICARE" || n == "HARPY" || n == "CAPTAIN" ||
+                n == "HIVE TYRANT" || n == "ASSAULT MARINE" || n == "GARGOLA") {
+                sonidoDistancia.play();
+            }
+            else if (n == "LICTOR" || n == "CULEXUS" || n == "GENESTEALER" || n == "LIBRARIAN") {
+                sonidoEnergia.play();
+            }
+            else if (n == "DREADNOUGHT" || n == "TOXICRENO") {
+                sonidoPunetazo.play();
+            }
+            else if (n == "CARNIFEX" || n == "TERMAGANT" || n == "PRIMARIS") {
+                sonidoMelee.play();
+            }
             // Obtenemos hacia dónde está mirando la pieza:
             sf::Vector2f dirAtaque = p->getultimadireccion();
 
@@ -801,6 +849,8 @@ void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
 
 }
 
+// void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
+/*
 void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
     sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
     sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt)
@@ -840,6 +890,8 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
 
     p->procesarMovimientoArena(dir, dt, this->arena);
 }
+*/
+
 //Calulamos los puntos de la pieza
 
 int Motor::calcularPuntosPieza(const std::string& nombre) {

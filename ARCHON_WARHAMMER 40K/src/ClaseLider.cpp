@@ -27,6 +27,7 @@ ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
     this->piezaAlturaTablero = 80.0f;
     this->piezaAlturaArena = 150.0f;
 
+
     //Carga de los sprites:
     cargarConfigurarSprites(tipo);
 
@@ -35,6 +36,12 @@ ClaseLider::ClaseLider(Bando b, sf::Vector2i pos, std::string tipo)
         animador->agreganAnimacion("INVOCANDO", 1, 2, 2, 0.4, true);
         animador->agreganAnimacion("ATAQUE", 1, 0, 1, 0.15f, true); //APAÑO spritesheet
     }
+    // Carga sonido invocacines
+    if (bufferMinionXeno.loadFromFile("sonidos/melee.mp3")) {
+        sonidoMinionXeno.setBuffer(bufferMinionXeno);
+        sonidoMinionXeno.setVolume(90.f);
+    }
+
 }
 
 // Físicas y animación:
@@ -234,6 +241,7 @@ void ClaseLider::actualizarMinions(float dt, Arena& arena, Pieza* enemigo, std::
                 if (!enemigo->getInvulnerable()) {
                     enemigo->stats.vida -= minion->stats.ataque;
                     std::cout << "Un Termagant ha mordido al enemigo haciendo " << minion->stats.ataque << " de dano!" << std::endl;
+                    sonidoMinionXeno.play();
                 }
                 minion->stats.relojHitbox.restart();
                 haAtacadoEnEsteFrame = true;

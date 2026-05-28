@@ -60,14 +60,29 @@ private:
     sf::SoundBuffer bufferMuerteOscuridad;
     sf::Sound sonidoMuerteOscuridad;
 
-    // Sonido de la espada clase kinght luz
+    //Sonidos Ataque
+    // Sonido de la 
+    // intercessor
     sf::SoundBuffer bufferMotosierra;
     sf::Sound sonidoMotosierra;
+    //Sonido del puñetazo
+    sf::SoundBuffer bufferPunetazo;
+    sf::Sound sonidoPunetazo;
+    //Sonido Melee
+    sf::SoundBuffer bufferMelee;
+    sf::Sound sonidoMelee;
+    //Sonido Disparo
+    sf::SoundBuffer bufferDistancia;
+    sf::Sound sonidoDistancia;
+    //Sonido Energia
+    sf::SoundBuffer bufferEnergia;
+    sf::Sound sonidoEnergia;
 
 
-    void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
+    // void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
+    /*void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
-        sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);
+        sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);*/
 public:
     std::vector<Pieza*> listaPiezas;
     std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }

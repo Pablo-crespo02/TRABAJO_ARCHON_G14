@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp> 
+#include <SFML/Audio.hpp>
 
 class ClaseLider : public PiezaTeletransporte {
 private:
@@ -14,7 +15,11 @@ private:
     //Variables de animación (ARENA)
     int frameActual;
     float temporizadorAnimacion;
-    
+
+    //Sonidos para los minions
+    sf::SoundBuffer bufferMinionXeno;
+    sf::Sound sonidoMinionXeno;
+
 public:
 
     ClaseLider(Bando b, sf::Vector2i pos, std::string tipo);

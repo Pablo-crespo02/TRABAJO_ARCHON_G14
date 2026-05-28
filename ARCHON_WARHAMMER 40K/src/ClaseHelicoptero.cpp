@@ -47,6 +47,11 @@ ClaseHelicoptero::ClaseHelicoptero(Bando b, sf::Vector2f posArena)
 
     frameActual = 0;
     temporizadorAnimacion = 0.0f;
+    //Sonido de distancia en el helicoptero
+    if (bufferHelic.loadFromFile("sonidos/distancia.mp3")) {
+        sonidoHelic.setBuffer(bufferHelic);
+        sonidoHelic.setVolume(90.f);
+    }
 }
 
 void ClaseHelicoptero::dibujar(sf::RenderWindow& window, Estado estadoActual) {
@@ -130,6 +135,8 @@ void ClaseHelicoptero::actualizarIA(float dt, Arena& arena, Pieza* enemigo, std:
         );
 
         relojDisparoAuto.restart();
+
+        sonidoHelic.play();
     }
 }
 void ClaseHelicoptero::animar(float dt, sf::Vector2f direccion) {
