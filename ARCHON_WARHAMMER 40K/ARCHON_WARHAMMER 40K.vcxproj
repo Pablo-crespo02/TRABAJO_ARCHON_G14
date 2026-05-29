@@ -146,6 +146,7 @@
     <ClCompile Include="src\Coordinador.cpp" />
     <ClCompile Include="src\Generador.cpp" />
     <ClCompile Include="src\GenerarArena.cpp" />
+    <ClCompile Include="src\GestorSonido.cpp" />
     <ClCompile Include="src\InterfazHUD.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MenuNombre.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="src\EstadoJuego.h" />
     <ClInclude Include="src\Generador.h" />
     <ClInclude Include="src\GenerarArena.h" />
+    <ClInclude Include="src\GestorSonido.h" />
     <ClInclude Include="src\InterfazHUD.h" />
     <ClInclude Include="src\MenuNombre.h" />
     <ClInclude Include="src\MenuPausa.h" />

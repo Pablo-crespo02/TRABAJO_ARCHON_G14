@@ -24,33 +24,21 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     piezaAtacante = nullptr;
     piezaDefensor = nullptr;
 
-    //  Sonido Mover:
-    if (!bufferMover.loadFromFile("sonidos/mover.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido mover.wav" << std::endl;
-    }
-    else {
-        sonidoMover.setBuffer(bufferMover);
-        sonidoMover.setVolume(70.f); 
-    }
-    //Sonido de error (pieza en el tablero)
-    if (!bufferError.loadFromFile("sonidos/error.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido error.mp3" << std::endl;
-    }
-    else {
-        sonidoError.setBuffer(bufferError);
-        sonidoError.setVolume(50.f); 
-    }
-    //Sonidos de muerte (pieza muere)
-    if (!bufferMuerteLuz.loadFromFile("sonidos/muerte_humanidad.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido muerte_humanidad.mp3" << std::endl;
-    }
-    else {
-        sonidoMuerteLuz.setBuffer(bufferMuerteLuz);
-        sonidoMuerteLuz.setVolume(70.f);
-    }
+    //Carga de sonidos
+    gestorSonido.cargar("mover", "sonidos/mover.mp3");
+    gestorSonido.cargar("error", "sonidos/error.mp3");
+    gestorSonido.cargar("muerteLuz", "sonidos/muerte_humanidad.mp3");
+    gestorSonido.cargar("muerteOsc", "sonidos/muerte_xenos.mp3");
+    gestorSonido.cargar("motosierra", "sonidos/motosierra.ogg");
 
-    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_xenos.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido muerte_xenos.mp3" << std::endl;
+    gestorSonido.setVolumen("mover", 70.f);
+    gestorSonido.setVolumen("error", 50.f);
+    gestorSonido.setVolumen("muerteLuz", 70.f);
+    gestorSonido.setVolumen("muerteOsc", 70.f);
+    gestorSonido.setVolumen("motosierra", 60.f);
+
+    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_oscuridad.ogg")) {
+        std::cout << "Aviso: No se pudo cargar el sonido muerte_oscuridad.ogg" << std::endl;
     }
     else {
         sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
@@ -97,6 +85,16 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
         sonidoEnergia.setBuffer(bufferEnergia);
         sonidoEnergia.setVolume(90.f);
     }
+
+    // CARGA DEL SONIDO MOTOSIERRA
+    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.wav")) {
+        std::cout << "Aviso: No se pudo cargar el sonido sonidos/motosierra.wav" << std::endl;
+    }
+    else {
+        sonidoMotosierra.setBuffer(bufferMotosierra);
+        sonidoMotosierra.setVolume(90.f); // Lo subimos bien alto para asegurarnos de oírlo
+    }
+
     // 2. Generar el mundo inicial
     // Llamamos a tus funciones de generación
     Generador::GenerarTablero(tablero);
@@ -379,7 +377,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
                 }
                 else {
                     std::cout << "No puedes seleccionar piezas enemigas." << std::endl;
-                    sonidoError.play();
+                    gestorSonido.reproducir("error");
                 }
                 return;
             }
@@ -416,7 +414,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
                     std::cout << "Movimiento realizado con exito." << std::endl;
 
-                    sonidoMover.play();
+                    gestorSonido.reproducir("mover");
 
                     piezaSeleccionada->seleccionado = false;
                     piezaSeleccionada = nullptr;
@@ -432,7 +430,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
             }
             else {
                 std::cout << "Movimiento denegado: Camino bloqueado o fuera de rango." << std::endl;
-                sonidoError.play();
+                gestorSonido.reproducir("error");
             }
         }
     }
@@ -685,7 +683,7 @@ void Motor::actualizar(double dt) {
                     sf::Vector2f vel = Hitboxes[i].getVelocidadHitbox();
                     if (vel.x != 0.f || vel.y != 0.f) { Hitboxes[i].setEstadoHitbox(false); }
                 }
-                // --- EVALUACIÓN FÍSICA CONTINUA (EMPUJE) ---
+                //EVALUACIÓN FÍSICA CONTINUA (EMPUJE)
                 // Al colocar esto aquí, el motor aplica la fuerza en cada frame (dt) 
                 // independientemente de si la pieza ya recibió daño inicial o no.
                 if (Hitboxes[i].getCausaEmpuje()) {
@@ -779,16 +777,15 @@ void Motor::actualizar(double dt) {
         Pieza* perdedor = (piezaAtacante->stats.vida <= 0.f) ? piezaAtacante : piezaDefensor;
         Pieza* ganador = (perdedor == piezaAtacante) ? piezaDefensor : piezaAtacante;
 
-        //SONIDO DE MUERTE POR BANDO (NUEVO)
+        //SONIDO DE MUERTE POR BANDO
         if (perdedor->getBando() == Bando::LUZ) {
-            sonidoMuerteLuz.play();
+            gestorSonido.reproducir("muerteLuz");
         }
         else {
-            sonidoMuerteOscuridad.play();
+            gestorSonido.reproducir("muerteOsc");
         }
-        // --
 
-        // --- NUEVO: SUMAR PUNTOS AL BANDO DEL GANADOR ---
+        //SUMAR PUNTOS AL BANDO DEL GANADOR
         int puntosObtenidos = calcularPuntosPieza(perdedor->stats.nombre);
         if (ganador->getBando() == Bando::LUZ) {
             puntosLuz += puntosObtenidos;
@@ -797,7 +794,7 @@ void Motor::actualizar(double dt) {
             puntosOscuridad += puntosObtenidos;
         }
 
-        // --- SOLUCIÓN: LIMPIEZA ABSOLUTA DE MINIONS ANTES DE BORRAR AL LÍDER ---
+       
         // Hacemos la limpieza mientras las piezas sigan vivas en memoria.
         if (pOsc != nullptr) {
             pOsc->limpiarMinions();
@@ -868,9 +865,9 @@ void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key 
         //SONIDOS DE COMBATE EN ARENA
         std::cout << "ATACANDO CON LA PIEZA: [" << p->stats.nombre << "]" << std::endl;
 
-        // --- SONIDOS DE COMBATE CUERPO A CUERPO ---
+        //SONIDOS DE COMBATE CUERPO A CUERPO
         if (p->stats.nombre == "INTERCESSOR") {
-            sonidoMotosierra.play();
+            gestorSonido.reproducir("motosierra");
         }
         sf::Vector2f dirAtaque = p->getultimadireccion();
         float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);

@@ -10,6 +10,7 @@
 #include "Hitboxes.h"
 #include "InterfazHUD.h"
 #include "PantallaInicio.h"
+#include "GestorSonido.h"
 
 class Coordinador; // Predeclaración correcta
 
@@ -46,6 +47,9 @@ private:
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
     //sonido
+
+    GestorSonido gestorSonido;
+
     sf::SoundBuffer bufferMover;
     sf::Sound sonidoMover;
 
@@ -65,6 +69,7 @@ private:
     // intercessor
     sf::SoundBuffer bufferMotosierra;
     sf::Sound sonidoMotosierra;
+
     //Sonido del puñetazo
     sf::SoundBuffer bufferPunetazo;
     sf::Sound sonidoPunetazo;
@@ -77,6 +82,8 @@ private:
     //Sonido Energia
     sf::SoundBuffer bufferEnergia;
     sf::Sound sonidoEnergia;
+
+ 
 
 
     // void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
