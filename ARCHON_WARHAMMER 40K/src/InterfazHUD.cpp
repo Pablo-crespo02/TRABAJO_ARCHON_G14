@@ -213,6 +213,41 @@ void InterfazHUD::dibujar(sf::RenderWindow& window, int ronda, int ciclo, int ju
 
     textoTiempoHUD.setPosition(450.f, alto - 75.f);
     window.draw(textoTiempoHUD);
+
+    //CONTADOR DE TURNO
+    float tiempoRestante = limiteTurno - tiempoTurno;
+    if (tiempoRestante < 0.f) tiempoRestante = 0.f;
+
+    // Color según urgencia
+    sf::Color colorTiempo;
+    if (tiempoRestante > 15.f)     colorTiempo = sf::Color::Green;
+    else if (tiempoRestante > 7.f) colorTiempo = sf::Color::Yellow;
+    else                           colorTiempo = sf::Color::Red;
+
+    // Número de segundos restantes
+    sf::Text textoTurno;
+    textoTurno.setFont(*fuente);
+    textoTurno.setCharacterSize(40);
+    textoTurno.setFillColor(colorTiempo);
+    textoTurno.setOutlineColor(sf::Color::Black);
+    textoTurno.setOutlineThickness(2.f);
+    textoTurno.setString("TURNO: " + std::to_string((int)tiempoRestante) + "s");
+    textoTurno.setPosition(450.f, alto - 120.f);
+    window.draw(textoTurno);
+
+    // Barra visual debajo del número
+    float anchoBarraTurno = 200.f;
+    float porcentaje = tiempoRestante / limiteTurno;
+
+    sf::RectangleShape fondoBarra(sf::Vector2f(anchoBarraTurno, 10.f));
+    fondoBarra.setFillColor(sf::Color(50, 50, 50));
+    fondoBarra.setPosition(450.f, alto - 75.f);
+    window.draw(fondoBarra);
+
+    sf::RectangleShape barraTurno(sf::Vector2f(anchoBarraTurno * porcentaje, 10.f));
+    barraTurno.setFillColor(colorTiempo);
+    barraTurno.setPosition(450.f, alto - 75.f);
+    window.draw(barraTurno);
 }
 
 void InterfazHUD::dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal) {

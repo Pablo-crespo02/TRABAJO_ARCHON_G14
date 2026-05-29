@@ -42,50 +42,18 @@ private:
     int calcularPuntosPieza(const std::string& nombre);
     //Tenporizador
     float tiempoJugado = 0.0f;
-
+    float tiempoTurno = 0.0f;        
+    float limiteTiempoTurno = 12.0f;
+    bool turnoAgotado = false;
+    bool contadorTurnoIniciado = false;
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
-    //sonido
 
+    //sonidos
     GestorSonido gestorSonido;
 
-    sf::SoundBuffer bufferMover;
-    sf::Sound sonidoMover;
-
-    //sonido error
-    sf::SoundBuffer bufferError;
-    sf::Sound sonidoError;
-
-    // sonido muerte luz/oscuridad
-    sf::SoundBuffer bufferMuerteLuz;
-    sf::Sound sonidoMuerteLuz;
-
-    sf::SoundBuffer bufferMuerteOscuridad;
-    sf::Sound sonidoMuerteOscuridad;
-
-    //Sonidos Ataque
-    // Sonido de la 
-    // intercessor
-    sf::SoundBuffer bufferMotosierra;
-    sf::Sound sonidoMotosierra;
-
-    //Sonido del puñetazo
-    sf::SoundBuffer bufferPunetazo;
-    sf::Sound sonidoPunetazo;
-    //Sonido Melee
-    sf::SoundBuffer bufferMelee;
-    sf::Sound sonidoMelee;
-    //Sonido Disparo
-    sf::SoundBuffer bufferDistancia;
-    sf::Sound sonidoDistancia;
-    //Sonido Energia
-    sf::SoundBuffer bufferEnergia;
-    sf::Sound sonidoEnergia;
-
- 
-
-
+  
     // void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
     /*void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,

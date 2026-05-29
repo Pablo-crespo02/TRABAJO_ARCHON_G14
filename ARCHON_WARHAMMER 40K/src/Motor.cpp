@@ -29,71 +29,22 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     gestorSonido.cargar("error", "sonidos/error.mp3");
     gestorSonido.cargar("muerteLuz", "sonidos/muerte_humanidad.mp3");
     gestorSonido.cargar("muerteOsc", "sonidos/muerte_xenos.mp3");
-    gestorSonido.cargar("motosierra", "sonidos/motosierra.ogg");
+    gestorSonido.cargar("motosierra", "sonidos/motosierra.wav");
+    gestorSonido.cargar("punetazo", "sonidos/punetazo.mp3");
+    gestorSonido.cargar("melee", "sonidos/melee.mp3");
+    gestorSonido.cargar("distancia", "sonidos/distancia.mp3");
+    gestorSonido.cargar("energia", "sonidos/energia.mp3");
 
     gestorSonido.setVolumen("mover", 70.f);
     gestorSonido.setVolumen("error", 50.f);
     gestorSonido.setVolumen("muerteLuz", 70.f);
     gestorSonido.setVolumen("muerteOsc", 70.f);
-    gestorSonido.setVolumen("motosierra", 60.f);
+    gestorSonido.setVolumen("motosierra", 90.f);
+    gestorSonido.setVolumen("punetazo", 90.f);
+    gestorSonido.setVolumen("melee", 90.f);
+    gestorSonido.setVolumen("distancia", 90.f);
+    gestorSonido.setVolumen("energia", 90.f);
 
-    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_oscuridad.ogg")) {
-        std::cout << "Aviso: No se pudo cargar el sonido muerte_oscuridad.ogg" << std::endl;
-    }
-    else {
-        sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
-        sonidoMuerteOscuridad.setVolume(70.f);
-    }
-    // Sonidos ataques
-    // Sonido de la motosierra:
-    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido motosierra.mp3" << std::endl;
-    }
-    else {
-        sonidoMotosierra.setBuffer(bufferMotosierra);
-        sonidoMotosierra.setVolume(90.f);
-    }
-    // Sonido del Punetazo
-    if (!bufferPunetazo.loadFromFile("sonidos/punetazo.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido punetazo.mp3" << std::endl;
-    }
-    else {
-        sonidoPunetazo.setBuffer(bufferPunetazo);
-        sonidoPunetazo.setVolume(90.f);
-    }
-    // Sonido de Melee
-    if (!bufferMelee.loadFromFile("sonidos/melee.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido melee.mp3" << std::endl;
-    }
-    else {
-        sonidoMelee.setBuffer(bufferMelee);
-        sonidoMelee.setVolume(90.f);
-    }
-    // Sonido Distancia
-    if (!bufferDistancia.loadFromFile("sonidos/distancia.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido distancia.mp3" << std::endl;
-    }
-    else {
-        sonidoDistancia.setBuffer(bufferDistancia);
-        sonidoDistancia.setVolume(90.f);
-    }
-    //Sonido Energia
-    if (!bufferEnergia.loadFromFile("sonidos/energia.mp3")) {
-        std::cout << "Aviso: No se pudo cargar el sonido energia.mp3" << std::endl;
-    }
-    else {
-        sonidoEnergia.setBuffer(bufferEnergia);
-        sonidoEnergia.setVolume(90.f);
-    }
-
-    // CARGA DEL SONIDO MOTOSIERRA
-    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.wav")) {
-        std::cout << "Aviso: No se pudo cargar el sonido sonidos/motosierra.wav" << std::endl;
-    }
-    else {
-        sonidoMotosierra.setBuffer(bufferMotosierra);
-        sonidoMotosierra.setVolume(90.f); // Lo subimos bien alto para asegurarnos de oírlo
-    }
 
     // 2. Generar el mundo inicial
     // Llamamos a tus funciones de generación
@@ -130,6 +81,9 @@ void Motor::limpiarDatos() {
     puntosLuz = 0;
     puntosOscuridad = 0;
     tiempoJugado = 0.0f;
+    tiempoTurno = 0.0f;
+    turnoAgotado = false;
+    contadorTurnoIniciado = false;
 
     // 3. Regeneración del mundo
     Generador::GenerarTablero(tablero);
@@ -192,10 +146,12 @@ void Motor::intentarAccionJugador(int idJugador) {
 
         if (jugadorActual == 1) {
             jugadorActual = 2;
+            tiempoTurno = 0.0f;
         }
         else {
             // Si el 2 termina, reseteamos a 1 y avanzamos ciclo
             jugadorActual = 1;
+            tiempoTurno = 0.0f;
             cicloActual++;
 
             if (cicloActual > 12) {
@@ -240,6 +196,9 @@ void Motor::reiniciarJuego(){
     puntosLuz = 0;
     puntosOscuridad = 0;
     tiempoJugado = 0.0f;
+    tiempoTurno = 0.0f;
+    turnoAgotado = false;
+    contadorTurnoIniciado = false;
     //Se vuelve a generar el tablero y las piezas:
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
@@ -351,6 +310,8 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
     // Comprueba que el juego está en el estado tablero:
     if (estadoActual != Estado::Tablero) return;
 
+    if (turnoAgotado) return;
+
     //Creación de un vector que indica la posición en el mundo del ratón:
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
 
@@ -405,6 +366,9 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
                 if (enemigo != nullptr && enemigo->bando != piezaSeleccionada->bando) {
                     // Si es enemigo, iniciamos combate
+                    tiempoTurno = 0.0f;
+                    turnoAgotado = false;
+                    contadorTurnoIniciado = false;
                     iniciarCombate(piezaSeleccionada, enemigo);
                 }
                 else {
@@ -414,6 +378,9 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
                     std::cout << "Movimiento realizado con exito." << std::endl;
 
+                    tiempoTurno = 0.0f;
+                    turnoAgotado = false;
+                    contadorTurnoIniciado = false;
                     gestorSonido.reproducir("mover");
 
                     piezaSeleccionada->seleccionado = false;
@@ -442,6 +409,41 @@ void Motor::actualizar(double dt) {
     // 1. Filtro de estado obligatorio
     // Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimiento de los FPS:
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
+ //Contador de turno
+    if (estadoActual == Estado::Tablero) {
+        if (!contadorTurnoIniciado) {
+            tiempoTurno = 0.0f;
+            contadorTurnoIniciado = true;
+        }
+        tiempoTurno += static_cast<float>(dt);
+        if (tiempoTurno >= limiteTiempoTurno) {
+            tiempoTurno = 0.0f;
+            turnoAgotado = true;
+            std::cout << "¡Tiempo agotado! Turno forzado." << std::endl;
+
+            if (jugadorActual == 1) {
+                jugadorActual = 2;
+            }
+            else {
+                jugadorActual = 1;
+                cicloActual++;
+                if (cicloActual > 12) {
+                    cicloActual = 1;
+                    rondaActual++;
+                    for (auto& pieza : listaPiezas) {
+                        pieza->resetearHechizos();
+                    }
+                }
+                tablero.actualizarColores(cicloActual);
+            }
+
+            if (piezaSeleccionada) {
+                piezaSeleccionada->seleccionado = false;
+                piezaSeleccionada = nullptr;
+            }
+            turnoAgotado = false;
+        }
+    }
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
 
 
@@ -477,24 +479,24 @@ void Motor::actualizar(double dt) {
         // Si se pulsa la tecla de ataque y el cooldown permite disparar:
         if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
             
-            // --- SISTEMA CENTRALIZADO DE SONIDOS DE ATAQUE ---
+            //SISTEMA CENTRALIZADO DE SONIDOS DE ATAQUE
             std::string n = p->stats.nombre;
 
             if (n == "INTERCESSOR") {
-                sonidoMotosierra.play();
+                gestorSonido.reproducir("motosierra");
             }
             else if (n == "VINDICARE" || n == "HARPY" || n == "CAPTAIN" ||
                 n == "HIVE TYRANT" || n == "ASSAULT MARINE" || n == "GARGOLA") {
-                sonidoDistancia.play();
+                gestorSonido.reproducir("distancia");
             }
             else if (n == "LICTOR" || n == "CULEXUS" || n == "GENESTEALER" || n == "LIBRARIAN") {
-                sonidoEnergia.play();
+                gestorSonido.reproducir("energia");
             }
             else if (n == "DREADNOUGHT" || n == "TOXICRENO") {
-                sonidoPunetazo.play();
+                gestorSonido.reproducir("punetazo");
             }
             else if (n == "CARNIFEX" || n == "TERMAGANT" || n == "PRIMARIS") {
-                sonidoMelee.play();
+                gestorSonido.reproducir("melee");
             }
             // Obtenemos hacia dónde está mirando la pieza:
             sf::Vector2f dirAtaque = p->getultimadireccion();
@@ -553,7 +555,7 @@ void Motor::actualizar(double dt) {
         }
     }
     
-    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA ---
+    // ACTUALIZACIÓN AUTÓNOMA DE MINIONS DE LA PIEZA 
     // Delegamos al Líder de la Oscuridad que actualice sus piezas auxiliares pasándole la arena y el rival
     if (pOsc != nullptr) {
         pOsc->actualizarMinions(dt, this->arena, pLuz, Hitboxes);
@@ -820,6 +822,8 @@ void Motor::actualizar(double dt) {
 
         Hitboxes.clear();
         estadoActual = Estado::Tablero;
+        tiempoTurno = 0.0f;
+        turnoAgotado = false;
 
         VerificarVictoria();
 
@@ -829,12 +833,15 @@ void Motor::actualizar(double dt) {
 
         return; // Salimos del método inmediatamente para que no intente ejecutar nada más de la arena en este frame
     }
+   
 }
 
 void Motor::dibujarHUD() {
     hud.setDatosHUD(puntosLuz, puntosOscuridad, tiempoJugado);
 
     hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
+
+    hud.setDatosTurno(tiempoTurno, limiteTiempoTurno);
 }
 
 void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {

@@ -11,6 +11,10 @@ private:
     int puntosOscuridad = 0;
 
     float tiempoJugado = 0.0f; 
+
+    float tiempoTurno = 0.0f;
+    float limiteTurno = 30.0f;
+
     void dibujarDato(sf::RenderWindow& window, std::string etiqueta, std::string valor, float x, float& yActual, sf::Color colorVal);
 
 public:
@@ -21,6 +25,10 @@ public:
         puntosLuz = luz;
         puntosOscuridad = osc;
         tiempoJugado = tiempo;
+    }
+    void setDatosTurno(float tiempo, float limite) {
+        tiempoTurno = tiempo;
+        limiteTurno = limite;
     }
 
     // La función principal que encapsula toda la lógica de dibujo
