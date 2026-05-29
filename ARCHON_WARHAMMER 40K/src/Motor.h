@@ -10,6 +10,7 @@
 #include "Hitboxes.h"
 #include "InterfazHUD.h"
 #include "PantallaInicio.h"
+#include "GestorSonido.h"
 
 class Coordinador; // Predeclaración correcta
 
@@ -46,23 +47,7 @@ private:
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
     //sonido
-    sf::SoundBuffer bufferMover;
-    sf::Sound sonidoMover;
-
-    //sonido error
-    sf::SoundBuffer bufferError;
-    sf::Sound sonidoError;
-
-    // sonido muerte luz/oscuridad
-    sf::SoundBuffer bufferMuerteLuz;
-    sf::Sound sonidoMuerteLuz;
-
-    sf::SoundBuffer bufferMuerteOscuridad;
-    sf::Sound sonidoMuerteOscuridad;
-
-    // Sonido de la espada clase kinght luz
-    sf::SoundBuffer bufferMotosierra;
-    sf::Sound sonidoMotosierra;
+    GestorSonido gestorSonido;
 
 
     void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
