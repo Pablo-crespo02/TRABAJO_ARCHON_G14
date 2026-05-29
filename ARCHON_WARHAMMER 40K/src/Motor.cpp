@@ -31,11 +31,29 @@ Motor::Motor(sf::RenderWindow& win, sf::Font& fuente)
     gestorSonido.cargar("muerteOsc", "sonidos/muerte_xenos.mp3");
     gestorSonido.cargar("motosierra", "sonidos/motosierra.ogg");
 
+<<<<<<< Updated upstream
     gestorSonido.setVolumen("mover", 70.f);
     gestorSonido.setVolumen("error", 50.f);
     gestorSonido.setVolumen("muerteLuz", 70.f);
     gestorSonido.setVolumen("muerteOsc", 70.f);
     gestorSonido.setVolumen("motosierra", 60.f);
+=======
+    if (!bufferMuerteOscuridad.loadFromFile("sonidos/muerte_oscuridad.ogg")) {
+        std::cout << "Aviso: No se pudo cargar el sonido muerte_oscuridad.ogg" << std::endl;
+    }
+    else {
+        sonidoMuerteOscuridad.setBuffer(bufferMuerteOscuridad);
+        sonidoMuerteOscuridad.setVolume(70.f);
+    }
+    // CARGA DEL SONIDO MOTOSIERRA
+    if (!bufferMotosierra.loadFromFile("sonidos/motosierra.wav")) {
+        std::cout << "Aviso: No se pudo cargar el sonido sonidos/motosierra.wav" << std::endl;
+    }
+    else {
+        sonidoMotosierra.setBuffer(bufferMotosierra);
+        sonidoMotosierra.setVolume(90.f); // Lo subimos bien alto para asegurarnos de oírlo
+    }
+>>>>>>> Stashed changes
 
     // 2. Generar el mundo inicial
     // Llamamos a tus funciones de generación

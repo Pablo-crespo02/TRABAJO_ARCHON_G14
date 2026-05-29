@@ -47,8 +47,29 @@ private:
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
     //sonido
+<<<<<<< Updated upstream
     GestorSonido gestorSonido;
 
+=======
+    sf::SoundBuffer bufferMover;
+    sf::Sound sonidoMover;
+
+    //sonido error
+    sf::SoundBuffer bufferError;
+    sf::Sound sonidoError;
+
+    // sonido muerte luz/oscuridad
+    sf::SoundBuffer bufferMuerteLuz;
+    sf::Sound sonidoMuerteLuz;
+
+    sf::SoundBuffer bufferMuerteOscuridad;
+    sf::Sound sonidoMuerteOscuridad;
+
+    // Sonido de la espada clase kinght luz
+    sf::SoundBuffer bufferMotosierra;
+    sf::Sound sonidoMotosierra;
+ 
+>>>>>>> Stashed changes
 
     void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
         sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
