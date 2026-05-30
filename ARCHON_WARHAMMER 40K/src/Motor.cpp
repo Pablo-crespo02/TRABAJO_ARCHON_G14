@@ -81,10 +81,7 @@ void Motor::limpiarDatos() {
     puntosLuz = 0;
     puntosOscuridad = 0;
     tiempoJugado = 0.0f;
-    tiempoTurno = 0.0f;
-    turnoAgotado = false;
-    contadorTurnoIniciado = false;
-
+    
     // 3. Regeneración del mundo
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
@@ -146,12 +143,12 @@ void Motor::intentarAccionJugador(int idJugador) {
 
         if (jugadorActual == 1) {
             jugadorActual = 2;
-            tiempoTurno = 0.0f;
+
         }
         else {
             // Si el 2 termina, reseteamos a 1 y avanzamos ciclo
             jugadorActual = 1;
-            tiempoTurno = 0.0f;
+
             cicloActual++;
 
             if (cicloActual > 12) {
@@ -196,9 +193,6 @@ void Motor::reiniciarJuego(){
     puntosLuz = 0;
     puntosOscuridad = 0;
     tiempoJugado = 0.0f;
-    tiempoTurno = 0.0f;
-    turnoAgotado = false;
-    contadorTurnoIniciado = false;
     //Se vuelve a generar el tablero y las piezas:
     Generador::GenerarTablero(tablero);
     Generador::GenerarDespliegueUnidades(*this);
@@ -310,8 +304,6 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
     // Comprueba que el juego está en el estado tablero:
     if (estadoActual != Estado::Tablero) return;
 
-    if (turnoAgotado) return;
-
     //Creación de un vector que indica la posición en el mundo del ratón:
     sf::Vector2f worldPos = window.mapPixelToCoords(mousePos, vistaTablero);
 
@@ -366,9 +358,7 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
                 if (enemigo != nullptr && enemigo->bando != piezaSeleccionada->bando) {
                     // Si es enemigo, iniciamos combate
-                    tiempoTurno = 0.0f;
-                    turnoAgotado = false;
-                    contadorTurnoIniciado = false;
+
                     iniciarCombate(piezaSeleccionada, enemigo);
                 }
                 else {
@@ -378,9 +368,6 @@ void Motor::manejarClick(sf::Vector2i mousePos, const sf::View& vistaTablero) {
 
                     std::cout << "Movimiento realizado con exito." << std::endl;
 
-                    tiempoTurno = 0.0f;
-                    turnoAgotado = false;
-                    contadorTurnoIniciado = false;
                     gestorSonido.reproducir("mover");
 
                     piezaSeleccionada->seleccionado = false;
@@ -409,41 +396,6 @@ void Motor::actualizar(double dt) {
     // 1. Filtro de estado obligatorio
     // Reinicia el reloj interno del motor y guarda el tiempo en segundos. Desacopla el movimiento de los FPS:
     // Sólo aplicable en la arena. Si no se está en la arena, o faltan piezas atacantes o defensoras, no aplica:
- //Contador de turno
-    if (estadoActual == Estado::Tablero) {
-        if (!contadorTurnoIniciado) {
-            tiempoTurno = 0.0f;
-            contadorTurnoIniciado = true;
-        }
-        tiempoTurno += static_cast<float>(dt);
-        if (tiempoTurno >= limiteTiempoTurno) {
-            tiempoTurno = 0.0f;
-            turnoAgotado = true;
-            std::cout << "¡Tiempo agotado! Turno forzado." << std::endl;
-
-            if (jugadorActual == 1) {
-                jugadorActual = 2;
-            }
-            else {
-                jugadorActual = 1;
-                cicloActual++;
-                if (cicloActual > 12) {
-                    cicloActual = 1;
-                    rondaActual++;
-                    for (auto& pieza : listaPiezas) {
-                        pieza->resetearHechizos();
-                    }
-                }
-                tablero.actualizarColores(cicloActual);
-            }
-
-            if (piezaSeleccionada) {
-                piezaSeleccionada->seleccionado = false;
-                piezaSeleccionada = nullptr;
-            }
-            turnoAgotado = false;
-        }
-    }
     if (estadoActual != Estado::Arena || !piezaAtacante || !piezaDefensor) return;
 
 
@@ -822,8 +774,6 @@ void Motor::actualizar(double dt) {
 
         Hitboxes.clear();
         estadoActual = Estado::Tablero;
-        tiempoTurno = 0.0f;
-        turnoAgotado = false;
 
         VerificarVictoria();
 
@@ -841,7 +791,6 @@ void Motor::dibujarHUD() {
 
     hud.dibujar(window, rondaActual, cicloActual, jugadorActual, piezaSeleccionada);
 
-    hud.setDatosTurno(tiempoTurno, limiteTiempoTurno);
 }
 
 void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
@@ -853,48 +802,6 @@ void Motor::gestionarEntrada(sf::Event& evento, const sf::View& vistaTablero) {
 
 }
 
-// void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
-/*
-void Motor::procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
-    sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
-    sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt)
-{
-    sf::Vector2f dir(0.f, 0.f);
-
-    if (sf::Keyboard::isKeyPressed(arriba)) dir.y -= 1.f;
-    if (sf::Keyboard::isKeyPressed(abajo))  dir.y += 1.f;
-    if (sf::Keyboard::isKeyPressed(izqda))  dir.x -= 1.f;
-    if (sf::Keyboard::isKeyPressed(dcha))   dir.x += 1.f;
-
-    p->setultimadireccion(dir);
-
-    if (sf::Keyboard::isKeyPressed(ataque) && p->puedeAtacar()) {
-        //SONIDOS DE COMBATE EN ARENA
-        std::cout << "ATACANDO CON LA PIEZA: [" << p->stats.nombre << "]" << std::endl;
-
-        //SONIDOS DE COMBATE CUERPO A CUERPO
-        if (p->stats.nombre == "INTERCESSOR") {
-            gestorSonido.reproducir("motosierra");
-        }
-        sf::Vector2f dirAtaque = p->getultimadireccion();
-        float magnitud = std::hypot(dirAtaque.x, dirAtaque.y);
-        dirAtaque = (magnitud != 0.f) ? (dirAtaque / magnitud) : dirPorDefecto;
-
-        sf::Vector2f puntoSpawnAtaque = p->getPosicionAbsoluta() + (dirAtaque * 35.f);
-
-        if (p->stats.esRango) {
-            Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 500, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 60, 15);
-        }
-        else {
-            Hitboxes.emplace_back(puntoSpawnAtaque, dirAtaque, 0, Colores::ColorProyectil, p, (p->stats.ataque * p->multiplicadorArena), 0.2, 35);
-        }
-
-        p->reiniciarRelojHitbox();
-    }
-
-    p->procesarMovimientoArena(dir, dt, this->arena);
-}
-*/
 
 //Calulamos los puntos de la pieza
 

@@ -42,10 +42,6 @@ private:
     int calcularPuntosPieza(const std::string& nombre);
     //Tenporizador
     float tiempoJugado = 0.0f;
-    float tiempoTurno = 0.0f;        
-    float limiteTiempoTurno = 12.0f;
-    bool turnoAgotado = false;
-    bool contadorTurnoIniciado = false;
     // Referencias externas (necesarias para dibujar y leer recursos)
     sf::RenderWindow& window;
     sf::Font& fuenteGlobal;
@@ -54,10 +50,7 @@ private:
     GestorSonido gestorSonido;
 
   
-    // void procesarInput COMENTADA EN REVISION DE SU ELIMINACION
-    /*void procesarInput(Pieza* p, sf::Keyboard::Key arriba, sf::Keyboard::Key abajo,
-        sf::Keyboard::Key izqda, sf::Keyboard::Key dcha,
-        sf::Keyboard::Key ataque, sf::Vector2f dirPorDefecto, float dt);*/
+
 public:
     std::vector<Pieza*> listaPiezas;
     std::vector<Pieza*> getListaPiezas() const { return listaPiezas; }
